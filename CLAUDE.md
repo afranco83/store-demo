@@ -15,6 +15,7 @@ Monorepo demo (no producto real) que demuestra un stack frontend profesional: Re
 - No hay diseños de Figma. Antes de construir cualquier página/template, comprueba qué átomos/moléculas/organismos hacen falta en `packages/ui` y créalos ahí primero (workflow component-first, `AGENTS.md` principio 6) — nunca maquetes directamente en la página.
 - No adelantes trabajo de fases futuras (p. ej. no montes `apps/admin` mientras la Fase 4 no esté cerrada) salvo que el usuario lo pida explícitamente.
 - Comandos esperados una vez exista el tooling base (Fase 1): `pnpm install`, `pnpm turbo lint typecheck test build`, `pnpm turbo dev --filter=storefront`. Ajusta esta lista si el `turbo.json` real difiere.
+- **Mejora continua activa** (desde el cierre de Fase 0, 2026-07-07): siempre que una decisión tomada durante el trabajo pueda derivar en una actualización, mejora o ampliación de las convenciones (`AGENTS.md`), los agentes/skills planificados (este documento) o el propio roadmap/arquitectura, se propone reflejarla en el documento correspondiente en el momento, no se deja pendiente ni se pierde entre sesiones. Igual de válido detectar y proponer una oportunidad de mejora no pedida explícitamente que aplicar una corrección pedida por el usuario.
 
 ## Multitasking con git worktrees
 

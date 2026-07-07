@@ -2,11 +2,11 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 0 en curso**.
+Estado actual: **Fase 1 en curso** (Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación).
 
 ---
 
-## Fase 0 — Fundamentos y Documentación *(en curso)*
+## Fase 0 — Fundamentos y Documentación *(cerrada — 2026-07-07)*
 
 **Objetivo**: dejar asentadas las bases de decisión antes de escribir código.
 
@@ -15,10 +15,10 @@ Tareas:
 - [x] Arquitectura técnica detallada (`ARCHITECTURE.md`)
 - [x] Roadmap desglosado (este documento)
 - [x] `AGENTS.md` con convenciones de código *(dado por completo para v1.0; se seguirá matizando en sesiones futuras, pero no bloquea el resto de la Fase 0)*
-- [ ] `CLAUDE.md` con contexto y agentes/skills planificados
-- [ ] Revisión y aprobación explícita del usuario de v1.0 de toda la documentación
+- [x] `CLAUDE.md` con contexto y agentes/skills planificados
+- [x] Revisión y aprobación explícita del usuario de v1.0 de toda la documentación *(2026-07-07: "creo que ya tenemos buena base y siempre podemos ir mejorando" — se cierra la fase con mejora continua activa, no con un cierre rígido; ver `CLAUDE.md` "Cómo trabajar en este repo")*
 
-**DoD**: los 4 documentos existen, están enlazados entre sí, y el usuario confirma que son la base aceptable para empezar a implementar.
+**DoD**: los 4 documentos existen, están enlazados entre sí, y el usuario confirma que son la base aceptable para empezar a implementar. **Cumplido.**
 
 ---
 

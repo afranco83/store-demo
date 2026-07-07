@@ -140,6 +140,8 @@ Cada componente se documenta en Storybook junto a su propia carpeta, co-localiza
 
 No hay mockups de Figma que dirijan el inventario de componentes: se diseña y construye a la vez, página a página (ver principio 3.6). Esto implica que `packages/ui` nunca se da por "terminado" de antemano; crece bajo demanda conforme cada página lo requiere, pero **siempre por debajo** de la página que lo necesita (primero el componente en `packages/ui`, después su uso en la página).
 
+**Precisión de alcance**: al no ser una tienda real, el objetivo no es un catálogo exhaustivo (no se persiguen 20-30 componentes ni cobertura de todos los casos posibles de un e-commerce real). Basta con un conjunto pequeño de átomos/moléculas realmente transversales más un puñado de organismos complejos como caso de estudio (p. ej. el wizard de checkout, una tarjeta de producto compuesta), suficientes para pintar el storefront/admin de la demo con calidad. El inventario crece con el contenido real que se vaya generando, nunca se diseña por adelantado ni se completa "por si acaso".
+
 ---
 
 ## 6. Organización de Aplicaciones
@@ -232,3 +234,4 @@ Ver [`ROADMAP.md`](./ROADMAP.md) para el desglose completo por fases, tareas y c
 | v1.3 | 2026-07-06 | `AGENTS.md` ampliado con convenciones de Performance (imágenes/CDN, navegación, streaming, memoización, listas virtualizadas...) y una nueva sección de Seguridad (env vars, defensa en profundidad, datos sensibles al cliente); Cloudinary incorporado al stack como CDN de imágenes de producto (§2) |
 | v1.4 | 2026-07-06 | `AGENTS.md` ampliado con convenciones de Estilos (`cva`/`cx`/`twMerge`, prohibición de `@apply`, riesgo de clases Tailwind dinámicas) y contenido de referentes (Kent C. Dodds: AHA programming/testing, Testing Trophy; Matt Pocock: enums; clean-code-javascript-es: Single Responsibility, parámetros de función) |
 | v1.5 | 2026-07-06 | Repositorio remoto creado en `github.com/afranco83/store-demo`; `AGENTS.md` se da por completo por ahora (Fase 0); corregidas referencias cruzadas desactualizadas en `CLAUDE.md` tras las renumeraciones de secciones de `AGENTS.md`; `cva`/`tailwind-merge` incorporados al stack (§2) |
+| v1.6 | 2026-07-07 | Fase 0 cerrada con aprobación explícita del usuario; añadida precisión de alcance en Design System (§5): no se persigue un catálogo exhaustivo, basta un conjunto pequeño de átomos/moléculas transversales más algunos organismos complejos como caso de estudio |
