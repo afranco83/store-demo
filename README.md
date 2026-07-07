@@ -18,6 +18,7 @@ Monorepo demo que replica un stack y unas prácticas de ingeniería frontend pro
 ```bash
 pnpm install
 cp apps/api/.env.example apps/api/.env   # y rellena los valores reales
+# UNSPLASH_ACCESS_KEY: cuenta gratuita de developer en unsplash.com/developers (solo el Access Key, no el Secret Key)
 
 pnpm --filter @store-demo/api exec prisma migrate dev
 pnpm --filter @store-demo/api exec prisma db seed

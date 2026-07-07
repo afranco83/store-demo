@@ -7,15 +7,31 @@ const SEED = 20260707;
 const PRODUCTS_PER_CATEGORY = 5;
 const DEMO_PASSWORD = "Password123!";
 
+// Catálogo enfocado en streetwear/apparel (no un e-commerce genérico): cada
+// categoría lleva su propia búsqueda de Unsplash (fotos reales, moderadas por
+// Unsplash — más fiables que un buscador de tags libre) y el sustantivo con
+// el que se construyen los nombres de producto.
 const CATEGORIES = [
-  { slug: "electronics", name: "Electronics", description: "Gadgets and devices for every day" },
-  { slug: "clothing", name: "Clothing", description: "Apparel for all seasons" },
-  { slug: "home-kitchen", name: "Home & Kitchen", description: "Everything for your home" },
-  { slug: "books", name: "Books", description: "Fiction, non-fiction and everything in between" },
   {
-    slug: "sports-outdoors",
-    name: "Sports & Outdoors",
-    description: "Gear for an active life",
+    slug: "camisetas",
+    name: "Camisetas",
+    description: "Camisetas para cualquier ocasión",
+    searchQuery: "t-shirt",
+    productNoun: "T-Shirt",
+  },
+  {
+    slug: "gorras",
+    name: "Gorras",
+    description: "Gorras y sombreros de temporada",
+    searchQuery: "baseball cap",
+    productNoun: "Cap",
+  },
+  {
+    slug: "zapatillas",
+    name: "Zapatillas",
+    description: "Calzado deportivo y casual",
+    searchQuery: "sneakers",
+    productNoun: "Sneakers",
   },
 ] as const;
 
@@ -26,7 +42,39 @@ function toSlug(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-async function uploadProductImage(slug: string): Promise<string> {
+async function searchUnsplashPhotos({
+  query,
+  count,
+}: {
+  query: string;
+  count: number;
+}): Promise<string[]> {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (!accessKey) {
+    throw new Error("UNSPLASH_ACCESS_KEY is not set");
+  }
+
+  const url = new URL("https://api.unsplash.com/search/photos");
+  url.searchParams.set("query", query);
+  url.searchParams.set("per_page", String(count));
+  url.searchParams.set("client_id", accessKey);
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Unsplash search failed for "${query}": HTTP ${response.status}`);
+  }
+
+  const json = (await response.json()) as { results: Array<{ urls: { regular: string } }> };
+  return json.results.map((result) => result.urls.regular);
+}
+
+async function uploadImageToCloudinary({
+  slug,
+  sourceUrl,
+}: {
+  slug: string;
+  sourceUrl: string;
+}): Promise<string> {
   const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
   const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
   if (!cloudName || !uploadPreset) {
@@ -34,7 +82,7 @@ async function uploadProductImage(slug: string): Promise<string> {
   }
 
   const formData = new FormData();
-  formData.append("file", `https://picsum.photos/seed/${slug}/800/600`);
+  formData.append("file", sourceUrl);
   formData.append("upload_preset", uploadPreset);
   formData.append("folder", "store-demo");
 
@@ -53,12 +101,12 @@ async function uploadProductImage(slug: string): Promise<string> {
 
 async function seedCategories() {
   const categories = [];
-  for (const category of CATEGORIES) {
+  for (const { slug, name, description } of CATEGORIES) {
     categories.push(
       await prisma.category.upsert({
-        where: { slug: category.slug },
-        create: category,
-        update: category,
+        where: { slug },
+        create: { slug, name, description },
+        update: { name, description },
       }),
     );
   }
@@ -67,11 +115,26 @@ async function seedCategories() {
 
 async function seedProducts(categories: Awaited<ReturnType<typeof seedCategories>>) {
   const products = [];
+
   for (const category of categories) {
+    const categoryConfig = CATEGORIES.find((candidate) => candidate.slug === category.slug);
+    if (!categoryConfig) {
+      throw new Error(`Missing image/naming config for category "${category.slug}"`);
+    }
+
+    const photoUrls = await searchUnsplashPhotos({
+      query: categoryConfig.searchQuery,
+      count: PRODUCTS_PER_CATEGORY,
+    });
+
     for (let index = 0; index < PRODUCTS_PER_CATEGORY; index += 1) {
-      const name = faker.commerce.productName();
+      const name = `${faker.commerce.productAdjective()} ${faker.commerce.productMaterial()} ${categoryConfig.productNoun}`;
       const slug = `${category.slug}-${toSlug(name)}-${index}`;
-      const imageUrl = await uploadProductImage(slug);
+      const photoUrl = photoUrls[index];
+      if (!photoUrl) {
+        throw new Error(`Not enough Unsplash results for category "${category.slug}"`);
+      }
+      const imageUrl = await uploadImageToCloudinary({ slug, sourceUrl: photoUrl });
       const description = faker.commerce.productDescription();
 
       products.push(

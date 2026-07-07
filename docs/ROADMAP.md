@@ -49,8 +49,8 @@ Tareas:
 Tareas:
 
 - [x] Definir esquema Prisma (`Product`, `Category`, `User`, `Order`, `OrderItem`, `CartItem`) — `CartItem` como tabla propia, no `Order` en estado `draft` (decisión cerrada en esta fase); dinero en céntimos (`Int`), `role`/`status` como `String` (SQLite no soporta enums nativos de Prisma), unión de literales validada solo en Zod
-- [x] Migraciones + script de seed (`@faker-js/faker`, seed fijo) — 5 categorías, 25 productos, 3 usuarios demo, cart items y un pedido de ejemplo
-- [x] Cuenta Cloudinary (tier gratuito) + imágenes de producto subidas para el seed (picsum.photos re-subido vía unsigned upload preset); `next.config.ts` de `storefront`/`admin` con `images.remotePatterns` apuntando a su dominio
+- [x] Migraciones + script de seed (`@faker-js/faker`, seed fijo) — catálogo enfocado en apparel/streetwear: 3 categorías (Camisetas, Gorras, Zapatillas), 15 productos, 3 usuarios demo, cart items y un pedido de ejemplo
+- [x] Cuenta Cloudinary (tier gratuito) + imágenes de producto subidas para el seed (fotos reales buscadas en la API de Unsplash por categoría — `picsum.photos`/`loremflickr.com` se descartaron por dar contenido irrelevante o inapropiado, ver nota abajo — re-subidas a Cloudinary vía unsigned upload preset); `next.config.ts` de `storefront`/`admin` con `images.remotePatterns` apuntando a su dominio
 - [x] `packages/shared-types`: esquemas Zod de las entidades de dominio + tipos inferidos
 - [x] `apps/api`: Route Handlers CRUD de productos, categorías, carrito, pedidos, y endpoint de login — sin sesión/JWT real todavía (`userId` explícito en la ruta; el guard de autorización es Fase 5)
 - [x] Validación de entrada/salida con Zod en cada handler (`validateOutputInDev` revalida en desarrollo para detectar drift Prisma↔Zod)
@@ -59,6 +59,8 @@ Tareas:
 - [x] Tests unitarios de `api-client` contra MSW
 
 **DoD**: `apps/api` corre localmente, responde datos seedeados, y `api-client` obtiene datos tipados sin `any` en ningún punto. Cobertura de test en `api-client` ≥ 80%. **Cumplido**: cobertura real 100% líneas/funciones, 95.23% ramas; `pnpm turbo lint typecheck test build` en verde en los 15 paquetes/apps del monorepo.
+
+**Nota sobre la fuente de imágenes del seed**: se probaron dos servicios de placeholder por keyword antes de asentarse en Unsplash — `loremflickr.com` (búsqueda libre de tags en Flickr) devolvió fotos sin relación con la keyword e incluso una imagen inapropiada para un repo de portfolio; se descartó de inmediato. La API de búsqueda de Unsplash (moderada, requiere Access Key gratuita de `unsplash.com/developers`) sí da resultados fiables y relevantes por categoría. `picsum.photos` (usado en la primera versión del seed) es seguro pero da fotos totalmente aleatorias sin relación con el producto — válido solo mientras el catálogo era genérico, no una vez se enfocó en apparel real (camisetas/gorras/zapatillas).
 
 ---
 
