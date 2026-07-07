@@ -33,6 +33,11 @@ Estos subagentes se definirán como archivos en `.claude/agents/*.md` durante la
 | `ui-component-generator` | Genera un átomo/molécula/organismo en `packages/ui` con su story y su test co-localizados | Al ampliar el design system (Fase 3) |
 | `a11y-auditor` | Ejecuta y resume violaciones de axe sobre una ruta o componente dado | Antes de cerrar el DoD de accesibilidad de cada fase |
 | `contract-sync-checker` | Compara el esquema Prisma de `apps/api` con los esquemas Zod de `packages/shared-types` y señala drift | Tras cualquier cambio en el esquema de datos (Fase 2+) |
+| `test-reviewer` | Audita cobertura y calidad de los tests de una feature/PR (Testing Trophy y convenciones de `AGENTS.md §6`) con contexto aislado y ojos frescos | Antes de crear PR, sobre el diff de la rama actual (Fase 4+, en cuanto existan features con tests reales) |
+| `bug-hunter` | Revisión de código enfocada en bugs de dominio y violaciones de las reglas no negociables del proyecto (Zod en los bordes, inmutabilidad, límite Server/Client...); complementario al `/code-review` genérico de Claude Code, no un sustituto | Antes de crear PR, como paso previo/adicional al `/code-review` (Fase 2+, en cuanto haya lógica de negocio real) |
+| `frontend-architect` | Asesora en decisiones de patrones de React/Next.js (Server vs. Client, dónde vive el estado, composición vs. herencia...) para componentes o estructuras complejas, leyendo `ARCHITECTURE.md` y `AGENTS.md` | Al diseñar un componente/feature no trivial, antes de implementarlo (Fase 3+, cuando aparezcan organismos o features con estado complejo) |
+
+*Se descarta explícitamente un cuarto agente genérico de "desarrollo frontend": ese rol ya queda cubierto por `feature-scaffolder` + `ui-component-generator` + el propio `AGENTS.md`, y un agente adicional solaparía sin aportar alcance nuevo.*
 
 ## Skills planificadas (backlog — aún no creadas)
 
@@ -44,6 +49,10 @@ Se definirán en `.claude/skills/` cuando arranque la implementación:
 | `/new-ui-component` | Scaffolding de un componente de `packages/ui` con story + test |
 | `/check-a11y` | Corre `@axe-core/playwright` contra una ruta y resume violaciones |
 | `/sync-contracts` | Verifica coherencia entre Prisma y `shared-types` |
+| `/write-tests` | Genera/completa tests (unitario/integración, co-localizados) para un componente, hook o feature dados, siguiendo el Testing Trophy y las convenciones de `AGENTS.md §6` |
+| `/open-pr` | Ejecuta el gate de Definición de Hecho de `AGENTS.md §6` (lint+typecheck+test+build en verde, sin `console.log`/`debugger` pendientes, cobertura) y redacta la descripción de la PR siguiendo Conventional Commits (`AGENTS.md §7`) antes de abrirla |
+
+*No se planifica un skill propio de revisión de código/bugs ni de decisiones de patrones React/Next.js: lo primero ya lo cubre el `/code-review` genérico de Claude Code más el agente `bug-hunter` (ver tabla de subagentes); lo segundo encaja mejor como consulta con contexto aislado (`frontend-architect`) que como procedimiento a ejecutar en la conversación principal. `/open-pr` es el gate mecánico final, distinto de ambos: no revisa contenido, comprueba que el pipeline está verde y da formato a la PR.*
 
 ## Qué NO hacer todavía
 
