@@ -19,5 +19,10 @@
   },
   "peerDependencies": {
     "react": "^19.0.0"
+  },
+  "dependencies": {
+    "@faker-js/faker": "10.5.0",
+    "@store-demo/shared-types": "workspace:*",
+    "msw": "2.14.6"
   }
 }

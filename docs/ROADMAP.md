@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 1 en curso — tareas completadas, pendiente verificación en CI real tras push** (Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación).
+Estado actual: **Fase 2 cerrada (2026-07-07)** — Fase 1 mergeada en `main` (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -38,27 +38,27 @@ Tareas:
 - [x] Crear las 5 apps y 10 packages vacíos con su `package.json` y tsconfig correcto, sin contenido de negocio — `apps/storybook` es un placeholder sin dependencia de Storybook todavía (se configura en Fase 3); los paquetes internos no tienen paso de `build` propio, se consumen como fuente TS directa (se añadirá `transpilePackages` en el `next.config` de cada app cuando una feature real los importe)
 - [x] CI base (`ci.yml`): install + lint + typecheck en cada PR
 
-**DoD**: `pnpm install && pnpm turbo lint typecheck` pasa en verde desde cero (27/27 tareas, verificado localmente tras limpiar `node_modules`/caché de Turborepo). Ningún paquete tiene código de negocio todavía. Pendiente: confirmación en GitHub Actions real, que requiere pushear la rama (no hecho todavía, a la espera de confirmación explícita del usuario).
+**DoD**: `pnpm install && pnpm turbo lint typecheck` pasa en verde desde cero (27/27 tareas, verificado localmente tras limpiar `node_modules`/caché de Turborepo). Ningún paquete tiene código de negocio todavía. **Cumplido y mergeado en `main` (PR #1).**
 
 ---
 
-## Fase 2 — Backend Fake & Contratos
+## Fase 2 — Backend Fake & Contratos _(cerrada — 2026-07-07)_
 
 **Objetivo**: tener datos reales que consumir antes de construir UI de negocio.
 
 Tareas:
 
-- [ ] Definir esquema Prisma (`Product`, `Category`, `User`, `Order`, `OrderItem`, `CartItem`)
-- [ ] Migraciones + script de seed (`@faker-js/faker`, seed fijo)
-- [ ] Cuenta Cloudinary (tier gratuito) + imágenes de producto subidas para el seed; `next.config.js` con `images.remotePatterns` apuntando a su dominio
-- [ ] `packages/shared-types`: esquemas Zod de las entidades de dominio + tipos inferidos
-- [ ] `apps/api`: Route Handlers CRUD de productos, categorías, carrito, pedidos, y endpoint de login
-- [ ] Validación de entrada/salida con Zod en cada handler
-- [ ] `packages/api-client`: funciones tipadas por dominio, parseo de respuesta con Zod
-- [ ] `packages/testing`: setup de servidor MSW + factories basadas en los esquemas de `shared-types`
-- [ ] Tests unitarios de `api-client` contra MSW
+- [x] Definir esquema Prisma (`Product`, `Category`, `User`, `Order`, `OrderItem`, `CartItem`) — `CartItem` como tabla propia, no `Order` en estado `draft` (decisión cerrada en esta fase); dinero en céntimos (`Int`), `role`/`status` como `String` (SQLite no soporta enums nativos de Prisma), unión de literales validada solo en Zod
+- [x] Migraciones + script de seed (`@faker-js/faker`, seed fijo) — 5 categorías, 25 productos, 3 usuarios demo, cart items y un pedido de ejemplo
+- [x] Cuenta Cloudinary (tier gratuito) + imágenes de producto subidas para el seed (picsum.photos re-subido vía unsigned upload preset); `next.config.ts` de `storefront`/`admin` con `images.remotePatterns` apuntando a su dominio
+- [x] `packages/shared-types`: esquemas Zod de las entidades de dominio + tipos inferidos
+- [x] `apps/api`: Route Handlers CRUD de productos, categorías, carrito, pedidos, y endpoint de login — sin sesión/JWT real todavía (`userId` explícito en la ruta; el guard de autorización es Fase 5)
+- [x] Validación de entrada/salida con Zod en cada handler (`validateOutputInDev` revalida en desarrollo para detectar drift Prisma↔Zod)
+- [x] `packages/api-client`: funciones tipadas por dominio, parseo de respuesta con Zod
+- [x] `packages/testing`: setup de servidor MSW + factories basadas en los esquemas de `shared-types` (`renderWithProviders` queda para Fase 3, no se adelanta)
+- [x] Tests unitarios de `api-client` contra MSW
 
-**DoD**: `apps/api` corre localmente, responde datos seedeados, y `api-client` obtiene datos tipados sin `any` en ningún punto. Cobertura de test en `api-client` ≥ 80%.
+**DoD**: `apps/api` corre localmente, responde datos seedeados, y `api-client` obtiene datos tipados sin `any` en ningún punto. Cobertura de test en `api-client` ≥ 80%. **Cumplido**: cobertura real 100% líneas/funciones, 95.23% ramas; `pnpm turbo lint typecheck test build` en verde en los 15 paquetes/apps del monorepo.
 
 ---
 

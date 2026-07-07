@@ -24,6 +24,7 @@ test-results/
 # prisma
 *.db
 *.db-journal
+apps/api/src/generated/
 
 # logs
 *.log
