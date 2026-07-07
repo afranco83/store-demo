@@ -31,6 +31,7 @@ Decisión explícita: **no se monta un pipeline de generación de tokens multipl
 ### 2.2 `packages/ui`
 
 Atomic Design (`atoms`, `molecules`, `organisms`). Reglas:
+
 - No importa React Hook Form, Zod, TanStack Query, Zustand ni nada de `features/*`.
 - Cada componente recibe datos y callbacks por props; es "tonto" por diseño.
 - Co-localización: `Button/Button.tsx`, `Button/Button.stories.tsx`, `Button/Button.test.tsx`, `Button/index.ts` (barrel).
@@ -50,17 +51,18 @@ Al no partir de un diseño cerrado, el orden de trabajo para cualquier página/t
 
 ## 3. Backend fake (`apps/api`)
 
-**Decisión**: Next.js App Router usado exclusivamente para Route Handlers (`app/api/**/route.ts`), sin páginas ni UI. Persistencia con **Prisma + SQLite** (fichero local, sin infraestructura externa).
+**Decisión**: Next.js App Router usado exclusivamente para Route Handlers (`app/api/**/route.ts`), sin páginas ni UI. Persistencia con **Prisma + SQLite** (fichero local, sin infraestructura externa), vía el driver adapter `@prisma/adapter-better-sqlite3` (Prisma 7 ya no admite `url` directo en el `datasource` de `schema.prisma`; la connection string vive en `prisma.config.ts`).
 
 Razonamiento: un `json-server` no permite demostrar diseño de esquema, migraciones ni lógica de negocio en el borde servidor; un backend real (aunque ligero) sí, y es más representativo de un entorno profesional real donde el frontend consume un BFF/API propio.
 
 Responsabilidades:
 
-- Definición de esquema Prisma para `Product`, `Category`, `User`, `Order`, `OrderItem`, `CartItem` (o carrito derivado de `Order` en estado `draft`, a decidir en Fase 2).
-- Migraciones versionadas (`prisma migrate`) + script de seed con datos de ejemplo (usar `@faker-js/faker` para variedad, con seed fijo para reproducibilidad). Las imágenes de producto del seed se alojan en **Cloudinary** (tier gratuito); el campo `imageUrl` de `Product` guarda la URL de Cloudinary, no un binario ni un asset local.
+- Esquema Prisma para `Product`, `Category`, `User`, `Order`, `OrderItem`, `CartItem` _(decidido en Fase 2)_: `CartItem` es tabla propia ligada a `User`+`Product` (`@@unique([userId, productId])`), no un `Order` en estado `draft` — separa el ciclo de vida efímero del carrito del inmutable de un pedido. Dinero siempre en céntimos (`Int`): `priceCents`, `unitPriceCents` (snapshot inmutable en `OrderItem`, no duplicación real con `Product.priceCents` — son dos conceptos que deben poder divergir), `totalCents`. SQLite no soporta enums nativos de Prisma: `role`/`status` son `String`, la unión de literales vive solo en el `z.enum` de `shared-types` correspondiente.
+- Migraciones versionadas (`prisma migrate`) + script de seed con datos de ejemplo (usar `@faker-js/faker` para variedad, con seed fijo para reproducibilidad). Catálogo enfocado en apparel/streetwear (Camisetas, Gorras, Zapatillas), no un e-commerce genérico. Las fotos de producto se buscan en la **API de búsqueda de Unsplash** (moderada y relevante por keyword; se descartaron `picsum.photos`/`loremflickr.com` por dar fotos irrelevantes o, en el caso de `loremflickr`, contenido inapropiado) y se re-suben a **Cloudinary** (tier gratuito, vía _unsigned upload preset_ para no requerir el API secret); el campo `imageUrl` de `Product` guarda la URL final de Cloudinary, no un binario ni un asset local.
 - Validación de entrada con Zod en cada Route Handler, usando los esquemas de `packages/shared-types` (nunca se valida "a mano").
-- Respuestas siempre tipadas y validadas también en la salida en desarrollo (para detectar drift entre Prisma y los contratos Zod).
-- Autenticación: endpoint de login que emite JWT, consumido por Auth.js como Credentials Provider (ver §4).
+- Respuestas siempre tipadas y validadas también en la salida en desarrollo (para detectar drift entre Prisma y los contratos Zod), vía un helper `validateOutputInDev` que solo se ejecuta fuera de `NODE_ENV=production`.
+- Formato de respuesta uniforme: éxito `{ data: T }`, error `{ error: { message: string } }`, con status HTTP explícito (400 validación Zod, 404 not-found, 409 conflicto de integridad referencial, 500 inesperado).
+- Autenticación: endpoint de login que emite JWT, consumido por Auth.js como Credentials Provider (ver §4). Hasta que `packages/auth`/los guards de Fase 5 existan, los Route Handlers de carrito/pedidos reciben el `userId` explícito en la ruta (`/api/cart/[userId]`, `/api/orders/[userId]`) en vez de derivarlo de una sesión — hueco de autorización aceptado y documentado para esta fase, no un descuido.
 - Consultas Prisma con `include`/`select` explícitos para traer relaciones en una sola query (p. ej. `Order` con sus `OrderItem`); nunca una query dentro de un bucle (N+1) para resolver relaciones.
 
 `packages/api-client` es el único punto de la app que hace `fetch` contra `apps/api`. Expone funciones por dominio (`getProducts()`, `getProductBySlug()`, `createOrder()`...) que:
@@ -83,13 +85,14 @@ Las features consumen `api-client` desde sus hooks de TanStack Query (`features/
 
 ## 5. Gestión de estado — límites explícitos
 
-| Tipo de estado | Herramienta | Ejemplos |
-|---|---|---|
-| Estado de servidor (remoto, cacheable, con ciclo de vida propio) | TanStack Query | Catálogo de productos, detalle de producto, historial de pedidos, carrito persistido en backend |
-| Estado de cliente mutable, con lógica de actualización | Zustand | Apertura de modales/drawers, paso actual del wizard de checkout, filtros no persistidos de la UI |
-| Configuración / inyección de dependencias de subárbol, semi-estática | Context API (React) | Sesión de Auth.js (`SessionProvider`), tema claro/oscuro, futura configuración de i18n |
+| Tipo de estado                                                       | Herramienta         | Ejemplos                                                                                         |
+| -------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------ |
+| Estado de servidor (remoto, cacheable, con ciclo de vida propio)     | TanStack Query      | Catálogo de productos, detalle de producto, historial de pedidos, carrito persistido en backend  |
+| Estado de cliente mutable, con lógica de actualización               | Zustand             | Apertura de modales/drawers, paso actual del wizard de checkout, filtros no persistidos de la UI |
+| Configuración / inyección de dependencias de subárbol, semi-estática | Context API (React) | Sesión de Auth.js (`SessionProvider`), tema claro/oscuro, futura configuración de i18n           |
 
 Reglas duras:
+
 - Si un dato sobrevive a un refresco de página o se comparte entre pestañas vía backend → TanStack Query.
 - Si es estado de cliente que cambia con frecuencia y tiene lógica de actualización (reducers, acciones, derivaciones) → Zustand.
 - Si es un valor que rara vez cambia y solo se necesita "inyectar" en un subárbol sin lógica de store (p. ej. la sesión ya resuelta, el tema activo) → Context API.
@@ -122,6 +125,7 @@ No hay despliegue real a producción (no hay "producción"); como mucho, un desp
 Para poder trabajar en varios frentes en paralelo sin bloquearse por cambios sin commitear (p. ej. avanzar una feature mientras se corrige algo en el design system, o comparar dos aproximaciones), el desarrollo se apoya en **git worktrees** en lugar de cambiar de rama sobre un único working directory. Cada frente de trabajo relevante (fase, feature grande, spike) puede vivir en su propio worktree con su propia rama.
 
 Consecuencias prácticas:
+
 - No se asume que solo existe un working directory activo sobre el repo.
 - El estado de `node_modules`/instalación de dependencias debe poder reproducirse por worktree (pnpm lo soporta bien vía su store global de contenido).
 - Se contempla, como candidato de backlog (no comprometido todavía, ver `ROADMAP.md`), construir una pequeña app interna de gestión de worktrees (monitorización de cuáles existen, creación, edición y borrado) para no depender de comandos manuales de `git worktree` — esto sería en sí mismo una demostración adicional de tooling interno / DX.

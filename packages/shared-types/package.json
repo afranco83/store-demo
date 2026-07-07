@@ -14,5 +14,8 @@
     "@store-demo/tsconfig": "workspace:*",
     "eslint": "9.39.4",
     "typescript": "6.0.3"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
   }
 }
