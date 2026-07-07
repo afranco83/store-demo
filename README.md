@@ -1,10 +1,25 @@
 # Store Demo — Frontend Architecture Showcase
 
+[![CI](https://github.com/afranco83/store-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/afranco83/store-demo/actions/workflows/ci.yml)
+
 Monorepo demo que replica un stack y unas prácticas de ingeniería frontend profesionales (React, Next.js, TypeScript, Zod, TanStack Query, Zustand, Turborepo...). No es un producto real: es un entorno controlado para demostrar arquitectura, testing, accesibilidad, performance y DX de nivel profesional.
 
-**Estado actual: Fase 0 — documentación y definición.** Aún no hay código de aplicación.
+**Estado actual: Fase 1 — Monorepo & Tooling Base (cerrada).** Esqueleto del monorepo funcionando (apps y packages vacíos de lógica de negocio); siguiente fase: Backend Fake & Contratos.
 
 **Repositorio**: [github.com/afranco83/store-demo](https://github.com/afranco83/store-demo).
+
+## Estructura del monorepo
+
+- **apps/**: `storefront` (tienda pública), `admin` (panel), `api` (backend fake, solo Route Handlers), `storybook` (design system, placeholder hasta Fase 3), `playground` (sandbox)
+- **packages/**: `ui`, `design-tokens`, `tailwind-config`, `auth`, `api-client`, `shared-types`, `core`, `testing`, `eslint-config`, `tsconfig`
+
+## Cómo arrancar
+
+```bash
+pnpm install
+pnpm turbo lint typecheck build   # verifica todo el monorepo
+pnpm turbo dev --filter=storefront
+```
 
 ## Documentación
 
