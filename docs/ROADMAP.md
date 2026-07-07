@@ -2,21 +2,22 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 1 en curso** (Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación).
+Estado actual: **Fase 1 en curso — tareas completadas, pendiente verificación en CI real tras push** (Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación).
 
 ---
 
-## Fase 0 — Fundamentos y Documentación *(cerrada — 2026-07-07)*
+## Fase 0 — Fundamentos y Documentación _(cerrada — 2026-07-07)_
 
 **Objetivo**: dejar asentadas las bases de decisión antes de escribir código.
 
 Tareas:
+
 - [x] Especificación general (`PROJECT_SPECIFICATION.md`)
 - [x] Arquitectura técnica detallada (`ARCHITECTURE.md`)
 - [x] Roadmap desglosado (este documento)
-- [x] `AGENTS.md` con convenciones de código *(dado por completo para v1.0; se seguirá matizando en sesiones futuras, pero no bloquea el resto de la Fase 0)*
+- [x] `AGENTS.md` con convenciones de código _(dado por completo para v1.0; se seguirá matizando en sesiones futuras, pero no bloquea el resto de la Fase 0)_
 - [x] `CLAUDE.md` con contexto y agentes/skills planificados
-- [x] Revisión y aprobación explícita del usuario de v1.0 de toda la documentación *(2026-07-07: "creo que ya tenemos buena base y siempre podemos ir mejorando" — se cierra la fase con mejora continua activa, no con un cierre rígido; ver `CLAUDE.md` "Cómo trabajar en este repo")*
+- [x] Revisión y aprobación explícita del usuario de v1.0 de toda la documentación _(2026-07-07: "creo que ya tenemos buena base y siempre podemos ir mejorando" — se cierra la fase con mejora continua activa, no con un cierre rígido; ver `CLAUDE.md` "Cómo trabajar en este repo")_
 
 **DoD**: los 4 documentos existen, están enlazados entre sí, y el usuario confirma que son la base aceptable para empezar a implementar. **Cumplido.**
 
@@ -27,16 +28,17 @@ Tareas:
 **Objetivo**: esqueleto del monorepo funcionando, sin lógica de negocio.
 
 Tareas:
-- [ ] Inicializar repo git + `pnpm-workspace.yaml`
-- [ ] Configurar Turborepo (`turbo.json`) con pipelines `build`/`dev`/`lint`/`test`/`typecheck`
-- [ ] Crear `packages/tsconfig` (base, nextjs, react-library)
-- [ ] Crear `packages/eslint-config` (flat config, presets base/react/next)
-- [ ] Configurar Prettier + integración con ESLint
-- [ ] Configurar Husky + lint-staged + commitlint (Conventional Commits)
-- [ ] Crear las 5 apps y 9 packages vacíos con su `package.json` y tsconfig correcto, sin contenido de negocio
-- [ ] CI base (`ci.yml`): install + lint + typecheck en cada PR
 
-**DoD**: `pnpm install && pnpm turbo lint typecheck` pasa en verde desde cero en CI. Ningún paquete tiene código de negocio todavía.
+- [x] Inicializar repo git + `pnpm-workspace.yaml`
+- [x] Configurar Turborepo (`turbo.json`) con pipelines `build`/`dev`/`lint`/`test`/`typecheck`
+- [x] Crear `packages/tsconfig` (base, nextjs, react-library)
+- [x] Crear `packages/eslint-config` (flat config, presets base/react/next) — pinado a ESLint 9.x: `eslint-plugin-react`/`eslint-plugin-jsx-a11y` aún no soportan ESLint 10 como peer, se sube de versión cuando lo hagan
+- [x] Configurar Prettier + integración con ESLint (`eslint-config-prettier`)
+- [x] Configurar Husky + lint-staged + commitlint (Conventional Commits) — `lint-staged` solo formatea (Prettier); el lint real de ESLint queda en `turbo lint`/CI para evitar problemas de resolución de flat config por paquete al ejecutar desde la raíz
+- [x] Crear las 5 apps y 10 packages vacíos con su `package.json` y tsconfig correcto, sin contenido de negocio — `apps/storybook` es un placeholder sin dependencia de Storybook todavía (se configura en Fase 3); los paquetes internos no tienen paso de `build` propio, se consumen como fuente TS directa (se añadirá `transpilePackages` en el `next.config` de cada app cuando una feature real los importe)
+- [x] CI base (`ci.yml`): install + lint + typecheck en cada PR
+
+**DoD**: `pnpm install && pnpm turbo lint typecheck` pasa en verde desde cero (27/27 tareas, verificado localmente tras limpiar `node_modules`/caché de Turborepo). Ningún paquete tiene código de negocio todavía. Pendiente: confirmación en GitHub Actions real, que requiere pushear la rama (no hecho todavía, a la espera de confirmación explícita del usuario).
 
 ---
 
@@ -45,6 +47,7 @@ Tareas:
 **Objetivo**: tener datos reales que consumir antes de construir UI de negocio.
 
 Tareas:
+
 - [ ] Definir esquema Prisma (`Product`, `Category`, `User`, `Order`, `OrderItem`, `CartItem`)
 - [ ] Migraciones + script de seed (`@faker-js/faker`, seed fijo)
 - [ ] Cuenta Cloudinary (tier gratuito) + imágenes de producto subidas para el seed; `next.config.js` con `images.remotePatterns` apuntando a su dominio
@@ -64,6 +67,7 @@ Tareas:
 **Objetivo**: cimientos del sistema visual — no un catálogo completo (no hay diseño previo en Figma; `packages/ui` crece página a página, ver `AGENTS.md` principio 6). Esta fase entrega solo lo transversal que sabemos que toda página va a necesitar.
 
 Tareas:
+
 - [ ] `packages/design-tokens`: valores personalizados mínimos y justificados (color de marca/acento, tipografía si aplica), como constantes simples — sin pipeline de transformación
 - [ ] `packages/tailwind-config`: preset que extiende el theme por defecto de Tailwind con esos tokens
 - [ ] `packages/ui`: átomos verdaderamente transversales (Button, Input, Badge, Spinner, Icon, Typography)
@@ -80,6 +84,7 @@ Tareas:
 **Objetivo**: primera app de negocio funcional end-to-end (lectura + carrito).
 
 Tareas:
+
 - [ ] Component-first: identificar y crear en `packages/ui` las moléculas/organismos que falten para catálogo y carrito (ProductCard, PriceTag, QuantitySelector, Navbar, CartDrawer...) antes de montar cualquier página
 - [ ] `features/products`: api/hooks/services/schemas/components (listado, detalle, filtros)
 - [ ] `features/cart`: estado de carrito (Zustand para UI del drawer, TanStack Query + `apps/api` para persistencia)
@@ -97,6 +102,7 @@ Tareas:
 **Objetivo**: sesión de usuario y área privada.
 
 Tareas:
+
 - [ ] `packages/auth`: Auth.js v5, Credentials Provider contra `apps/api`, sesión expuesta vía Context (`SessionProvider`)
 - [ ] Roles `customer`/`admin` en JWT
 - [ ] Component-first: formularios de login/registro y componentes de listado de pedidos que falten en `packages/ui`
@@ -114,6 +120,7 @@ Tareas:
 **Objetivo**: cerrar el flujo transaccional principal del storefront.
 
 Tareas:
+
 - [ ] Component-first: pasos/steps del wizard, resumen de pedido y demás moléculas/organismos que falten en `packages/ui`
 - [ ] `features/checkout`: formulario multi-paso con React Hook Form + Zod Resolver
 - [ ] Wizard de checkout gestionado con Zustand (paso actual, validez por paso)
@@ -131,6 +138,7 @@ Tareas:
 **Objetivo**: segunda app de negocio, reutilizando el design system y los contratos ya construidos.
 
 Tareas:
+
 - [ ] `apps/admin`: bootstrap reutilizando `packages/ui`, `auth`, `api-client`
 - [ ] Component-first: componentes de tabla/formulario de administración que falten en `packages/ui` (probablemente el primer punto donde aparecen organismos nuevos propios de `admin`)
 - [ ] `features/products` (admin): CRUD de productos y categorías
@@ -147,6 +155,7 @@ Tareas:
 **Objetivo**: cerrar las garantías de calidad que no se pueden validar app por app de forma aislada.
 
 Tareas:
+
 - [ ] Auditoría de accesibilidad completa (Playwright + axe) sobre todas las rutas de `storefront` y `admin`
 - [ ] Lighthouse CI integrado en el pipeline, presupuestos de Core Web Vitals afinados con datos reales
 - [ ] Revisión de cobertura de tests global (unit + integración + E2E) y cierre de huecos

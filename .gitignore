@@ -3,3 +3,30 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# turborepo
+.turbo/
+
+# next.js
+.next/
+out/
+
+# build outputs
+dist/
+build/
+storybook-static/
+
+# testing
+coverage/
+playwright-report/
+test-results/
+
+# prisma
+*.db
+*.db-journal
+
+# logs
+*.log
+
+# typescript
+*.tsbuildinfo

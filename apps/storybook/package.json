@@ -1,0 +1,16 @@
+{
+  "name": "@store-demo/storybook",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@store-demo/eslint-config": "workspace:*",
+    "@store-demo/tsconfig": "workspace:*",
+    "eslint": "9.39.4",
+    "typescript": "6.0.3"
+  }
+}
