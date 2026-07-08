@@ -1,0 +1,24 @@
+@theme {
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-accent-foreground: #ffffff;
+  --color-accent-soft: rgb(194 65 12 / 10%);
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+ * El acento a secas no llega a AA sobre fondos oscuros (#c2410c ronda 3.4-3.8:1,
+ * por debajo del 4.5:1 exigido para texto normal). En dark mode se aclara y el
+ * texto sobre él pasa a oscuro en vez de blanco; --color-accent-soft también
+ * sube de opacidad porque, sobre una superficie oscura, un 10% del acento más
+ * claro deja el texto por debajo de 4.5:1. Solo el acento tiene variante dark
+ * hoy — el resto de la paleta (grises, semánticos) sigue siendo solo-claro.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-accent: #f0672a;
+    --color-accent-hover: #f38250;
+    --color-accent-foreground: #17110c;
+    --color-accent-soft: rgb(240 103 42 / 18%);
+  }
+}

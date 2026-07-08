@@ -11,6 +11,10 @@ export const testConfig = [
     rules: {
       ...testingLibrary.configs["flat/react"].rules,
       ...vitestPlugin.configs.recommended.rules,
+      "vitest/expect-expect": [
+        "error",
+        { assertFunctionNames: ["expect", "expectNoAccessibilityViolations"] },
+      ],
     },
   },
 ];

@@ -64,20 +64,22 @@ Tareas:
 
 ---
 
-## Fase 3 — Design System (Base)
+## Fase 3 — Design System (Base) _(cerrada — 2026-07-08)_
 
 **Objetivo**: cimientos del sistema visual — no un catálogo completo (no hay diseño previo en Figma; `packages/ui` crece página a página, ver `AGENTS.md` principio 6). Esta fase entrega solo lo transversal que sabemos que toda página va a necesitar.
 
 Tareas:
 
-- [ ] `packages/design-tokens`: valores personalizados mínimos y justificados (color de marca/acento, tipografía si aplica), como constantes simples — sin pipeline de transformación
-- [ ] `packages/tailwind-config`: preset que extiende el theme por defecto de Tailwind con esos tokens
-- [ ] `packages/ui`: átomos verdaderamente transversales (Button, Input, Badge, Spinner, Icon, Typography)
-- [ ] `apps/storybook`: configurado, con addon-a11y y addon-interactions
-- [ ] Historias de Storybook + test unitario + a11y para cada átomo de esta fase
-- [ ] `packages/testing`: `renderWithProviders` base reutilizable desde ya
+- [x] `packages/design-tokens`: valores personalizados mínimos y justificados (acento de marca `#c2410c` + tipografía display "Space Grotesk"), como constantes TS simples — sin pipeline de transformación. `design-tokens` también expone `tokens.css` (custom properties + bloque `@theme`) para Tailwind v4
+- [x] `packages/tailwind-config`: preset **Tailwind v4 CSS-first** (`preset.css`: `@import "tailwindcss"` + tokens de `design-tokens`) — decisión tomada junto al usuario, sustituye el estilo v3 (`theme.extend`/`content`) asumido en versiones previas de `ARCHITECTURE.md`/`PROJECT_SPECIFICATION.md`, ya actualizadas
+- [x] `packages/ui`: átomos verdaderamente transversales (Button, Input, Badge, Spinner, Icon, Typography), iconos vía `lucide-react`
+- [x] `apps/storybook`: configurado con Storybook 10 (builder `@storybook/react-vite`, ya que `packages/ui` no depende de Next.js) + addon-a11y. **Sin** `addon-interactions` como paquete aparte: desde Storybook 8 esa funcionalidad vive en el core (`storybook/test`), y el paquete standalone quedó congelado en `8.6.x` frente a un core en `10.x` — se documenta esta sustitución en `PROJECT_SPECIFICATION.md` §2
+- [x] Historias de Storybook + test unitario + a11y (`vitest-axe`) para cada átomo de esta fase
+- [x] `packages/testing`: `renderWithProviders` base reutilizable desde ya (wrapper de `render` + `userEvent.setup()`, sin providers globales todavía — punto de extensión listo para Fase 4+), más el setup compartido de Vitest (`jest-dom`, `vitest-axe`, cleanup de RTL)
 
-**DoD**: `apps/storybook` corre localmente con los átomos base documentados, 0 violaciones a11y "serias"/"críticas", cobertura de test en `packages/ui` ≥ 85% de lo construido hasta ahora. **No** es requisito tener moléculas/organismos ni cobertura completa de un inventario hipotético: esos se crean bajo demanda en las fases siguientes, siguiendo el flujo component-first.
+**DoD**: `apps/storybook` corre localmente con los átomos base documentados (`pnpm --filter @store-demo/storybook dev`, verificado; `storybook build` también en verde), 0 violaciones a11y "serias"/"críticas" (cubierto por test unitario `vitest-axe` en cada átomo, ya que no hay herramienta de navegador disponible en este entorno para verificar el addon-a11y de forma interactiva). Cobertura de test en `packages/ui`: **100%** líneas/funciones/statements, **100%** ramas — por encima del ≥85% exigido. `pnpm turbo lint typecheck test build` en verde en los 16 paquetes/apps del monorepo. **Cumplido.**
+
+**Adenda (2026-07-08, revisión post-cierre del usuario)**: al repasar el acento en dark mode se detectó que `#c2410c` no llega a AA sobre fondos oscuros (~3.4-3.8:1, por debajo de 4.5:1). Se añadieron variantes dark de `--color-accent`/`-hover`/`-foreground`/`-soft` en `tokens.css` bajo `@media (prefers-color-scheme: dark)` — verificadas a mano con la fórmula de contraste WCAG (no hay test automático de contraste en este entorno, ver nota de DoD arriba). `Badge` pasó de `bg-accent/10` a un token `--color-accent-soft` propio porque la opacidad AA-correcta difiere entre claro (10%) y oscuro (18%). Alcance deliberadamente acotado al acento: el resto de la paleta (grises, colores semánticos) sigue solo-claro, y no existe todavía un toggle manual de tema — candidato de una fase futura si se decide construir uno. Detalle técnico en `ARCHITECTURE.md` §2.1.
 
 ---
 

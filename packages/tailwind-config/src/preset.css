@@ -1,0 +1,8 @@
+@import "tailwindcss";
+@import "@store-demo/design-tokens/tokens.css";
+
+/* packages/ui vive fuera del árbol de cualquier app consumidora, así que la
+   detección automática de contenido de Tailwind v4 no lo alcanza sin ayuda;
+   se declara aquí una sola vez para que todo consumidor de este preset lo
+   herede, sin tener que repetirlo en cada app. */
+@source "../../ui/src";

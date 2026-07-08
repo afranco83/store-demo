@@ -1,4 +1,4 @@
 {
-  "extends": "@store-demo/tsconfig/base.json",
-  "include": ["src"]
+  "extends": "@store-demo/tsconfig/react-library.json",
+  "include": ["src", ".storybook"]
 }

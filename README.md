@@ -4,13 +4,13 @@
 
 Monorepo demo que replica un stack y unas prácticas de ingeniería frontend profesionales (React, Next.js, TypeScript, Zod, TanStack Query, Zustand, Turborepo...). No es un producto real: es un entorno controlado para demostrar arquitectura, testing, accesibilidad, performance y DX de nivel profesional.
 
-**Estado actual: Fase 2 — Backend Fake & Contratos (cerrada).** `apps/api` (Prisma + SQLite) expone CRUD de productos/categorías/carrito/pedidos y login, con contratos Zod compartidos (`packages/shared-types`) y un `api-client` tipado y testeado (MSW + Vitest, cobertura 100%); siguiente fase: Design System (Base).
+**Estado actual: Fase 3 — Design System, base (cerrada).** `packages/design-tokens` + `packages/tailwind-config` (Tailwind v4 CSS-first) y `packages/ui` (átomos Button, Input, Badge, Spinner, Icon, Typography, documentados en `apps/storybook` con Storybook 10 + addon-a11y, cobertura de test 100%); siguiente fase: Storefront — Catálogo & Carrito.
 
 **Repositorio**: [github.com/afranco83/store-demo](https://github.com/afranco83/store-demo).
 
 ## Estructura del monorepo
 
-- **apps/**: `storefront` (tienda pública), `admin` (panel), `api` (backend fake, solo Route Handlers), `storybook` (design system, placeholder hasta Fase 3), `playground` (sandbox)
+- **apps/**: `storefront` (tienda pública), `admin` (panel), `api` (backend fake, solo Route Handlers), `storybook` (design system, Storybook 10), `playground` (sandbox)
 - **packages/**: `ui`, `design-tokens`, `tailwind-config`, `auth`, `api-client`, `shared-types`, `core`, `testing`, `eslint-config`, `tsconfig`
 
 ## Cómo arrancar
@@ -26,6 +26,7 @@ pnpm --filter @store-demo/api exec prisma db seed
 pnpm turbo lint typecheck test build   # verifica todo el monorepo
 pnpm turbo dev --filter=@store-demo/api        # backend fake en :4000
 pnpm turbo dev --filter=storefront
+pnpm --filter @store-demo/storybook dev        # design system en :6006
 ```
 
 ## Documentación

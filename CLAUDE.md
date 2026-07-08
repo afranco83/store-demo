@@ -6,15 +6,15 @@ Este archivo da a Claude Code el contexto operativo de este repositorio. Las con
 
 Monorepo demo (no producto real) que demuestra un stack frontend profesional: React + Next.js + TypeScript + Zod + TanStack Query + Zustand, con un backend fake propio (Prisma + SQLite) en lugar de mocks estáticos. Contexto completo en `docs/PROJECT_SPECIFICATION.md`, `docs/ARCHITECTURE.md` y `docs/ROADMAP.md`.
 
-**Estado actual: Fase 2 (Backend Fake & Contratos) cerrada en local, en rama `feat/phase-2-backend-fakes-contracts`.** `apps/api` (Prisma + SQLite) expone CRUD de productos/categorías/carrito/pedidos y login; `packages/shared-types`, `packages/api-client` y `packages/testing` tienen contenido real. Siguiente fase: Fase 3 (Design System, base).
+**Estado actual: Fase 3 (Design System, base) cerrada en local, en rama `feat/phase-3-design-system-base`.** `packages/design-tokens`/`packages/tailwind-config` (Tailwind v4 CSS-first) y `packages/ui` (Button, Input, Badge, Spinner, Icon, Typography) tienen contenido real, documentados en `apps/storybook` (Storybook 10). Siguiente fase: Fase 4 (Storefront: Catálogo & Carrito).
 
 ## Cómo trabajar en este repo
 
 - Antes de implementar algo, comprueba en `docs/ROADMAP.md` en qué fase estamos y qué tareas de esa fase siguen pendientes.
 - Sigue `AGENTS.md` al pie de la letra: Server Components por defecto, TanStack Query vs. Zustand vs. Context API, Zod en los bordes, Atomic Design solo en `packages/ui`.
 - No hay diseños de Figma. Antes de construir cualquier página/template, comprueba qué átomos/moléculas/organismos hacen falta en `packages/ui` y créalos ahí primero (workflow component-first, `AGENTS.md` principio 6) — nunca maquetes directamente en la página.
-- No adelantes trabajo de fases futuras (p. ej. no montes páginas reales de `apps/storefront` mientras la Fase 3/4 no estén cerradas) salvo que el usuario lo pida explícitamente.
-- Comandos esperados: `pnpm install`, `pnpm turbo lint typecheck test build`, `pnpm turbo dev --filter=storefront` (o `--filter=@store-demo/api` para el backend fake, puerto 4000). Ajusta esta lista si el `turbo.json` real difiere.
+- No adelantes trabajo de fases futuras (p. ej. no montes páginas reales de `apps/storefront` mientras la Fase 4 no esté cerrada) salvo que el usuario lo pida explícitamente.
+- Comandos esperados: `pnpm install`, `pnpm turbo lint typecheck test build`, `pnpm turbo dev --filter=storefront` (o `--filter=@store-demo/api` para el backend fake, puerto 4000; `pnpm --filter @store-demo/storybook dev` para el design system, puerto 6006). Ajusta esta lista si el `turbo.json` real difiere.
 - **Mejora continua activa** (desde el cierre de Fase 0, 2026-07-07): siempre que una decisión tomada durante el trabajo pueda derivar en una actualización, mejora o ampliación de las convenciones (`AGENTS.md`), los agentes/skills planificados (este documento) o el propio roadmap/arquitectura, se propone reflejarla en el documento correspondiente en el momento, no se deja pendiente ni se pierde entre sesiones. Igual de válido detectar y proponer una oportunidad de mejora no pedida explícitamente que aplicar una corrección pedida por el usuario.
 
 ## Multitasking con git worktrees
