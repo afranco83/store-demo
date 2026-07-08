@@ -46,3 +46,25 @@ test("browses the catalog, filters by category and adds a product to the cart", 
   await expect(cartDrawer).toBeVisible();
   await expect(cartDrawer.getByText(product.name)).toBeVisible();
 });
+
+test("adds a product to the cart directly from the catalog grid, without navigating away", async ({
+  page,
+  request,
+}) => {
+  const productsResponse = await request.get(`${API_URL}/api/products`);
+  const { data: products }: { data: ApiProduct[] } = await productsResponse.json();
+  const product = products.find((item) => item.stock > 0);
+
+  test.skip(!product, "No hay producto con stock disponible en el catálogo");
+  if (!product) return;
+
+  await page.goto("/products");
+
+  const card = page.getByRole("link", { name: product.name }).locator("xpath=..");
+  await card.getByRole("button", { name: "Add to cart" }).click();
+
+  const cartDrawer = page.getByRole("dialog", { name: "Carrito" });
+  await expect(cartDrawer).toBeVisible();
+  await expect(cartDrawer.getByText(product.name)).toBeVisible();
+  await expect(page).toHaveURL("/products");
+});

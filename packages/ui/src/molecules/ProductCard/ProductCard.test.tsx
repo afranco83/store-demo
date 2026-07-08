@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 import { expectNoAccessibilityViolations, renderWithProviders } from "@store-demo/testing";
 
@@ -11,6 +11,19 @@ describe("ProductCard", () => {
         name="Camiseta gráfica"
         imageUrl="https://example.com/shirt.jpg"
         priceCents={2999}
+      />,
+    );
+
+    await expectNoAccessibilityViolations(container);
+  });
+
+  it("should have no accessibility violations with the add-to-cart button", async () => {
+    const { container } = renderWithProviders(
+      <ProductCard
+        name="Camiseta gráfica"
+        imageUrl="https://example.com/shirt.jpg"
+        priceCents={2999}
+        onAddToCart={vi.fn()}
       />,
     );
 
@@ -53,5 +66,29 @@ describe("ProductCard", () => {
     );
 
     expect(screen.queryByText(/unidades|agotado/i)).not.toBeInTheDocument();
+  });
+
+  it("should not render an add-to-cart button when onAddToCart is not provided", () => {
+    renderWithProviders(
+      <ProductCard name="Zapatillas" imageUrl="https://example.com/shoes.jpg" priceCents={7999} />,
+    );
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("should call onAddToCart when the add-to-cart button is clicked", async () => {
+    const handleAddToCart = vi.fn();
+    const { user } = renderWithProviders(
+      <ProductCard
+        name="Zapatillas"
+        imageUrl="https://example.com/shoes.jpg"
+        priceCents={7999}
+        onAddToCart={handleAddToCart}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Add to cart" }));
+
+    expect(handleAddToCart).toHaveBeenCalledOnce();
   });
 });

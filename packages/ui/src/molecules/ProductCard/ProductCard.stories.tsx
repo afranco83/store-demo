@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
 
 import { ProductCard } from "./ProductCard";
 
@@ -9,6 +10,7 @@ const meta = {
     name: "Camiseta gráfica",
     imageUrl: "https://picsum.photos/seed/store-demo-product/480/480",
     priceCents: 2999,
+    onAddToCart: fn(),
   },
 } satisfies Meta<typeof ProductCard>;
 
@@ -20,5 +22,8 @@ export const LowStock: Story = {
   args: { stockBadge: { label: "Últimas unidades", intent: "warning" } },
 };
 export const OutOfStock: Story = {
-  args: { stockBadge: { label: "Agotado", intent: "danger" } },
+  args: { stockBadge: { label: "Agotado", intent: "danger" }, onAddToCart: undefined },
+};
+export const LongName: Story = {
+  args: { name: "Sudadera oversize de algodón orgánico con capucha y bolsillo canguro" },
 };
