@@ -43,7 +43,7 @@ export function CartLineItem({
 }: CartLineItemProps) {
   return (
     <div ref={ref} className={cn("flex items-center gap-3 py-3", className)}>
-      <img src={imageUrl} alt={name} className="size-16 shrink-0 rounded-md object-cover" />
+      <img src={imageUrl} alt={name} className="h-16 w-auto shrink-0 rounded-md object-contain" />
       <div className="flex flex-1 flex-col gap-1">
         <Typography as="p" variant="body" className="font-medium">
           {name}
