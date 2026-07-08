@@ -1,0 +1,48 @@
+import { expect, test } from "@playwright/test";
+
+const API_URL = "http://localhost:4000";
+
+interface ApiProduct {
+  slug: string;
+  name: string;
+  stock: number;
+}
+
+interface ApiCategory {
+  slug: string;
+  name: string;
+}
+
+test("browses the catalog, filters by category and adds a product to the cart", async ({
+  page,
+  request,
+}) => {
+  const categoriesResponse = await request.get(`${API_URL}/api/categories`);
+  const { data: categories }: { data: ApiCategory[] } = await categoriesResponse.json();
+  const category = categories[0];
+  if (!category) {
+    throw new Error("El seed no tiene categorías, no se puede probar el filtro de catálogo");
+  }
+
+  await page.goto("/products");
+  await page.getByRole("link", { name: category.name }).click();
+  await expect(page).toHaveURL(`/products?category=${category.slug}`);
+
+  const productsResponse = await request.get(
+    `${API_URL}/api/products?categorySlug=${category.slug}`,
+  );
+  const { data: products }: { data: ApiProduct[] } = await productsResponse.json();
+  const product = products.find((item) => item.stock > 0);
+
+  test.skip(!product, "No hay producto con stock disponible en esta categoría");
+  if (!product) return;
+
+  await page.getByRole("link", { name: product.name }).click();
+  await expect(page.getByRole("heading", { name: product.name })).toBeVisible();
+
+  await page.getByRole("button", { name: "Añadir al carrito" }).click();
+
+  const cartDrawer = page.getByRole("dialog", { name: "Carrito" });
+  await expect(cartDrawer).toBeVisible();
+  await expect(cartDrawer.getByText(product.name)).toBeVisible();
+});

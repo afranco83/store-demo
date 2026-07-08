@@ -6,7 +6,7 @@ Este archivo da a Claude Code el contexto operativo de este repositorio. Las con
 
 Monorepo demo (no producto real) que demuestra un stack frontend profesional: React + Next.js + TypeScript + Zod + TanStack Query + Zustand, con un backend fake propio (Prisma + SQLite) en lugar de mocks estáticos. Contexto completo en `docs/PROJECT_SPECIFICATION.md`, `docs/ARCHITECTURE.md` y `docs/ROADMAP.md`.
 
-**Estado actual: Fase 3 (Design System, base) cerrada en local, en rama `feat/phase-3-design-system-base`.** `packages/design-tokens`/`packages/tailwind-config` (Tailwind v4 CSS-first) y `packages/ui` (Button, Input, Badge, Spinner, Icon, Typography) tienen contenido real, documentados en `apps/storybook` (Storybook 10). Siguiente fase: Fase 4 (Storefront: Catálogo & Carrito).
+**Estado actual: Fase 4 (Storefront: Catálogo & Carrito) cerrada en local, en rama `feat/phase-4-storefront`.** `apps/storefront` tiene un flujo real end-to-end (catálogo con filtro por categoría, detalle de producto, carrito persistido contra `apps/api`), `packages/ui` amplió su inventario con moléculas/organismos (ProductCard, PriceTag, QuantitySelector, EmptyState, ProductGrid, CartLineItem, Navbar, CartDrawer). Siguiente fase: Fase 5 (Autenticación & Cuenta).
 
 ## Cómo trabajar en este repo
 

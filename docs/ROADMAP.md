@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 3 cerrada (2026-07-08)** — mergeada en `main` (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
+Estado actual: **Fase 4 cerrada en local (2026-07-08)**, en rama `feat/phase-4-storefront`, pendiente de PR; Fase 3 cerrada y mergeada en `main` (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -83,21 +83,33 @@ Tareas:
 
 ---
 
-## Fase 4 — Storefront: Catálogo & Carrito
+## Fase 4 — Storefront: Catálogo & Carrito _(cerrada en local — 2026-07-08)_
 
 **Objetivo**: primera app de negocio funcional end-to-end (lectura + carrito).
 
 Tareas:
 
-- [ ] Component-first: identificar y crear en `packages/ui` las moléculas/organismos que falten para catálogo y carrito (ProductCard, PriceTag, QuantitySelector, Navbar, CartDrawer...) antes de montar cualquier página
-- [ ] `features/products`: api/hooks/services/schemas/components (listado, detalle, filtros)
-- [ ] `features/cart`: estado de carrito (Zustand para UI del drawer, TanStack Query + `apps/api` para persistencia)
-- [ ] Páginas App Router: `/`, `/products`, `/products/[slug]`, integrando Server Components por defecto
-- [ ] Providers globales (`providers/QueryProvider`, etc.)
-- [ ] Tests de integración de ambas features con `packages/testing`
-- [ ] Primeros specs E2E (Playwright): navegar catálogo → añadir al carrito
+- [x] Component-first: identificar y crear en `packages/ui` las moléculas/organismos que falten para catálogo y carrito (ProductCard, PriceTag, QuantitySelector, Navbar, CartDrawer...) antes de montar cualquier página — más `EmptyState`, `ProductGrid` y `CartLineItem`, gaps detectados durante la implementación (DRY/AHA, `AGENTS.md §1.9`)
+- [x] `features/products`: api/hooks/services/schemas/components (listado, detalle, filtros) — sin `hooks/` (YAGNI: listado/detalle se sirven vía Server Components llamando a `api-client` directamente, sin TanStack Query para datos de solo lectura)
+- [x] `features/cart`: estado de carrito (Zustand para UI del drawer, TanStack Query + `apps/api` para persistencia)
+- [x] Páginas App Router: `/`, `/products`, `/products/[slug]`, integrando Server Components por defecto
+- [x] Providers globales (`providers/QueryProvider`, etc.)
+- [x] Tests de integración de ambas features con `packages/testing`
+- [x] Primeros specs E2E (Playwright): navegar catálogo → añadir al carrito
 
-**DoD**: flujo de catálogo→carrito funciona contra `apps/api` real, specs E2E en verde, sin `"use client"` en componentes que no lo necesitan (verificable por revisión).
+**DoD**: flujo de catálogo→carrito funciona contra `apps/api` real, specs E2E en verde, sin `"use client"` en componentes que no lo necesitan (verificable por revisión). **Cumplido**: `pnpm turbo lint typecheck test build` en verde en los 16 paquetes/apps, 4 specs E2E (Playwright, Chromium real) en verde contra `apps/api` real, flujo catálogo→filtro por categoría→detalle→añadir al carrito→drawer verificado manualmente y por E2E. `"use client"` solo en `SiteHeader`, `AddToCartButton`, `CartDrawerContainer`, `QueryProvider` y `CartDrawer` (design system, necesita `useEffect` para cerrar con Escape) — el resto del árbol (páginas, `ProductCardLink`, `ProductGridSection`, `CategoryFilterNav`) son Server Components.
+
+**Decisiones tomadas con el usuario antes de implementar** (plan mode): mutaciones del carrito como Server Actions (`features/cart/api/*.action.ts`), extendido a la lectura (`useCart`) por testabilidad con Vitest+MSW sin necesitar mocks de red adicionales; identidad del carrito sin auth real vía un usuario demo fijo (seedeado, resuelto en runtime con `login()` y memoizado — sustituible en Fase 5 por sesión real); filtros de catálogo limitados a categoría (única dimensión que soporta `apps/api`).
+
+**Notas técnicas no obvias de la Fase 4:**
+
+- `packages/testing`'s `renderWithProviders` ahora envuelve `QueryClientProvider` (el "punto de extensión" que dejó preparado la Fase 3); nuevo `packages/testing/src/query-client.tsx` con `createTestQueryClient`/`createQueryWrapper`.
+- El paquete `server-only` lanza en tiempo de ejecución si detecta globals de navegador (`window`/`document`) — bajo jsdom estos SIEMPRE existen, así que cualquier módulo con `import "server-only"` revienta en tests de Vitest. Se retiró de `features/cart/lib/get-demo-user-id.ts` (las Server Actions que lo importan ya tienen su propio límite de compilación vía `"use server"`); se mantiene en `features/products/api/*.ts` porque esos módulos no están cubiertos por ningún test bajo jsdom.
+- El `tsconfig.json` de `apps/storefront` hereda `jsx: "preserve"` de `@store-demo/tsconfig/nextjs.json` (lo exige el compilador de Next). Fuera del pipeline de Next, Vitest necesita transformar el JSX él mismo — hizo falta añadir `@vitejs/plugin-react` a `vitest.config.ts` (ajustar solo `esbuild.jsx`/`tsconfigRaw` no fue suficiente, el parser SSR de Vite 8 no los respeta en este caso).
+- El umbral de cobertura de `apps/storefront` (80%, `AGENTS.md §6`) se acota a `features/**/{hooks,services,store,lib,schemas}` — los componentes de composición Server/Client (páginas, `ProductCardLink`, `SiteHeader`...) se validan por integración/E2E, no por cobertura unitaria exhaustiva, mismo criterio que ya aplicaba `docs/ARCHITECTURE.md §6` al Testing Trophy.
+- `CartDrawer` (organism) necesitó `"use client"` explícito pese a que `packages/ui` evita depender de Next.js: al reexportarse desde el barrel `packages/ui/src/index.ts`, Next evalúa el módulo aunque una página Server Component solo use otro componente del mismo barrel — cualquier componente que use hooks exclusivos de cliente (`useEffect`, `useState`...) necesita el directive así, sin excepción, si vive en un paquete consumido vía barrel.
+- `<dialog>` nativo (`showModal()`/`close()`) no está implementado en `jsdom@29`; `CartDrawer` se implementó como overlay simple (`role="dialog"`, cierre por Escape/backdrop/botón vía `useEffect`) en vez de depender del elemento nativo, manteniendo cero dependencias nuevas.
+- `CartItem.userId` es FK real a `User` en Prisma (no admite un id arbitrario) — de ahí la necesidad de resolver el usuario demo vía `login()` real contra el seed, en vez de un id hardcodeado o inventado.
 
 ---
 
