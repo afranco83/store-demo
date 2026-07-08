@@ -18,6 +18,8 @@ export interface CartLineItemProps {
   maxQuantity?: number;
   isUpdating?: boolean;
   quantityLabel?: string;
+  decreaseQuantityLabel?: string;
+  increaseQuantityLabel?: string;
   removeLabel?: string;
   className?: string;
   ref?: Ref<HTMLDivElement>;
@@ -33,6 +35,8 @@ export function CartLineItem({
   maxQuantity,
   isUpdating = false,
   quantityLabel = "Quantity",
+  decreaseQuantityLabel = "Decrease quantity",
+  increaseQuantityLabel = "Increase quantity",
   removeLabel = "Remove item",
   className,
   ref,
@@ -51,6 +55,8 @@ export function CartLineItem({
           max={maxQuantity}
           disabled={isUpdating}
           label={quantityLabel}
+          decreaseLabel={decreaseQuantityLabel}
+          increaseLabel={increaseQuantityLabel}
         />
       </div>
       <Button

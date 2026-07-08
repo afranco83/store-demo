@@ -100,4 +100,48 @@ describe("CartDrawer", () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("should move focus into the dialog when it opens", () => {
+    renderWithProviders(<CartDrawer isOpen onClose={vi.fn()} items={items} subtotalCents={5998} />);
+
+    expect(screen.getByRole("dialog")).toHaveFocus();
+  });
+
+  it("should trap Tab focus within the dialog", async () => {
+    const { user } = renderWithProviders(
+      <CartDrawer isOpen onClose={vi.fn()} items={items} subtotalCents={5998} />,
+    );
+
+    const closeButton = screen.getByRole("button", { name: "Close cart" });
+    const removeButton = screen.getByRole("button", { name: "Remove item" });
+
+    removeButton.focus();
+    await user.tab();
+    expect(closeButton).toHaveFocus();
+
+    await user.tab({ shift: true });
+    expect(removeButton).toHaveFocus();
+  });
+
+  it("should restore focus to the previously focused element when it closes", () => {
+    function Wrapper({ isOpen }: { isOpen: boolean }) {
+      return (
+        <>
+          <button type="button">Open cart</button>
+          <CartDrawer isOpen={isOpen} onClose={vi.fn()} items={items} subtotalCents={5998} />
+        </>
+      );
+    }
+
+    const { rerender } = renderWithProviders(<Wrapper isOpen={false} />);
+    const triggerButton = screen.getByRole("button", { name: "Open cart" });
+    triggerButton.focus();
+    expect(triggerButton).toHaveFocus();
+
+    rerender(<Wrapper isOpen />);
+    expect(triggerButton).not.toHaveFocus();
+
+    rerender(<Wrapper isOpen={false} />);
+    expect(triggerButton).toHaveFocus();
+  });
 });

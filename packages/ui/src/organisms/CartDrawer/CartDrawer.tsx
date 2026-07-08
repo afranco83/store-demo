@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import type { ReactNode } from "react";
 import { ShoppingBag, X } from "lucide-react";
 
@@ -23,6 +23,10 @@ export type CartDrawerItem = { id: string } & Pick<
   | "onRemove"
   | "maxQuantity"
   | "isUpdating"
+  | "quantityLabel"
+  | "decreaseQuantityLabel"
+  | "increaseQuantityLabel"
+  | "removeLabel"
 >;
 
 export interface CartDrawerProps {
@@ -57,16 +61,51 @@ export function CartDrawer({
   className,
 }: CartDrawerProps) {
   const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
+    previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
+    dialogRef.current?.focus();
+
+    function getFocusableElements(): HTMLElement[] {
+      if (!dialogRef.current) return [];
+      return Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+    }
+
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+
+      const focusableElements = getFocusableElements();
+      const first = focusableElements[0];
+      const last = focusableElements[focusableElements.length - 1];
+      if (!first || !last) return;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElementRef.current?.focus();
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -80,11 +119,13 @@ export function CartDrawer({
         aria-hidden="true"
       />
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "relative flex h-dvh w-full max-w-md flex-col gap-4 bg-white p-6 shadow-xl",
+          "relative flex h-dvh w-full max-w-md flex-col gap-4 bg-white p-6 shadow-xl focus:outline-none",
           className,
         )}
       >

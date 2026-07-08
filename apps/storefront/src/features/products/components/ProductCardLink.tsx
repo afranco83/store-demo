@@ -31,6 +31,7 @@ export function ProductCardLink({ product }: { product: Product }) {
         imageUrl={product.imageUrl}
         priceCents={product.priceCents}
         stockBadge={getStockBadge(product.stock)}
+        addToCartLabel="Añadir al carrito"
         onAddToCart={
           product.stock > 0
             ? () =>

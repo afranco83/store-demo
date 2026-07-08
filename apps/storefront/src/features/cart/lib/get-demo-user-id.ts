@@ -12,9 +12,16 @@ let cachedUserId: Promise<string> | null = null;
  * cuando exista sesión real.
  */
 export function getDemoUserId(): Promise<string> {
-  cachedUserId ??= login({ email: DEMO_USER_EMAIL, password: DEMO_USER_PASSWORD }).then(
-    (response) => response.user.id,
-  );
+  // Si login() falla (p. ej. apps/api tarda en arrancar), no se cachea el
+  // rechazo: `??=` solo reasigna cuando cachedUserId es null/undefined, así
+  // que sin este catch un único fallo transitorio dejaría el carrito roto
+  // hasta reiniciar el proceso.
+  cachedUserId ??= login({ email: DEMO_USER_EMAIL, password: DEMO_USER_PASSWORD })
+    .then((response) => response.user.id)
+    .catch((error: unknown) => {
+      cachedUserId = null;
+      throw error;
+    });
 
   return cachedUserId;
 }

@@ -38,6 +38,10 @@ test("browses the catalog, filters by category and adds a product to the cart", 
   if (!product) return;
 
   await page.getByRole("link", { name: product.name }).click();
+  // Espera la navegación explícitamente: la card del listado y la página de
+  // detalle comparten el mismo texto de botón ("Añadir al carrito"), así que
+  // buscarlo antes de que la navegación termine es ambiguo.
+  await page.waitForURL(`/products/${product.slug}`);
   await expect(page.getByRole("heading", { name: product.name })).toBeVisible();
 
   await page.getByRole("button", { name: "Añadir al carrito" }).click();
@@ -61,7 +65,7 @@ test("adds a product to the cart directly from the catalog grid, without navigat
   await page.goto("/products");
 
   const card = page.getByRole("link", { name: product.name }).locator("xpath=..");
-  await card.getByRole("button", { name: "Add to cart" }).click();
+  await card.getByRole("button", { name: "Añadir al carrito" }).click();
 
   const cartDrawer = page.getByRole("dialog", { name: "Carrito" });
   await expect(cartDrawer).toBeVisible();

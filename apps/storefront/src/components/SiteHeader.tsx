@@ -1,19 +1,11 @@
-"use client";
-
 import Link from "next/link";
-import { Navbar, Typography } from "@store-demo/ui";
+import { Typography } from "@store-demo/ui";
 
-import { useCart } from "@/features/cart/hooks/use-cart";
-import { useCartDrawerStore } from "@/features/cart/store/use-cart-drawer-store";
+import { CartAwareNavbar } from "./CartAwareNavbar";
 
 export function SiteHeader() {
-  const cartQuery = useCart();
-  const openCartDrawer = useCartDrawerStore((state) => state.open);
-
-  const cartItemCount = (cartQuery.data ?? []).reduce((total, item) => total + item.quantity, 0);
-
   return (
-    <Navbar
+    <CartAwareNavbar
       logoSlot={
         <Link href="/">
           <Typography as="span" variant="heading" className="text-xl">
@@ -27,9 +19,6 @@ export function SiteHeader() {
           <Link href="/products">Catálogo</Link>
         </>
       }
-      cartItemCount={cartItemCount}
-      onCartClick={openCartDrawer}
-      cartLabel="Abrir carrito"
     />
   );
 }

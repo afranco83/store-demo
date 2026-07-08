@@ -17,6 +17,11 @@ test("loads a product detail page from the catalog", async ({ page }) => {
 
   const firstProductLink = page.locator("main a[href^='/products/']").first();
   await firstProductLink.click();
+  // Espera la navegación explícitamente: la card del listado y la página de
+  // detalle comparten el mismo texto de botón ("Añadir al carrito"), así que
+  // buscarlo antes de que la navegación termine es ambiguo (matchea las 15
+  // cards del listado a la vez).
+  await page.waitForURL(/\/products\/.+/);
 
   await expect(page.getByRole("button", { name: "Añadir al carrito" })).toBeVisible();
 });

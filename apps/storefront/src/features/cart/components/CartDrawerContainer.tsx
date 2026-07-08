@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CartDrawer, type CartDrawerItem } from "@store-demo/ui";
 
 import { useCart } from "../hooks/use-cart";
@@ -14,6 +15,12 @@ export function CartDrawerContainer() {
   const cartQuery = useCart();
   const updateCartItemMutation = useUpdateCartItemMutation();
   const removeCartItemMutation = useRemoveCartItemMutation();
+  // updateCartItemMutation/removeCartItemMutation son instancias únicas
+  // compartidas por todas las líneas del carrito: su .isPending/.variables
+  // solo reflejan la última llamada, no una por ítem. Se rastrea aquí el
+  // conjunto de productos con una petición en curso para que marcar
+  // "actualizando" un ítem no reactive por error otro que sigue pendiente.
+  const [pendingProductIds, setPendingProductIds] = useState<ReadonlySet<string>>(new Set());
 
   const cartItems = cartQuery.data ?? [];
 
@@ -22,6 +29,18 @@ export function CartDrawerContainer() {
     0,
   );
 
+  function markPending(productId: string) {
+    setPendingProductIds((current) => new Set(current).add(productId));
+  }
+
+  function clearPending(productId: string) {
+    setPendingProductIds((current) => {
+      const next = new Set(current);
+      next.delete(productId);
+      return next;
+    });
+  }
+
   const drawerItems: CartDrawerItem[] = cartItems.map((item) => ({
     id: item.id,
     name: item.product.name,
@@ -29,14 +48,30 @@ export function CartDrawerContainer() {
     priceCents: item.product.priceCents,
     quantity: item.quantity,
     maxQuantity: item.product.stock,
-    isUpdating:
-      (updateCartItemMutation.isPending &&
-        updateCartItemMutation.variables?.productId === item.productId) ||
-      (removeCartItemMutation.isPending &&
-        removeCartItemMutation.variables?.productId === item.productId),
-    onQuantityChange: (next) =>
-      updateCartItemMutation.mutate({ productId: item.productId, quantity: next }),
-    onRemove: () => removeCartItemMutation.mutate({ productId: item.productId }),
+    isUpdating: pendingProductIds.has(item.productId),
+    quantityLabel: "Cantidad",
+    decreaseQuantityLabel: "Reducir cantidad",
+    increaseQuantityLabel: "Aumentar cantidad",
+    removeLabel: "Eliminar producto",
+    onQuantityChange: (next) => {
+      markPending(item.productId);
+      // mutateAsync (no mutate con callbacks) porque updateCartItemMutation
+      // es una única instancia compartida: si dos ítems mutan a la vez, la
+      // segunda llamada a mutate() desengancha al observer de la primera
+      // mutación y su onSettled nunca llega a dispararse. La promesa que
+      // devuelve mutateAsync sí está atada a esta ejecución concreta.
+      void updateCartItemMutation
+        .mutateAsync({ productId: item.productId, quantity: next })
+        .catch(() => {})
+        .finally(() => clearPending(item.productId));
+    },
+    onRemove: () => {
+      markPending(item.productId);
+      void removeCartItemMutation
+        .mutateAsync({ productId: item.productId })
+        .catch(() => {})
+        .finally(() => clearPending(item.productId));
+    },
   }));
 
   const errorMessage =
