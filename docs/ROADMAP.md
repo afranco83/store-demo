@@ -79,6 +79,8 @@ Tareas:
 
 **DoD**: `apps/storybook` corre localmente con los átomos base documentados (`pnpm --filter @store-demo/storybook dev`, verificado; `storybook build` también en verde), 0 violaciones a11y "serias"/"críticas" (cubierto por test unitario `vitest-axe` en cada átomo, ya que no hay herramienta de navegador disponible en este entorno para verificar el addon-a11y de forma interactiva). Cobertura de test en `packages/ui`: **100%** líneas/funciones/statements, **100%** ramas — por encima del ≥85% exigido. `pnpm turbo lint typecheck test build` en verde en los 16 paquetes/apps del monorepo. **Cumplido.**
 
+**Adenda (2026-07-08, revisión post-cierre del usuario)**: al repasar el acento en dark mode se detectó que `#c2410c` no llega a AA sobre fondos oscuros (~3.4-3.8:1, por debajo de 4.5:1). Se añadieron variantes dark de `--color-accent`/`-hover`/`-foreground`/`-soft` en `tokens.css` bajo `@media (prefers-color-scheme: dark)` — verificadas a mano con la fórmula de contraste WCAG (no hay test automático de contraste en este entorno, ver nota de DoD arriba). `Badge` pasó de `bg-accent/10` a un token `--color-accent-soft` propio porque la opacidad AA-correcta difiere entre claro (10%) y oscuro (18%). Alcance deliberadamente acotado al acento: el resto de la paleta (grises, colores semánticos) sigue solo-claro, y no existe todavía un toggle manual de tema — candidato de una fase futura si se decide construir uno. Detalle técnico en `ARCHITECTURE.md` §2.1.
+
 ---
 
 ## Fase 4 — Storefront: Catálogo & Carrito

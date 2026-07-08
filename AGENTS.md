@@ -28,40 +28,40 @@ Convenciones de lenguaje (naming, inmutabilidad, async/errores). Ver también `�
 
 ```ts
 // PASS
-const marketSearchQuery = 'election'
-const isUserAuthenticated = true
-const totalRevenue = 1000
+const marketSearchQuery = "election";
+const isUserAuthenticated = true;
+const totalRevenue = 1000;
 
 // FAIL
-const q = 'election'
-const flag = true
-const x = 1000
+const q = "election";
+const flag = true;
+const x = 1000;
 ```
 
 **Naming de funciones**: patrón verbo-sustantivo que describe la acción, nunca un sustantivo solo.
 
 ```ts
 // PASS
-async function fetchMarketData(marketId: string) { }
-function calculateSimilarity(a: number[], b: number[]) { }
-function isValidEmail(email: string): boolean { }
+async function fetchMarketData(marketId: string) {}
+function calculateSimilarity(a: number[], b: number[]) {}
+function isValidEmail(email: string): boolean {}
 
 // FAIL
-async function market(id: string) { }
-function similarity(a, b) { }
-function email(e) { }
+async function market(id: string) {}
+function similarity(a, b) {}
+function email(e) {}
 ```
 
 **Inmutabilidad (crítico)**: nunca se muta un objeto/array recibido por parámetro o leído de estado — React, TanStack Query y Zustand asumen inmutabilidad para detectar cambios. Siempre spread u operaciones que devuelven una copia.
 
 ```ts
 // PASS
-const updatedUser = { ...user, name: 'New Name' }
-const updatedArray = [...items, newItem]
+const updatedUser = { ...user, name: "New Name" };
+const updatedArray = [...items, newItem];
 
 // FAIL
-user.name = 'New Name'  // muta el objeto original
-items.push(newItem)     // muta el array original
+user.name = "New Name"; // muta el objeto original
+items.push(newItem); // muta el array original
 ```
 
 **Manejo de errores**: toda llamada a `fetch` (siempre dentro de `packages/api-client`, ver §11) comprueba `response.ok` y relanza un error explícito con contexto; nunca se asume que una promesa resuelta implica éxito.
@@ -70,21 +70,21 @@ items.push(newItem)     // muta el array original
 // PASS
 async function fetchData(url: string) {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
-    return await response.json()
+    return await response.json();
   } catch (error) {
-    console.error('Fetch failed:', error)
-    throw new Error('Failed to fetch data')
+    console.error("Fetch failed:", error);
+    throw new Error("Failed to fetch data");
   }
 }
 
 // FAIL: sin manejo de errores
 async function fetchData(url) {
-  const response = await fetch(url)
-  return response.json()
+  const response = await fetch(url);
+  return response.json();
 }
 ```
 
@@ -92,16 +92,12 @@ async function fetchData(url) {
 
 ```ts
 // PASS: ejecución en paralelo
-const [users, markets, stats] = await Promise.all([
-  fetchUsers(),
-  fetchMarkets(),
-  fetchStats(),
-])
+const [users, markets, stats] = await Promise.all([fetchUsers(), fetchMarkets(), fetchStats()]);
 
 // FAIL: secuencial sin necesidad
-const users = await fetchUsers()
-const markets = await fetchMarkets()
-const stats = await fetchStats()
+const users = await fetchUsers();
+const markets = await fetchMarkets();
+const stats = await fetchStats();
 ```
 
 **Type Safety**: ningún `any` (principio 1 de §1). A diferencia del ejemplo original de la fuente (que usa un `interface` escrito a mano), aquí el tipo de dominio se infiere de un schema Zod, coherente con `§1.1`.
@@ -111,10 +107,10 @@ const stats = await fetchStats()
 const marketSchema = z.object({
   id: z.string(),
   name: z.string(),
-  status: z.enum(['active', 'resolved', 'closed']),
+  status: z.enum(["active", "resolved", "closed"]),
   created_at: z.date(),
-})
-type Market = z.infer<typeof marketSchema>
+});
+type Market = z.infer<typeof marketSchema>;
 
 function getMarket(id: string): Promise<Market> {
   // Implementation
@@ -139,14 +135,17 @@ function getMarket(id: any): Promise<any> {
 **Exhaustividad en uniones discriminadas**: todo `switch`/cadena de `if` sobre una unión de literales (p. ej. `status` de `Market`) termina en un caso `default`/`else` que asigna el valor a `never`, para que TypeScript avise en compilación si se añade un nuevo caso sin manejar.
 
 ```ts
-function getStatusLabel(status: Market['status']): string {
+function getStatusLabel(status: Market["status"]): string {
   switch (status) {
-    case 'active': return 'Activo'
-    case 'resolved': return 'Resuelto'
-    case 'closed': return 'Cerrado'
+    case "active":
+      return "Activo";
+    case "resolved":
+      return "Resuelto";
+    case "closed":
+      return "Cerrado";
     default:
-      const _exhaustive: never = status
-      return _exhaustive
+      const _exhaustive: never = status;
+      return _exhaustive;
   }
 }
 ```
@@ -194,15 +193,16 @@ function getStatusLabel(status: Market['status']): string {
 
 ```ts
 // packages/ui/utils/cn.ts
-import { cx, type ClassValue } from 'class-variance-authority'
-import { twMerge } from 'tailwind-merge'
+import { cx, type ClassValue } from "class-variance-authority";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(cx(...inputs))
+  return twMerge(cx(...inputs));
 }
 ```
 
 - **Nunca clases Tailwind construidas por interpolación de datos dinámicos** (`` `bg-${color}-500` ``, con `color` viniendo de una API/BD): el compilador JIT de Tailwind solo detecta strings de clase completos de forma estática, así que esa clase se purga en producción y el estilo desaparece. Para valores realmente dinámicos (color de marca de un pedido, etc.) se usan variables CSS vía `style` inline (`style={{ '--bg-color': color }}` + clase `bg-(--bg-color)`), nunca interpolación directa en el nombre de la clase.
+- **Variantes de tema (dark mode) a nivel de token, no de componente**: cuando un token necesita un valor distinto en dark mode (p. ej. el acento de marca, que no llega a AA sobre fondos oscuros), se redefine la custom property en `packages/design-tokens/src/tokens.css` dentro de `@media (prefers-color-scheme: dark)`, nunca añadiendo clases `dark:` sueltas por cada componente que use ese token — las utilidades de Tailwind ya apuntan a la custom property, así que heredan el cambio sin tocar `packages/ui`. Si una utilidad con modificador de opacidad (`bg-accent/10`) necesita una opacidad distinta según el tema, esa opacidad no puede variar con un modificador estático: se promociona a un token propio (`--color-accent-soft`) con su propio valor por tema, siguiendo el mismo criterio de "value se repite/diverge → sube al preset" de la regla de arriba.
 
 ## 6. Testing
 
@@ -220,7 +220,7 @@ export function cn(...inputs: ClassValue[]) {
 - **Idioma**: código de test (nombres, `describe`/`it`, mensajes) siempre en inglés, igual que el resto del código de la base.
 - **Definición de hecho**: un test o batería de tests no se da por terminado hasta que (a) el propio test/batería pasa en verde, (b) no hay errores de tipado ni de lint, y (c) el formato es correcto. Después se ejecuta la suite completa (`pnpm turbo lint typecheck test build`, ver `CLAUDE.md`) para confirmar que no se ha roto nada más.
 - Si cualquiera de esas comprobaciones falla, se corrige de inmediato — nunca se deja un error de tipado, lint o test pendiente para después.
-- **Selectores (Testing Library)**: prioriza `getByRole` y otros selectores accesibles (`getByLabelText`, `getByText`) sobre cualquier otro; refuerza el objetivo de accesibilidad de `§8`, ya que si `getByRole` no encuentra el elemento suele ser señal de un problema real de a11y. `data-testid` es el último recurso, solo cuando no hay rol ni texto accesible, con convención `data-testid="nombre-en-kebab-case"`. *Nota*: esto es una desviación deliberada de una de las fuentes consultadas (`javascript-testing-best-practices`), que recomienda `data-test-id` como selector principal — esa guía es agnóstica de framework/librería; aquí usamos específicamente React Testing Library, cuya filosofía (y la nuestra, dado el objetivo WCAG 2.1 AA de `§8`) es que un selector por rol/texto accesible es a la vez más resistente a refactors de UI y una prueba en sí misma de que el componente es accesible.
+- **Selectores (Testing Library)**: prioriza `getByRole` y otros selectores accesibles (`getByLabelText`, `getByText`) sobre cualquier otro; refuerza el objetivo de accesibilidad de `§8`, ya que si `getByRole` no encuentra el elemento suele ser señal de un problema real de a11y. `data-testid` es el último recurso, solo cuando no hay rol ni texto accesible, con convención `data-testid="nombre-en-kebab-case"`. _Nota_: esto es una desviación deliberada de una de las fuentes consultadas (`javascript-testing-best-practices`), que recomienda `data-test-id` como selector principal — esa guía es agnóstica de framework/librería; aquí usamos específicamente React Testing Library, cuya filosofía (y la nuestra, dado el objetivo WCAG 2.1 AA de `§8`) es que un selector por rol/texto accesible es a la vez más resistente a refactors de UI y una prueba en sí misma de que el componente es accesible.
 - **Renderizado real**: siempre que sea posible se renderiza el componente completo con sus dependencias reales (o `renderWithProviders` de `packages/testing`), evitando mocks parciales de componentes hijos — un mock parcial puede ocultar bugs de integración entre padre e hijo que sí ocurrirían en producción.
 - **Esperas asíncronas**: nunca `setTimeout`/pausas arbitrarias para esperar una actualización; se usan las utilidades async de Testing Library (`findBy*`, `waitFor`) o de Playwright, que esperan la condición real en vez de un tiempo fijo.
 - **Interacción**: siempre `userEvent`, nunca `fireEvent` — `userEvent` simula la secuencia real de eventos del navegador (p. ej. hover antes de click); `fireEvent` solo dispara el evento de forma aislada y puede dar falsos positivos.
@@ -245,11 +245,11 @@ it('should increment the counter on click', async () => {
 - **Mock de `next/navigation`**: si un componente usa `useRouter`/`usePathname` del App Router, se mockea explícitamente. Este proyecto usa **Vitest**, no Jest (ver `docs/PROJECT_SPECIFICATION.md`), así que es `vi.mock`/`vi.fn`, no `jest.mock`/`jest.fn`:
 
 ```ts
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter() {
-    return { prefetch: () => null, push: vi.fn() }
+    return { prefetch: () => null, push: vi.fn() };
   },
-}))
+}));
 ```
 
 - **Independencia**: ningún test depende del orden de ejecución ni de efectos secundarios dejados por otro test; `beforeEach`/`beforeAll` resetea mocks y estado (`vi.clearAllMocks()` o equivalente) antes de cada test. Cada test genera su propio dataset (vía las factories de `packages/testing`), nunca depende de fixtures globales compartidas y mutables entre tests.
@@ -311,26 +311,26 @@ vi.mock('next/navigation', () => ({
 
 Convenciones de este documento adaptadas (no copiadas literalmente) de fuentes externas. Se listan aquí, junto a la convención, para que quede trazado de dónde viene cada criterio cuando no es una decisión propia del proyecto.
 
-| Sección | Fuente |
-|---|---|
-| §2 TypeScript/JavaScript | [ecc.tools](https://ecc.tools) |
-| §2 TypeScript/JavaScript | [TypeScript Handbook — Do's and Don'ts](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html) |
-| §2 TypeScript/JavaScript | [AWS Prescriptive Guidance — TypeScript best practices](https://docs.aws.amazon.com/es_es/prescriptive-guidance/latest/best-practices-cdk-typescript-iac/typescript-best-practices.html) |
-| §2 TypeScript/JavaScript | [ts.dev — Style Guide](https://ts.dev/style/) |
-| §2 TypeScript/JavaScript | [Clean Code Principles for React + TypeScript (dev.to)](https://dev.to/dangkhoado43/clean-code-principles-code-conventions-for-react-typescript-3n7d) |
-| §2 TypeScript/JavaScript | [Buenas prácticas en TypeScript (Medium, S. Roldán)](https://medium.com/@_sroldan/buenas-pr%C3%A1cticas-en-typescript-tips-para-escribir-mejor-c%C3%B3digo-5b764f31bca4) |
-| §2 TypeScript/JavaScript | [TypeScript code conventions (gist)](https://gist.github.com/anichitiandreea/e1d466022d772ea22db56399a7af576b) |
-| §6 Testing | [javascript-testing-best-practices (goldbergyoni)](https://github.com/goldbergyoni/javascript-testing-best-practices/blob/master/readme-es.md) |
-| §3 Estructura y naming | [Next.js — Local Development guide](https://nextjs.org/docs/app/guides/local-development) |
-| §9 Performance | [Next.js — Production Checklist](https://nextjs.org/docs/app/guides/production-checklist) |
-| §9 Performance | [Optimizing Performance in Next.js and React.js (dev.to)](https://dev.to/bhargab/optimizing-performance-in-nextjs-and-reactjs-best-practices-and-strategies-1j2a) |
-| §9 Performance | [React Performance Optimization (softaims.com)](https://softaims.com/blog/react-performance-optimization) |
-| §10 Seguridad | [Next.js — Production Checklist](https://nextjs.org/docs/app/guides/production-checklist) |
-| §5 Estilos | [Tailwind CSS — Styling with utility classes](https://tailwindcss.com/docs/styling-with-utility-classes) |
-| §5 Estilos | [Tailwind CSS — Adding custom styles](https://tailwindcss.com/docs/adding-custom-styles) |
-| §5 Estilos | [class-variance-authority (cva) — docs](https://cva.style/docs) |
-| §5 Estilos | [tailwind-merge — docs](https://github.com/dcastil/tailwind-merge#readme) |
-| §1 Principios / §6 Testing | [AHA Programming — Kent C. Dodds](https://kentcdodds.com/blog/aha-programming) |
-| §6 Testing | [Write tests. Not too many. Mostly integration. (Testing Trophy) — Kent C. Dodds](https://kentcdodds.com/blog/write-tests) |
-| §2 TypeScript/JavaScript | [Why I Don't Like TypeScript Enums — Matt Pocock (Total TypeScript)](https://www.totaltypescript.com/why-i-dont-like-typescript-enums) |
-| §1 Principios / §2 TypeScript/JavaScript | [clean-code-javascript-es (trad. al español, difundido por midudev)](https://github.com/andersontr15/clean-code-javascript-es) |
+| Sección                                  | Fuente                                                                                                                                                                                   |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| §2 TypeScript/JavaScript                 | [ecc.tools](https://ecc.tools)                                                                                                                                                           |
+| §2 TypeScript/JavaScript                 | [TypeScript Handbook — Do's and Don'ts](https://www.typescriptlang.org/docs/handbook/declaration-files/do-s-and-don-ts.html)                                                             |
+| §2 TypeScript/JavaScript                 | [AWS Prescriptive Guidance — TypeScript best practices](https://docs.aws.amazon.com/es_es/prescriptive-guidance/latest/best-practices-cdk-typescript-iac/typescript-best-practices.html) |
+| §2 TypeScript/JavaScript                 | [ts.dev — Style Guide](https://ts.dev/style/)                                                                                                                                            |
+| §2 TypeScript/JavaScript                 | [Clean Code Principles for React + TypeScript (dev.to)](https://dev.to/dangkhoado43/clean-code-principles-code-conventions-for-react-typescript-3n7d)                                    |
+| §2 TypeScript/JavaScript                 | [Buenas prácticas en TypeScript (Medium, S. Roldán)](https://medium.com/@_sroldan/buenas-pr%C3%A1cticas-en-typescript-tips-para-escribir-mejor-c%C3%B3digo-5b764f31bca4)                 |
+| §2 TypeScript/JavaScript                 | [TypeScript code conventions (gist)](https://gist.github.com/anichitiandreea/e1d466022d772ea22db56399a7af576b)                                                                           |
+| §6 Testing                               | [javascript-testing-best-practices (goldbergyoni)](https://github.com/goldbergyoni/javascript-testing-best-practices/blob/master/readme-es.md)                                           |
+| §3 Estructura y naming                   | [Next.js — Local Development guide](https://nextjs.org/docs/app/guides/local-development)                                                                                                |
+| §9 Performance                           | [Next.js — Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)                                                                                                |
+| §9 Performance                           | [Optimizing Performance in Next.js and React.js (dev.to)](https://dev.to/bhargab/optimizing-performance-in-nextjs-and-reactjs-best-practices-and-strategies-1j2a)                        |
+| §9 Performance                           | [React Performance Optimization (softaims.com)](https://softaims.com/blog/react-performance-optimization)                                                                                |
+| §10 Seguridad                            | [Next.js — Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)                                                                                                |
+| §5 Estilos                               | [Tailwind CSS — Styling with utility classes](https://tailwindcss.com/docs/styling-with-utility-classes)                                                                                 |
+| §5 Estilos                               | [Tailwind CSS — Adding custom styles](https://tailwindcss.com/docs/adding-custom-styles)                                                                                                 |
+| §5 Estilos                               | [class-variance-authority (cva) — docs](https://cva.style/docs)                                                                                                                          |
+| §5 Estilos                               | [tailwind-merge — docs](https://github.com/dcastil/tailwind-merge#readme)                                                                                                                |
+| §1 Principios / §6 Testing               | [AHA Programming — Kent C. Dodds](https://kentcdodds.com/blog/aha-programming)                                                                                                           |
+| §6 Testing                               | [Write tests. Not too many. Mostly integration. (Testing Trophy) — Kent C. Dodds](https://kentcdodds.com/blog/write-tests)                                                               |
+| §2 TypeScript/JavaScript                 | [Why I Don't Like TypeScript Enums — Matt Pocock (Total TypeScript)](https://www.totaltypescript.com/why-i-dont-like-typescript-enums)                                                   |
+| §1 Principios / §2 TypeScript/JavaScript | [clean-code-javascript-es (trad. al español, difundido por midudev)](https://github.com/andersontr15/clean-code-javascript-es)                                                           |
