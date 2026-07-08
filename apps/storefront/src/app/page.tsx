@@ -5,6 +5,13 @@ import { ProductGridSection } from "@/features/products/components/ProductGridSe
 
 const FEATURED_PRODUCTS_LIMIT = 8;
 
+// Sin esto, el `revalidate: 60` de getProducts() hace que Next intente
+// pre-renderizar esta página en build time — funciona en local porque
+// apps/api ya está levantado, pero revienta en CI (no hay backend real
+// corriendo durante `next build`). Igual que /products y /products/[slug],
+// que ya son dinámicas por usar searchParams/params.
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const products = await getProducts();
 
