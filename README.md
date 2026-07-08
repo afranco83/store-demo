@@ -9,7 +9,7 @@ Monorepo demo que replica un stack y unas prácticas de ingeniería frontend pro
 
 Es una pieza de portfolio, no un producto con usuarios reales. El objetivo es demostrar, sobre un caso de uso concreto (una tienda online), decisiones y prácticas de un equipo de frontend profesional: arquitectura de monorepo, type safety end-to-end (Zod + TypeScript, del backend fake al componente), un design system con Storybook, testing en tres capas (unit/integración/E2E), accesibilidad WCAG 2.1 AA y un pipeline de CI/CD cuidado. El detalle completo está en [`docs/PROJECT_SPECIFICATION.md`](./docs/PROJECT_SPECIFICATION.md).
 
-**Estado actual: Fase 3 — Design System, base (cerrada).** `packages/design-tokens` + `packages/tailwind-config` (Tailwind v4 CSS-first) y `packages/ui` (átomos Button, Input, Badge, Spinner, Icon, Typography, documentados en `apps/storybook` con Storybook 10 + addon-a11y, cobertura de test 100%); siguiente fase: Storefront — Catálogo & Carrito.
+**Estado actual: Fase 4 — Storefront: Catálogo & Carrito (cerrada en local, pendiente de PR).** `apps/storefront` tiene un flujo real end-to-end: catálogo con filtro por categoría, detalle de producto y carrito persistido contra `apps/api` (Zustand para el drawer, TanStack Query + Server Actions para los datos). `packages/ui` amplió su inventario con moléculas/organismos (ProductCard, PriceTag, QuantitySelector, EmptyState, ProductGrid, CartLineItem, Navbar, CartDrawer), documentados en `apps/storybook`; siguiente fase: Autenticación & Cuenta.
 
 **Repositorio**: [github.com/afranco83/store-demo](https://github.com/afranco83/store-demo).
 
@@ -50,6 +50,8 @@ pnpm turbo dev --filter=@store-demo/api        # backend fake en :4000
 pnpm turbo dev --filter=storefront              # storefront en :3000
 pnpm --filter @store-demo/storybook dev        # design system en :6006
 ```
+
+`apps/storefront/.env.example` no hace falta copiarlo para arrancar en local: sus valores (`API_URL`, `DEMO_USER_EMAIL`/`DEMO_USER_PASSWORD`) ya tienen defaults seguros para el seed. Solo hace falta si se apunta a otra instancia de `apps/api` o a un usuario demo distinto.
 
 ## Cómo verificar
 

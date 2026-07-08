@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 3 cerrada (2026-07-08)** — mergeada en `main` (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
+Estado actual: **Fase 4 cerrada en local (2026-07-08)**, en rama `feat/phase-4-storefront`, pendiente de PR; Fase 3 cerrada y mergeada en `main` (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -83,21 +83,57 @@ Tareas:
 
 ---
 
-## Fase 4 — Storefront: Catálogo & Carrito
+## Fase 4 — Storefront: Catálogo & Carrito _(cerrada en local — 2026-07-08)_
 
 **Objetivo**: primera app de negocio funcional end-to-end (lectura + carrito).
 
 Tareas:
 
-- [ ] Component-first: identificar y crear en `packages/ui` las moléculas/organismos que falten para catálogo y carrito (ProductCard, PriceTag, QuantitySelector, Navbar, CartDrawer...) antes de montar cualquier página
-- [ ] `features/products`: api/hooks/services/schemas/components (listado, detalle, filtros)
-- [ ] `features/cart`: estado de carrito (Zustand para UI del drawer, TanStack Query + `apps/api` para persistencia)
-- [ ] Páginas App Router: `/`, `/products`, `/products/[slug]`, integrando Server Components por defecto
-- [ ] Providers globales (`providers/QueryProvider`, etc.)
-- [ ] Tests de integración de ambas features con `packages/testing`
-- [ ] Primeros specs E2E (Playwright): navegar catálogo → añadir al carrito
+- [x] Component-first: identificar y crear en `packages/ui` las moléculas/organismos que falten para catálogo y carrito (ProductCard, PriceTag, QuantitySelector, Navbar, CartDrawer...) antes de montar cualquier página — más `EmptyState`, `ProductGrid` y `CartLineItem`, gaps detectados durante la implementación (DRY/AHA, `AGENTS.md §1.9`)
+- [x] `features/products`: api/hooks/services/schemas/components (listado, detalle, filtros) — sin `hooks/` (YAGNI: listado/detalle se sirven vía Server Components llamando a `api-client` directamente, sin TanStack Query para datos de solo lectura)
+- [x] `features/cart`: estado de carrito (Zustand para UI del drawer, TanStack Query + `apps/api` para persistencia)
+- [x] Páginas App Router: `/`, `/products`, `/products/[slug]`, integrando Server Components por defecto
+- [x] Providers globales (`providers/QueryProvider`, etc.)
+- [x] Tests de integración de ambas features con `packages/testing`
+- [x] Primeros specs E2E (Playwright): navegar catálogo → añadir al carrito
 
-**DoD**: flujo de catálogo→carrito funciona contra `apps/api` real, specs E2E en verde, sin `"use client"` en componentes que no lo necesitan (verificable por revisión).
+**DoD**: flujo de catálogo→carrito funciona contra `apps/api` real, specs E2E en verde, sin `"use client"` en componentes que no lo necesitan (verificable por revisión). **Cumplido**: `pnpm turbo lint typecheck test build` en verde en los 16 paquetes/apps, 5 specs E2E (Playwright, Chromium real) en verde contra `apps/api` real, flujo catálogo→filtro por categoría→detalle→añadir al carrito→drawer verificado manualmente y por E2E. `"use client"` solo en `CartAwareNavbar`, `AddToCartButton`, `ProductCardLink`, `CartDrawerContainer`, `QueryProvider` y `CartDrawer` (design system, necesita `useEffect` para el focus trap y cerrar con Escape) — el resto del árbol (páginas, `SiteHeader`, `ProductGridSection`, `CategoryFilterNav`) son Server Components.
+
+**Decisiones tomadas con el usuario antes de implementar** (plan mode): mutaciones del carrito como Server Actions (`features/cart/api/*.action.ts`), extendido a la lectura (`useCart`) por testabilidad con Vitest+MSW sin necesitar mocks de red adicionales; identidad del carrito sin auth real vía un usuario demo fijo (seedeado, resuelto en runtime con `login()` y memoizado — sustituible en Fase 5 por sesión real); filtros de catálogo limitados a categoría (única dimensión que soporta `apps/api`).
+
+**Notas técnicas no obvias de la Fase 4:**
+
+- `packages/testing`'s `renderWithProviders` ahora envuelve `QueryClientProvider` (el "punto de extensión" que dejó preparado la Fase 3); nuevo `packages/testing/src/query-client.tsx` con `createTestQueryClient`/`createQueryWrapper`.
+- El paquete `server-only` lanza en tiempo de ejecución si detecta globals de navegador (`window`/`document`) — bajo jsdom estos SIEMPRE existen, así que cualquier módulo con `import "server-only"` revienta en tests de Vitest. Se retiró de `features/cart/lib/get-demo-user-id.ts` (las Server Actions que lo importan ya tienen su propio límite de compilación vía `"use server"`); se mantiene en `features/products/api/*.ts` porque esos módulos no están cubiertos por ningún test bajo jsdom.
+- El `tsconfig.json` de `apps/storefront` hereda `jsx: "preserve"` de `@store-demo/tsconfig/nextjs.json` (lo exige el compilador de Next). Fuera del pipeline de Next, Vitest necesita transformar el JSX él mismo — hizo falta añadir `@vitejs/plugin-react` a `vitest.config.ts` (ajustar solo `esbuild.jsx`/`tsconfigRaw` no fue suficiente, el parser SSR de Vite 8 no los respeta en este caso).
+- El umbral de cobertura de `apps/storefront` (80%, `AGENTS.md §6`) se acota a `features/**/{hooks,services,store,lib,schemas}` — los componentes de composición Server/Client (páginas, `ProductCardLink`, `SiteHeader`...) se validan por integración/E2E, no por cobertura unitaria exhaustiva, mismo criterio que ya aplicaba `docs/ARCHITECTURE.md §6` al Testing Trophy.
+- `CartDrawer` (organism) necesitó `"use client"` explícito pese a que `packages/ui` evita depender de Next.js: al reexportarse desde el barrel `packages/ui/src/index.ts`, Next evalúa el módulo aunque una página Server Component solo use otro componente del mismo barrel — cualquier componente que use hooks exclusivos de cliente (`useEffect`, `useState`...) necesita el directive así, sin excepción, si vive en un paquete consumido vía barrel.
+- `<dialog>` nativo (`showModal()`/`close()`) no está implementado en `jsdom@29`; `CartDrawer` se implementó como overlay simple (`role="dialog"`, cierre por Escape/backdrop/botón vía `useEffect`) en vez de depender del elemento nativo, manteniendo cero dependencias nuevas.
+- `CartItem.userId` es FK real a `User` en Prisma (no admite un id arbitrario) — de ahí la necesidad de resolver el usuario demo vía `login()` real contra el seed, en vez de un id hardcodeado o inventado.
+
+**Adenda a Fase 4 — quick-add y revisión de código (2026-07-08, misma sesión de PR review):**
+
+Durante la revisión de la PR, el usuario pidió añadir un botón de "añadir al carrito" directamente en `ProductCard` (antes solo existía en el detalle de producto). `ProductCard` gana `onAddToCart?`/`addToCartLabel?` (botón con icono, opcional, sin selector de cantidad — siempre 1 unidad). `ProductCardLink` pasó de Server Component a Client Component y sustituyó el `<Link>` envolvente por el patrón **stretched link** (overlay `absolute inset-0` + botón con `z-index` propio) para no anidar un `<button>` dentro de un `<a>` (HTML inválido); hizo falta un `z-index` explícito porque `ProductCard` ya tenía un contenedor `position: relative` propio (para el badge de stock) que competía con el overlay al mismo nivel de stacking y ganaba por estar más profundo en el árbol.
+
+Después, un `/code-review high` sobre el diff completo de la PR encontró y se corrigieron 8 problemas reales (commit `554bbd7`), de mayor a menor severidad:
+
+- **`getDemoUserId` cacheaba una promesa rechazada para siempre** si `login()` fallaba una vez (`cachedUserId ??= ...` nunca reasigna sobre un rechazo, solo sobre `null`/`undefined`) — rompía el carrito entero hasta reiniciar el servidor. Encontrado de forma independiente por 4 de los 8 agentes de búsqueda del review.
+- **Añadir un producto ya presente en el carrito sobrescribía su cantidad** en vez de sumarla — `apps/api` hace `upsert` con la cantidad absoluta recibida, no un incremento. `useAddToCartMutation` ahora lee la cantidad existente de la caché de TanStack Query y manda el total.
+- **Condición de carrera en `CartDrawerContainer`**: una única instancia de `useUpdateCartItemMutation`/`useRemoveCartItemMutation` compartida por todas las líneas del carrito hacía que `isUpdating` solo reflejara el último ítem pulsado. Se rastrea ahora un `Set` de `productId`s pendientes, actualizado con `mutateAsync` (no `mutate` con callbacks — TanStack Query desengancha el observer de una mutación en curso en cuanto se llama a `mutate()`/`mutateAsync()` de nuevo sobre la misma instancia, ver `AGENTS.md §1.5`).
+- **`CartDrawer` sin focus trap ni restauración de foco** al cerrar — gap de accesibilidad real que el test de `vitest-axe` (análisis estático del DOM) no detecta, al ser comportamiento dinámico de foco.
+- **Sin `error.tsx`** en `apps/storefront/src/app` — un fallo de `apps/api` al cargar la home reventaba en la página de error genérica de Next en vez de degradar con gracia.
+- **Labels en inglés colándose en la tienda en español**: el botón de añadir rápido y los +/- de cantidad dentro del drawer caían en los defaults en inglés de `packages/ui` por no pasarse `addToCartLabel`/`decreaseQuantityLabel`/`increaseQuantityLabel` desde la app.
+- **`SiteHeader` entero marcado `"use client"`** cuando solo el botón del carrito necesita hooks — dividido en `SiteHeader` (Server Component, logo/nav estáticos) + `CartAwareNavbar` (Client Component, solo el botón), pasando el contenido estático como children/props desde el Server Component.
+- **`invalidateQueries` redundante**: las tres mutaciones del carrito forzaban un GET adicional a `apps/api` aunque su propia respuesta ya traía los datos frescos — sustituido por `setQueryData` con la respuesta de la mutación.
+
+Ajuste posterior, pedido explícitamente por el usuario tras revisar visualmente: la imagen de `CartLineItem` pasó de `size-16 object-cover` (cuadrado fijo, recorta) a `h-16 w-auto object-contain` (altura fija, ancho según la proporción real de la imagen, sin recortar).
+
+**Adenda a Fase 4 — dos fallos de CI no reproducidos en local (2026-07-08):** tras el push, `.github/workflows/ci.yml` falló dos veces seguidas con errores que en local no habían aparecido nunca, por dos razones distintas de fondo (ver también `CLAUDE.md`, "Cómo trabajar en este repo"):
+
+- **Caché de Turborepo obsoleta**: `packages/testing/src/query-client.tsx` (con JSX real) se exportaba desde el barrel principal de `@store-demo/testing`. Cualquier consumidor que importe de ahí obliga a TypeScript a resolver ese archivo — y `packages/api-client` no tiene `jsx` configurado en su tsconfig (no lo necesita para su propio código), así que su `typecheck` fallaba con `'--jsx' is not set`. En local pasaba siempre porque Turborepo tenía cacheado el resultado de `api-client#typecheck` de antes de que ese archivo existiera, y nada en el hash de esa tarea capturó el cambio. Arreglado sustituyendo el JSX por `createElement()` (renombrado a `.ts`), no tocando el tsconfig de ningún consumidor. **Lección**: antes de cada push, correr el gate una vez con `--force` (sin caché) — barato, y habría detectado esto al instante.
+- **Build-time dependency de un servicio no levantado en CI**: la home (`/`) usaba el `revalidate: 60` por defecto de `getProducts()`, lo que hace que Next intente pre-renderizarla en build time. En local funcionaba porque `apps/api` siempre estaba levantado a mano; en CI no arranca ningún backend antes de `pnpm turbo build`, así que el fetch fallaba con `ECONNREFUSED`. Arreglado con `export const dynamic = "force-dynamic"` en la home, igualándola a `/products`/`/products/[slug]` (ya dinámicas por `searchParams`/`params`). **Lección**: cualquier página que dependa de un servicio externo en build time hay que probarla también sin ese servicio levantado, ya que CI nunca lo tiene salvo que se aprovisione explícitamente — esto no lo habría pillado ni `--force`, solo repetir el build con `apps/api` apagado.
+
+Verificado tras ambos fixes con `pnpm turbo lint typecheck test build --force --concurrency=4`, sin `apps/api` corriendo — 35/35 en verde, y CI en verde en el siguiente push.
 
 ---
 

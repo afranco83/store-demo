@@ -8,20 +8,45 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@fontsource/space-grotesk": "5.2.10",
+    "@store-demo/api-client": "workspace:*",
+    "@store-demo/design-tokens": "workspace:*",
+    "@store-demo/shared-types": "workspace:*",
+    "@store-demo/tailwind-config": "workspace:*",
+    "@store-demo/ui": "workspace:*",
+    "@tanstack/react-query": "5.101.2",
+    "lucide-react": "1.23.0",
     "next": "16.2.10",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "server-only": "0.0.1",
+    "zod": "4.4.3",
+    "zustand": "5.0.14"
   },
   "devDependencies": {
+    "@faker-js/faker": "10.5.0",
+    "@playwright/test": "1.61.1",
     "@store-demo/eslint-config": "workspace:*",
+    "@vitejs/plugin-react": "6.0.3",
+    "@store-demo/testing": "workspace:*",
     "@store-demo/tsconfig": "workspace:*",
+    "@tailwindcss/postcss": "4.3.2",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
     "@types/node": "26.1.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.4",
-    "typescript": "6.0.3"
+    "jsdom": "29.1.1",
+    "msw": "2.14.6",
+    "tailwindcss": "4.3.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   }
 }
