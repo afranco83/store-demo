@@ -5,9 +5,17 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./preset.css": "./src/preset.css"
+  },
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@store-demo/design-tokens": "workspace:*",
+    "tailwindcss": "4.3.2"
   },
   "devDependencies": {
     "@store-demo/eslint-config": "workspace:*",

@@ -4,13 +4,29 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "storybook build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@store-demo/tailwind-config": "workspace:*",
+    "@store-demo/ui": "workspace:*",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
+  },
   "devDependencies": {
+    "@fontsource/space-grotesk": "5.2.10",
     "@store-demo/eslint-config": "workspace:*",
     "@store-demo/tsconfig": "workspace:*",
+    "@storybook/addon-a11y": "10.4.6",
+    "@storybook/react-vite": "10.4.6",
+    "@tailwindcss/vite": "4.3.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
-    "typescript": "6.0.3"
+    "storybook": "10.4.6",
+    "typescript": "6.0.3",
+    "vite": "8.1.3"
   }
 }

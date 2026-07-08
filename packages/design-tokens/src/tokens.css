@@ -1,0 +1,6 @@
+@theme {
+  --color-accent: #c2410c;
+  --color-accent-hover: #9a3412;
+  --color-accent-foreground: #ffffff;
+  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+}

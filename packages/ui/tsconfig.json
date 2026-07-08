@@ -1,4 +1,4 @@
 {
   "extends": "@store-demo/tsconfig/react-library.json",
-  "include": ["src"]
+  "include": ["src", "../testing/src/vitest-setup.ts"]
 }

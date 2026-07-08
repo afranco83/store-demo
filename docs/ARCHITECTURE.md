@@ -23,10 +23,10 @@
 Decisión explícita: **no se monta un pipeline de generación de tokens multiplataforma** (se descarta Style Dictionary por sobre-ingeniería para el alcance de este proyecto). En su lugar:
 
 - Partimos de la paleta, escala tipográfica, espaciados y radios **por defecto de Tailwind**, que ya son de calidad profesional.
-- `packages/design-tokens` contiene únicamente los valores que decidimos personalizar de forma justificada (p. ej. 2-3 colores de marca/acento, quizá una familia tipográfica propia), como constantes TS/JSON simples — sin capa de transformación.
-- `packages/tailwind-config` expone el preset de Tailwind (`theme.extend`) que añade esos tokens personalizados por encima de los defaults, sin redefinir toda la paleta desde cero. Todas las apps consumen este preset; ninguna app define su propia paleta en local.
+- `packages/design-tokens` contiene únicamente los valores que decidimos personalizar de forma justificada (color de acento de marca + una familia tipográfica propia para heading/display), como constantes TS simples **y** las custom properties CSS equivalentes (`tokens.css`) — sin capa de transformación entre ambas, se mantienen a mano.
+- **Tailwind v4, CSS-first**: no hay `tailwind.config.js`. `packages/tailwind-config` expone un único `preset.css` que hace `@import "tailwindcss"` + `@import` del `tokens.css` de `design-tokens` (que trae su propio bloque `@theme`, así que los tokens personalizados quedan añadidos por encima de los defaults sin redefinir la paleta). Todas las apps consumen este preset con un único `@import` en su hoja de estilos global; ninguna app define su propia paleta en local.
 - Objetivo: demostrar criterio para personalizar un design system (saber qué tocar y qué no tocar), no reconstruir Tailwind desde cero.
-- El array `content` de la config de Tailwind de cada app apunta explícitamente a sus propias carpetas `src`/`app` y a `packages/ui/src`, nunca a un glob amplio que también matchee `node_modules` — un glob demasiado abierto ralentiza el build al escanear miles de archivos irrelevantes.
+- **Detección de contenido**: Tailwind v4 escanea automáticamente el árbol de la app que hace el `@import` — ya no hay array `content` que mantener a mano. La única salvedad es `packages/ui`, que vive fuera del árbol de cualquier app consumidora: `preset.css` declara explícitamente `@source "../../ui/src"` una sola vez, así que todo consumidor del preset hereda esa cobertura sin tener que repetirla.
 
 ### 2.2 `packages/ui`
 

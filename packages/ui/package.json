@@ -7,15 +7,31 @@
   "types": "./src/index.ts",
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
+  },
+  "dependencies": {
+    "class-variance-authority": "0.7.1",
+    "lucide-react": "1.23.0",
+    "tailwind-merge": "3.6.0"
   },
   "devDependencies": {
+    "@storybook/react-vite": "10.4.6",
     "@store-demo/eslint-config": "workspace:*",
+    "@store-demo/testing": "workspace:*",
     "@store-demo/tsconfig": "workspace:*",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.2",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.4",
-    "typescript": "6.0.3"
+    "jsdom": "29.1.1",
+    "react-dom": "19.2.7",
+    "storybook": "10.4.6",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10",
+    "vitest-axe": "0.1.0"
   },
   "peerDependencies": {
     "react": "^19.0.0"
