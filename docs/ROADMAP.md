@@ -128,6 +128,13 @@ Después, un `/code-review high` sobre el diff completo de la PR encontró y se 
 
 Ajuste posterior, pedido explícitamente por el usuario tras revisar visualmente: la imagen de `CartLineItem` pasó de `size-16 object-cover` (cuadrado fijo, recorta) a `h-16 w-auto object-contain` (altura fija, ancho según la proporción real de la imagen, sin recortar).
 
+**Adenda a Fase 4 — dos fallos de CI no reproducidos en local (2026-07-08):** tras el push, `.github/workflows/ci.yml` falló dos veces seguidas con errores que en local no habían aparecido nunca, por dos razones distintas de fondo (ver también `CLAUDE.md`, "Cómo trabajar en este repo"):
+
+- **Caché de Turborepo obsoleta**: `packages/testing/src/query-client.tsx` (con JSX real) se exportaba desde el barrel principal de `@store-demo/testing`. Cualquier consumidor que importe de ahí obliga a TypeScript a resolver ese archivo — y `packages/api-client` no tiene `jsx` configurado en su tsconfig (no lo necesita para su propio código), así que su `typecheck` fallaba con `'--jsx' is not set`. En local pasaba siempre porque Turborepo tenía cacheado el resultado de `api-client#typecheck` de antes de que ese archivo existiera, y nada en el hash de esa tarea capturó el cambio. Arreglado sustituyendo el JSX por `createElement()` (renombrado a `.ts`), no tocando el tsconfig de ningún consumidor. **Lección**: antes de cada push, correr el gate una vez con `--force` (sin caché) — barato, y habría detectado esto al instante.
+- **Build-time dependency de un servicio no levantado en CI**: la home (`/`) usaba el `revalidate: 60` por defecto de `getProducts()`, lo que hace que Next intente pre-renderizarla en build time. En local funcionaba porque `apps/api` siempre estaba levantado a mano; en CI no arranca ningún backend antes de `pnpm turbo build`, así que el fetch fallaba con `ECONNREFUSED`. Arreglado con `export const dynamic = "force-dynamic"` en la home, igualándola a `/products`/`/products/[slug]` (ya dinámicas por `searchParams`/`params`). **Lección**: cualquier página que dependa de un servicio externo en build time hay que probarla también sin ese servicio levantado, ya que CI nunca lo tiene salvo que se aprovisione explícitamente — esto no lo habría pillado ni `--force`, solo repetir el build con `apps/api` apagado.
+
+Verificado tras ambos fixes con `pnpm turbo lint typecheck test build --force --concurrency=4`, sin `apps/api` corriendo — 35/35 en verde, y CI en verde en el siguiente push.
+
 ---
 
 ## Fase 5 — Autenticación & Cuenta
