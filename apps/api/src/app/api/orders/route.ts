@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { orderSchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonError, jsonSuccess, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonError, jsonSuccess } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
-import { requireUser, UnauthorizedError } from "@/lib/guard";
+import { handleCartRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -22,10 +22,7 @@ export async function GET(request: Request) {
     validateOutputInDev({ schema: z.array(orderSchema), data });
     return jsonSuccess(data);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }
 
@@ -71,12 +68,9 @@ export async function POST(request: Request) {
     validateOutputInDev({ schema: orderSchema, data });
     return jsonSuccess(data, 201);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
     if (error instanceof EmptyCartError) {
       return jsonError("Cart is empty", 400);
     }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }

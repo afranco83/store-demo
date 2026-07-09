@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
-// Import de subpath deliberado (no del barrel "@store-demo/auth"): el
+// Imports de subpath deliberados (no del barrel "@store-demo/auth"): el
 // barrel reexporta también ./config, que carga next-auth entero
 // (Credentials provider incluido) — y next-auth importa "next/server" de
 // una forma que Vite/Vitest no resuelve bien (ver packages/auth/package.json
-// "exports"). getApiToken no necesita nada de eso, solo next/headers.
+// "exports"). Ni getApiToken ni las opciones de cookie necesitan nada de eso.
 import { getApiToken } from "@store-demo/auth/get-api-token";
+import { ownHttpOnlyCookieOptions } from "@store-demo/auth/cookies";
 import { GUEST_CART_COOKIE } from "@store-demo/shared-types";
 import type { CartIdentity } from "@store-demo/api-client";
 
@@ -28,12 +29,10 @@ export async function getCartIdentity(): Promise<CartIdentity> {
   }
 
   const guestId = crypto.randomUUID();
-  cookieStore.set(GUEST_CART_COOKIE, guestId, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: GUEST_COOKIE_MAX_AGE_SECONDS,
-  });
+  cookieStore.set(
+    GUEST_CART_COOKIE,
+    guestId,
+    ownHttpOnlyCookieOptions(GUEST_COOKIE_MAX_AGE_SECONDS),
+  );
   return { guestId };
 }

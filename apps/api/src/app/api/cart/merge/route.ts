@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { GUEST_ID_HEADER, cartItemWithProductSchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonError, jsonSuccess, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonError, jsonSuccess } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toCartItemWithProductDto } from "@/lib/mappers";
-import { requireUser, UnauthorizedError } from "@/lib/guard";
+import { handleCartRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -22,16 +22,33 @@ export async function POST(request: Request) {
 
     await prisma.$transaction(async (tx) => {
       const guestItems = await tx.cartItem.findMany({ where: { guestId } });
-      for (const guestItem of guestItems) {
-        const existingUserItem = await tx.cartItem.findUnique({
-          where: { userId_productId: { userId, productId: guestItem.productId } },
-        });
-        await tx.cartItem.upsert({
-          where: { userId_productId: { userId, productId: guestItem.productId } },
-          create: { userId, productId: guestItem.productId, quantity: guestItem.quantity },
-          update: { quantity: (existingUserItem?.quantity ?? 0) + guestItem.quantity },
-        });
+      if (guestItems.length === 0) {
+        return;
       }
+
+      // Una sola query para los items ya existentes del usuario en vez de un
+      // findUnique por item dentro del bucle (evita 2N round-trips
+      // secuenciales reteniendo el lock de escritura de SQLite).
+      const existingUserItems = await tx.cartItem.findMany({
+        where: { userId, productId: { in: guestItems.map((item) => item.productId) } },
+      });
+      const existingQuantityByProductId = new Map(
+        existingUserItems.map((item) => [item.productId, item.quantity]),
+      );
+
+      await Promise.all(
+        guestItems.map((guestItem) =>
+          tx.cartItem.upsert({
+            where: { userId_productId: { userId, productId: guestItem.productId } },
+            create: { userId, productId: guestItem.productId, quantity: guestItem.quantity },
+            update: {
+              quantity:
+                (existingQuantityByProductId.get(guestItem.productId) ?? 0) + guestItem.quantity,
+            },
+          }),
+        ),
+      );
+
       await tx.cartItem.deleteMany({ where: { guestId } });
     });
 
@@ -44,9 +61,6 @@ export async function POST(request: Request) {
     validateOutputInDev({ schema: z.array(cartItemWithProductSchema), data });
     return jsonSuccess(data);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }

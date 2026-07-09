@@ -1,6 +1,6 @@
 "use server";
 
-import { AuthError } from "next-auth";
+import { AuthError, CredentialsSignin } from "next-auth";
 import { ApiClientError, register } from "@store-demo/api-client";
 import { signIn } from "@store-demo/auth";
 import { registerRequestSchema } from "@store-demo/shared-types";
@@ -33,8 +33,14 @@ export async function registerAction(
       redirectTo: "/account",
     });
   } catch (error) {
-    if (error instanceof AuthError) {
+    if (error instanceof CredentialsSignin) {
       return { error: "Cuenta creada. Inicia sesión para continuar." };
+    }
+    if (error instanceof AuthError) {
+      return {
+        error:
+          "Cuenta creada, pero no se pudo iniciar sesión automáticamente. Inicia sesión manualmente.",
+      };
     }
     throw error;
   }

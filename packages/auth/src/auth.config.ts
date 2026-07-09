@@ -1,6 +1,16 @@
+import { z } from "zod";
 import type { NextAuthConfig } from "next-auth";
+import { userRoleSchema } from "@store-demo/shared-types";
 import "./types";
-import type { AppJwt } from "./types";
+
+// Claims propios embebidos en el JWT de Auth.js (userId/role) — el token no
+// se amplía por tipos (ver types.ts, next-auth/jwt no se pudo aumentar en
+// este setup), así que se valida en runtime con Zod al leerlo en session()
+// en vez de un `as` sin comprobación (AGENTS.md §2).
+const jwtClaimsSchema = z.object({
+  userId: z.string(),
+  role: userRoleSchema,
+});
 
 // Config edge-safe: sin providers (Credentials/authorize vive solo en
 // config.ts) ni callbacks que toquen next/headers — es lo único que
@@ -17,18 +27,26 @@ export const authConfig = {
   trustHost: true,
   callbacks: {
     async jwt({ token, user }) {
-      const appToken = token as AppJwt<typeof token>;
-      if (user) {
-        appToken.userId = user.id as string;
-        appToken.role = user.role;
+      // Solo en el sign-in inicial (user presente): nunca se muta `token`
+      // (AGENTS.md §2), se devuelve una copia con los claims añadidos.
+      if (user && typeof user.id === "string") {
+        const tokenWithClaims = { ...token, userId: user.id, role: user.role };
+        return tokenWithClaims;
       }
-      return appToken;
+      return token;
     },
     async session({ session, token }) {
-      const appToken = token as AppJwt<typeof token>;
-      session.user.id = appToken.userId;
-      session.user.role = appToken.role;
-      return session;
+      const claims = jwtClaimsSchema.safeParse(token);
+      if (!claims.success) {
+        return session;
+      }
+      // Copia de `session`/`session.user`, nunca mutación del parámetro
+      // recibido (AGENTS.md §2).
+      const sessionWithUser = {
+        ...session,
+        user: { ...session.user, id: claims.data.userId, role: claims.data.role },
+      };
+      return sessionWithUser;
     },
   },
 } satisfies NextAuthConfig;

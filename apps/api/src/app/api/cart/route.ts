@@ -1,10 +1,15 @@
 import { z } from "zod";
 import { addCartItemSchema, cartItemWithProductSchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonError, jsonSuccess, jsonZodError, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toCartItemWithProductDto } from "@/lib/mappers";
-import { resolveCartIdentity, UnauthorizedError, type CartIdentity } from "@/lib/guard";
+import {
+  cartItemUniqueWhere,
+  handleCartRouteError,
+  resolveCartIdentity,
+  type CartIdentity,
+} from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -28,10 +33,7 @@ export async function GET(request: Request) {
     validateOutputInDev({ schema: z.array(cartItemWithProductSchema), data });
     return jsonSuccess(data);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }
 
@@ -44,13 +46,9 @@ export async function POST(request: Request) {
   try {
     const identity = await resolveCartIdentity(request);
     const { productId, quantity } = parsedBody.data;
-    const identityWhere = whereForIdentity(identity);
     await prisma.cartItem.upsert({
-      where:
-        identity.type === "user"
-          ? { userId_productId: { userId: identity.userId, productId } }
-          : { guestId_productId: { guestId: identity.guestId, productId } },
-      create: { ...identityWhere, productId, quantity },
+      where: cartItemUniqueWhere(identity, productId),
+      create: { ...whereForIdentity(identity), productId, quantity },
       update: { quantity },
     });
 
@@ -59,10 +57,7 @@ export async function POST(request: Request) {
     validateOutputInDev({ schema: z.array(cartItemWithProductSchema), data });
     return jsonSuccess(data, 201);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }
 
@@ -72,9 +67,6 @@ export async function DELETE(request: Request) {
     await prisma.cartItem.deleteMany({ where: whereForIdentity(identity) });
     return jsonSuccess([]);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }

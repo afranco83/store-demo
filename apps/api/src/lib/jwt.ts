@@ -3,13 +3,15 @@ import { userRoleSchema } from "@store-demo/shared-types";
 import type { UserRole } from "@store-demo/shared-types";
 
 const JWT_ALGORITHM = "HS256";
-// Alineado con el maxAge por defecto de la sesión JWT de Auth.js (30 días) en
-// packages/auth: el token que este módulo firma se embebe en la sesión de
-// Auth.js y se reenvía a apps/api en cada mutación (Fase 5). Si caducara
-// antes que la sesión, las Server Actions empezarían a fallar con 401 aunque
-// el usuario siguiera "logueado" en el storefront. Sin refresh-token
-// rotation: simplificación deliberada, razonable para un proyecto demo.
-const JWT_EXPIRATION = "30d";
+// Ventana de expiración corta (7 días) porque no hay revocación/blacklist de
+// tokens: es la única forma de acotar cuánto tiempo sigue siendo válido un
+// token filtrado o usado tras logout. `packages/auth` (get-api-token.ts)
+// desliza la cookie httpOnly que guarda este token con el mismo maxAge en
+// cada lectura mientras la sesión de Auth.js siga activa, así que un usuario
+// activo no nota la expiración — solo se aplica a sesiones realmente
+// inactivas. Sin refresh-token rotation: simplificación deliberada,
+// razonable para un proyecto demo.
+const JWT_EXPIRATION = "7d";
 
 function getJwtSecretKey(): Uint8Array {
   const secret = process.env.AUTH_JWT_SECRET;

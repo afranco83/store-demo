@@ -1,9 +1,9 @@
 import { updateOrderStatusSchema, orderSchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonError, jsonSuccess, jsonZodError, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonError, jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
-import { requireUser, UnauthorizedError } from "@/lib/guard";
+import { handleCartRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +30,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     validateOutputInDev({ schema: orderSchema, data });
     return jsonSuccess(data);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }
 
@@ -62,9 +59,6 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     validateOutputInDev({ schema: orderSchema, data });
     return jsonSuccess(data);
   } catch (error) {
-    if (error instanceof UnauthorizedError) {
-      return jsonError("Unauthorized", 401);
-    }
-    return mapPrismaErrorToResponse(error);
+    return handleCartRouteError(error);
   }
 }

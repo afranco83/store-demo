@@ -1,6 +1,7 @@
 import { GUEST_ID_HEADER } from "@store-demo/shared-types";
 import type { UserRole } from "@store-demo/shared-types";
-import { verifyAuthToken } from "./jwt";
+import { jsonError, mapPrismaErrorToResponse } from "./api-response";
+import { InvalidAuthTokenError, verifyAuthToken } from "./jwt";
 
 export class UnauthorizedError extends Error {}
 
@@ -16,6 +17,20 @@ function getBearerToken(request: Request): string | null {
   return token.length > 0 ? token : null;
 }
 
+// Único punto donde se verifica un token: un token inválido/expirado es,
+// para cualquier caller, indistinguible de "sin token" (UnauthorizedError,
+// 401) — así ningún Route Handler necesita conocer InvalidAuthTokenError.
+async function verifyBearerToken(token: string) {
+  try {
+    return await verifyAuthToken(token);
+  } catch (error) {
+    if (error instanceof InvalidAuthTokenError) {
+      throw new UnauthorizedError("Invalid or expired session token", { cause: error });
+    }
+    throw error;
+  }
+}
+
 // Identidad para el carrito: usuario autenticado (token verificado) o
 // invitado (header opaco, sin verificación criptográfica — ver
 // ARCHITECTURE.md §4, un carrito de invitado no tiene datos sensibles).
@@ -23,7 +38,7 @@ function getBearerToken(request: Request): string | null {
 export async function resolveCartIdentity(request: Request): Promise<CartIdentity> {
   const token = getBearerToken(request);
   if (token) {
-    const { userId, role } = await verifyAuthToken(token);
+    const { userId, role } = await verifyBearerToken(token);
     return { type: "user", userId, role };
   }
 
@@ -42,5 +57,24 @@ export async function requireUser(request: Request): Promise<{ userId: string; r
   if (!token) {
     throw new UnauthorizedError("Missing session token");
   }
-  return verifyAuthToken(token);
+  return verifyBearerToken(token);
+}
+
+// Construye la cláusula `where` de la clave única compuesta de CartItem
+// según el tipo de identidad — el mismo par (userId_productId /
+// guestId_productId) que necesitan GET/POST/PATCH/DELETE de cart.
+export function cartItemUniqueWhere(identity: CartIdentity, productId: string) {
+  return identity.type === "user"
+    ? { userId_productId: { userId: identity.userId, productId } }
+    : { guestId_productId: { guestId: identity.guestId, productId } };
+}
+
+// Único manejador de errores para los Route Handlers de cart/orders: una
+// identidad ausente o inválida siempre es 401, cualquier otro error se
+// mapea igual que el resto de la API (ver api-response.ts).
+export function handleCartRouteError(error: unknown): Response {
+  if (error instanceof UnauthorizedError) {
+    return jsonError("Unauthorized", 401);
+  }
+  return mapPrismaErrorToResponse(error);
 }

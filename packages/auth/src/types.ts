@@ -21,7 +21,6 @@ declare module "next-auth" {
 }
 
 // No se aumenta "next-auth/jwt" (TS no resuelve la augmentation contra el
-// re-export de @auth/core en este setup de pnpm/moduleResolution) — el
-// token con nuestros claims custom se tipa localmente como AppJwt donde se
-// usa (auth.config.ts).
-export type AppJwt<TToken> = TToken & { userId: string; role: UserRole };
+// re-export de @auth/core en este setup de pnpm/moduleResolution) — los
+// claims custom del JWT (userId/role) se validan en runtime con Zod donde
+// se leen (auth.config.ts), no se tipan por cast.
