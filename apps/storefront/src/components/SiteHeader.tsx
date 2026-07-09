@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { Typography } from "@store-demo/ui";
+import { auth } from "@store-demo/auth";
 
 import { CartAwareNavbar } from "./CartAwareNavbar";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const session = await auth();
+
   return (
     <CartAwareNavbar
       logoSlot={
@@ -17,6 +20,11 @@ export function SiteHeader() {
         <>
           <Link href="/">Inicio</Link>
           <Link href="/products">Catálogo</Link>
+          {session ? (
+            <Link href="/account">Mi cuenta</Link>
+          ) : (
+            <Link href="/login">Iniciar sesión</Link>
+          )}
         </>
       }
     />

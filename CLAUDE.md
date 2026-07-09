@@ -6,7 +6,7 @@ Este archivo da a Claude Code el contexto operativo de este repositorio. Las con
 
 Monorepo demo (no producto real) que demuestra un stack frontend profesional: React + Next.js + TypeScript + Zod + TanStack Query + Zustand, con un backend fake propio (Prisma + SQLite) en lugar de mocks estáticos. Contexto completo en `docs/PROJECT_SPECIFICATION.md`, `docs/ARCHITECTURE.md` y `docs/ROADMAP.md`.
 
-**Estado actual: Fase 4 (Storefront: Catálogo & Carrito) cerrada en local, en rama `feat/phase-4-storefront`.** `apps/storefront` tiene un flujo real end-to-end (catálogo con filtro por categoría, detalle de producto, carrito persistido contra `apps/api`), `packages/ui` amplió su inventario con moléculas/organismos (ProductCard, PriceTag, QuantitySelector, EmptyState, ProductGrid, CartLineItem, Navbar, CartDrawer). Siguiente fase: Fase 5 (Autenticación & Cuenta).
+**Estado actual: Fase 5 (Autenticación & Cuenta) cerrada en local, en rama `feat/phase-5-login-account`.** `packages/auth` (Auth.js v5) da sesión real con roles `customer`/`admin`; `apps/storefront` tiene login/registro/logout, historial de pedidos y rutas privadas guardadas por middleware; el carrito ahora soporta invitados sin sesión (identidad vía `guestId` opaco) que se fusionan al loguearse, y `apps/api` deriva la identidad de `cart`/`orders` siempre de un token verificado (ya no de un `userId` en la URL). `packages/ui` sumó `OrderSummaryCard`. Siguiente fase: Fase 6 (Checkout).
 
 ## Cómo trabajar en este repo
 

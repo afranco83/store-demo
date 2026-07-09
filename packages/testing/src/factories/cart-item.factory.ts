@@ -14,6 +14,7 @@ export function createCartItemFixture(
   return cartItemWithProductSchema.parse({
     id: faker.string.uuid(),
     userId: faker.string.uuid(),
+    guestId: null,
     productId: product.id,
     quantity: faker.number.int({ min: 1, max: 5 }),
     createdAt: faker.date.past(),

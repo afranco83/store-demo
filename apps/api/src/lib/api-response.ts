@@ -16,12 +16,16 @@ export function jsonZodError(error: ZodError) {
 }
 
 const PRISMA_NOT_FOUND_CODE = "P2025";
+const PRISMA_UNIQUE_CONSTRAINT_CODE = "P2002";
 const PRISMA_FOREIGN_KEY_CODES = new Set(["P2003", "P2014"]);
 
 export function mapPrismaErrorToResponse(error: unknown) {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === PRISMA_NOT_FOUND_CODE) {
       return jsonError("Resource not found", 404);
+    }
+    if (error.code === PRISMA_UNIQUE_CONSTRAINT_CODE) {
+      return jsonError("A resource with this value already exists", 409);
     }
     if (PRISMA_FOREIGN_KEY_CODES.has(error.code)) {
       return jsonError("Cannot complete the operation: related records exist", 409);

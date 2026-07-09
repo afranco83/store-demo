@@ -7,6 +7,7 @@ export * from "./atoms/Spinner";
 export * from "./atoms/Typography";
 export * from "./molecules/CartLineItem";
 export * from "./molecules/EmptyState";
+export * from "./molecules/OrderSummaryCard";
 export * from "./molecules/ProductCard";
 export * from "./molecules/ProductGrid";
 export * from "./molecules/QuantitySelector";

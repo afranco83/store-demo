@@ -12,3 +12,17 @@ export const loginResponseSchema = z.object({
   user: userSchema,
 });
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+export const registerRequestSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  name: z.string().min(1),
+});
+export type RegisterRequest = z.infer<typeof registerRequestSchema>;
+
+// El registro no devuelve token: el cliente hace signIn() (Auth.js) justo
+// después, reusando el mismo flujo de login en vez de emitir sesión aquí.
+export const registerResponseSchema = z.object({
+  user: userSchema,
+});
+export type RegisterResponse = z.infer<typeof registerResponseSchema>;

@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 4 cerrada en local (2026-07-08)**, en rama `feat/phase-4-storefront`, pendiente de PR; Fase 3 cerrada y mergeada en `main` (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
+Estado actual: **Fase 5 cerrada en local (2026-07-09)**, en rama `feat/phase-5-login-account`, pendiente de PR; Fase 4 mergeada en `main` (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -137,21 +137,38 @@ Verificado tras ambos fixes con `pnpm turbo lint typecheck test build --force --
 
 ---
 
-## Fase 5 — Autenticación & Cuenta
+## Fase 5 — Autenticación & Cuenta _(cerrada en local — 2026-07-09)_
 
 **Objetivo**: sesión de usuario y área privada.
 
 Tareas:
 
-- [ ] `packages/auth`: Auth.js v5, Credentials Provider contra `apps/api`, sesión expuesta vía Context (`SessionProvider`)
-- [ ] Roles `customer`/`admin` en JWT
-- [ ] Component-first: formularios de login/registro y componentes de listado de pedidos que falten en `packages/ui`
-- [ ] `features/auth` (o dentro de `packages/auth` + páginas): login, registro, logout
-- [ ] `features/orders`: historial de pedidos del usuario autenticado
-- [ ] Guards: middleware en rutas privadas de `storefront`
-- [ ] Tests unitarios de guards + E2E de login/logout
+- [x] `packages/auth`: Auth.js v5, Credentials Provider contra `apps/api` — **sin** sesión expuesta vía Context/`SessionProvider` (decisión tomada durante la implementación, ver adenda): `auth()` server-side + props a los Client Components que lo necesitan
+- [x] Roles `customer`/`admin` en JWT
+- [x] Component-first: `OrderSummaryCard` (molecule nuevo en `packages/ui`, con story + test) para el listado de pedidos; los formularios de login/registro reusan `Input`/`Button` ya existentes, sin átomo nuevo
+- [x] `features/auth` (en `apps/storefront`, no en `packages/auth`): login, registro, logout — Server Actions + `LoginForm`/`RegisterForm` (React Hook Form + `zodResolver`, `AGENTS.md §4`)
+- [x] `features/orders`: historial de pedidos del usuario autenticado
+- [x] Guards: `middleware.ts` en rutas privadas de `storefront` (`/account/**`) vía `withAuthGuard()` reutilizable
+- [x] Tests unitarios/integración de identidad de carrito y formularios + E2E de login/registro/logout/guard/fusión de carrito de invitado
 
-**DoD**: usuario puede registrarse/iniciar sesión, ver su historial de pedidos, y las rutas privadas redirigen correctamente si no hay sesión.
+**DoD**: usuario puede registrarse/iniciar sesión, ver su historial de pedidos, y las rutas privadas redirigen correctamente si no hay sesión. **Cumplido**: `pnpm turbo lint typecheck test build --force` en verde en los 18 paquetes/apps del monorepo, 10/10 specs E2E (Playwright, Chromium real) en verde contra `apps/api` real — incluye registro→cuenta, login→cuenta→logout, credenciales inválidas, ruta privada sin sesión→redirect con `callbackUrl`, y carrito de invitado→login→fusión.
+
+**Decisiones tomadas con el usuario antes de implementar (plan mode)** — esta fase amplió su alcance más allá de lo previsto originalmente en el ROADMAP, a partir de dos preguntas resueltas con el usuario:
+
+1. **Guard de `apps/api`**: en vez de mantener `[userId]` en la URL de `cart`/`orders` y solo cruzarlo contra el token, se rediseñaron los endpoints (`/api/cart`, `/api/orders`, sin segmento de usuario) para derivar la identidad siempre de un token verificado server-side — nunca de un id que el cliente pueda fijar. Cierra el "hueco de autorización aceptado" que quedó documentado en la Fase 2.
+2. **Carrito de invitado con fusión al loguearse**: el usuario pidió que un usuario anónimo pueda comprar sin login (solo se exige sesión al pagar, alcance de Fase 6) y que su carrito se conserve al iniciar sesión. Como `CartItem.userId` era FK obligatoria a `User`, se optó por una migración de esquema (`userId` nullable + `guestId` nuevo, con sus propios `@@unique`/índice) en vez de reutilizar el hack de "usuario demo" de la Fase 4 con un id arbitrario.
+
+**Notas técnicas no obvias de la Fase 5:**
+
+- **Dos JWT distintos, sin compartir secreto**: Auth.js gestiona su propia cookie de sesión cifrada con `AUTH_SECRET` (independiente); el token que `apps/api` ya emitía en login (`signAuthToken`, `AUTH_JWT_SECRET`) se guarda aparte, en una cookie httpOnly propia (`api_token`, `packages/auth/src/cookies.ts`) fuera del JWT de Auth.js — así nunca pasa por el callback `session()` ni llega a `useSession()`/al cliente. `getApiToken()` (server-only) es el único punto de lectura para Server Actions.
+- **Identidad de invitado sin criptografía, a propósito**: un carrito de invitado no tiene datos sensibles (ni PII ni pago), así que se identifica con un `crypto.randomUUID()` opaco en cookie httpOnly (`guest_cart_id`) y un header (`X-Guest-Id`) que `apps/api` no verifica — desproporcionado añadir firma/verificación para ese caso, mismo criterio de proporcionalidad que el resto del proyecto.
+- **`middleware.ts` necesita una config de Auth.js "edge-safe" separada**: el Credentials Provider (`authorize()`, llama a `login()`) y el callback `signIn` (usa `cookies()` de `next/headers`) no son aptos para el Edge runtime de `middleware.ts`. `packages/auth` se dividió en `auth.config.ts` (sin providers, callbacks `jwt`/`session` puros, lo único que carga `middleware-guard.ts`) y `config.ts` (config completa, usada por la Route Handler `/api/auth/[...nextauth]`).
+- **`next-auth@5.0.0-beta.31` no resuelve bien `"next/server"` bajo Vite/Vitest** (aunque sí bajo el bundler real de Next.js): el paquete tiene un `@ts-expect-error` reconociendo que Next.js "no usa bien `package.json#exports`" todavía. Como el barrel de `@store-demo/auth` reexporta `./config` (que invoca `NextAuth()` en el top-level), cualquier import desde el barrel rompía los tests de Vitest de `features/cart`/`features/orders`. Se añadió un `exports` map a `packages/auth/package.json` con subpaths dedicados (`./get-api-token`, `./middleware-guard`) que **no** pasan por `config.ts`, y el código de `apps/storefront` que sí se testea bajo Vitest los usa explícitamente en vez del barrel.
+- **`next/headers` no funciona bajo Vitest sin un servidor Next real** (`cookies` was called outside a request scope): se añadió un mock compartido (`apps/storefront/src/test/next-headers-mock.ts`, registrado en `setupFiles`) con un almacén de cookies en memoria, reseteado entre tests — permite testear de verdad la resolución de identidad de carrito (sesión vs. invitado) en vez de tener que saltárselo.
+- **Auth.js v5 exige `trustHost: true` explícito fuera de plataformas reconocidas** (Vercel, etc.): sin él, cualquier request de auth contra `localhost` (incluidos los specs E2E vía `next start`) falla con `UntrustedHost`. Se añadió a la config edge-safe compartida — encontrado y corregido gracias a que los specs E2E corren contra un servidor real, no solo contra mocks.
+- **`JWT_EXPIRATION` de `apps/api` pasó de `"2h"` a `"30d"`**: al quedar embebido en la cookie `api_token` (que vive tanto como la sesión de Auth.js, 30 días por defecto), un token de corta duración habría dejado las Server Actions autenticadas fallando con 401 mucho antes de que la sesión "pareciera" caducada al usuario.
+- **`ROUTE PATCH /api/orders/[orderId]` distingue `customer` de `admin`**: aunque el guard de administración real es alcance de Fase 7, el rol ya viaja en el token verificado, así que el Route Handler ya acota por `userId` solo si el rol no es `admin` — evita tener que reabrir este archivo cuando llegue Fase 7.
+- El aviso de compilación `The "middleware" file convention is deprecated. Please use "proxy" instead` (Next 16.2.10) es un cambio de convención muy reciente del framework, no bloqueante — se deja `middleware.ts` tal cual por ahora y se revisa si el proyecto llega a actualizar de major de Next.
 
 ---
 

@@ -28,9 +28,7 @@ describe("useRemoveCartItemMutation", () => {
     const otherItem = createCartItemFixture({ productId: "product-2" });
     queryClient.setQueryData(cartQueryKey, [removedItem, otherItem]);
 
-    server.use(
-      http.delete("*/api/cart/:userId/:productId", () => new HttpResponse(null, { status: 204 })),
-    );
+    server.use(http.delete("*/api/cart/:productId", () => new HttpResponse(null, { status: 204 })));
 
     const { result } = renderHook(() => useRemoveCartItemMutation(), {
       wrapper: createQueryWrapper(queryClient),
@@ -44,7 +42,7 @@ describe("useRemoveCartItemMutation", () => {
 
   it("should expose an error state when the request fails", async () => {
     server.use(
-      http.delete("*/api/cart/:userId/:productId", () =>
+      http.delete("*/api/cart/:productId", () =>
         HttpResponse.json({ error: { message: "Cannot remove item" } }, { status: 500 }),
       ),
     );

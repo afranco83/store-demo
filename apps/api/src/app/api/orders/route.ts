@@ -4,29 +4,35 @@ import { prisma } from "@/lib/prisma";
 import { jsonError, jsonSuccess, mapPrismaErrorToResponse } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
+import { requireUser, UnauthorizedError } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
-type RouteParams = { params: Promise<{ userId: string }> };
-
 class EmptyCartError extends Error {}
 
-export async function GET(_request: Request, { params }: RouteParams) {
-  const { userId } = await params;
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    include: { items: true },
-    orderBy: { createdAt: "desc" },
-  });
-  const data = orders.map(toOrderDto);
-  validateOutputInDev({ schema: z.array(orderSchema), data });
-  return jsonSuccess(data);
+export async function GET(request: Request) {
+  try {
+    const { userId } = await requireUser(request);
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+    });
+    const data = orders.map(toOrderDto);
+    validateOutputInDev({ schema: z.array(orderSchema), data });
+    return jsonSuccess(data);
+  } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return jsonError("Unauthorized", 401);
+    }
+    return mapPrismaErrorToResponse(error);
+  }
 }
 
-export async function POST(_request: Request, { params }: RouteParams) {
-  const { userId } = await params;
-
+export async function POST(request: Request) {
   try {
+    const { userId } = await requireUser(request);
+
     const order = await prisma.$transaction(async (tx) => {
       const cartItems = await tx.cartItem.findMany({
         where: { userId },
@@ -65,6 +71,9 @@ export async function POST(_request: Request, { params }: RouteParams) {
     validateOutputInDev({ schema: orderSchema, data });
     return jsonSuccess(data, 201);
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return jsonError("Unauthorized", 401);
+    }
     if (error instanceof EmptyCartError) {
       return jsonError("Cart is empty", 400);
     }

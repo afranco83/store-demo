@@ -3,7 +3,8 @@ import { productSchema } from "./product.schema";
 
 export const cartItemSchema = z.object({
   id: z.string(),
-  userId: z.string(),
+  userId: z.string().nullable(),
+  guestId: z.string().nullable(),
   productId: z.string(),
   quantity: z.number().int().positive(),
   createdAt: z.coerce.date(),

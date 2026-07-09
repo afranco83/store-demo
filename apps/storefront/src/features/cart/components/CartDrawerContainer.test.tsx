@@ -20,7 +20,7 @@ describe("CartDrawerContainer", () => {
 
   it("should render the cart items once loaded", async () => {
     const cartItem = createCartItemFixture({ quantity: 2 });
-    server.use(http.get("*/api/cart/:userId", () => HttpResponse.json({ data: [cartItem] })));
+    server.use(http.get("*/api/cart", () => HttpResponse.json({ data: [cartItem] })));
 
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
@@ -30,7 +30,7 @@ describe("CartDrawerContainer", () => {
 
   it("should show an error message when the cart fails to load", async () => {
     server.use(
-      http.get("*/api/cart/:userId", () =>
+      http.get("*/api/cart", () =>
         HttpResponse.json({ error: { message: "Cart unavailable" } }, { status: 500 }),
       ),
     );
@@ -43,7 +43,7 @@ describe("CartDrawerContainer", () => {
 
   it("should prevent decreasing an item's quantity below one", async () => {
     const cartItem = createCartItemFixture({ quantity: 1 });
-    server.use(http.get("*/api/cart/:userId", () => HttpResponse.json({ data: [cartItem] })));
+    server.use(http.get("*/api/cart", () => HttpResponse.json({ data: [cartItem] })));
 
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
@@ -66,8 +66,8 @@ describe("CartDrawerContainer", () => {
     });
 
     server.use(
-      http.get("*/api/cart/:userId", () => HttpResponse.json({ data: [itemA, itemB] })),
-      http.patch("*/api/cart/:userId/:productId", async ({ params }) => {
+      http.get("*/api/cart", () => HttpResponse.json({ data: [itemA, itemB] })),
+      http.patch("*/api/cart/:productId", async ({ params }) => {
         const original = params.productId === itemA.productId ? itemA : itemB;
         if (params.productId === itemA.productId) {
           await itemAResponseGate;

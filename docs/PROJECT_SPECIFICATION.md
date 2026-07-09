@@ -85,7 +85,7 @@ Tres herramientas, tres responsabilidades sin solape:
 
 - **TanStack Query**: estado que vive en el servidor (productos, carrito persistido, pedidos).
 - **Zustand**: estado de UI/cliente mutable con lógica de actualización (modales, toggles, filtros no persistidos, wizard de checkout).
-- **Context API (React)**: valores semi-estáticos de configuración/inyección de dependencias compartidos en un subárbol, que cambian poco y no necesitan store con lógica (tema, sesión de Auth.js, futura configuración de i18n). Si un "contexto" empieza a acumular lógica de actualización compleja, es una señal de que en realidad pertenece a Zustand.
+- **Context API (React)**: valores semi-estáticos de configuración/inyección de dependencias compartidos en un subárbol, que cambian poco y no necesitan store con lógica (tema, futura configuración de i18n). Si un "contexto" empieza a acumular lógica de actualización compleja, es una señal de que en realidad pertenece a Zustand. La sesión de Auth.js **no** entra aquí (decisión de Fase 5): se resuelve server-side con `auth()` y se pasa por props a los pocos Client Components que la necesitan, sin `SessionProvider`/`useSession()` — ver `ARCHITECTURE.md` §4.
 
 Nunca se duplica un mismo dato entre dos de estas tres herramientas.
 
@@ -185,7 +185,7 @@ features/products/
 
 - Sesión (Auth.js v5, JWT strategy)
 - Autorización basada en roles (`customer`, `admin`)
-- Guards (middleware de Next.js + HOCs/hooks `useRequireAuth`)
+- Guards (`withAuthGuard()` para `middleware.ts`; sin hook `useRequireAuth` de cliente — no hizo falta, `auth()` server-side cubre los casos de la Fase 5, ver `ARCHITECTURE.md` §4)
 - Integración con `apps/api` como Credentials Provider
 
 Detalle de flujo en `ARCHITECTURE.md` §4.
