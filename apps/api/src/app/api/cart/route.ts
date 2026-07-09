@@ -6,7 +6,7 @@ import { validateOutputInDev } from "@/lib/validate-output";
 import { toCartItemWithProductDto } from "@/lib/mappers";
 import {
   cartItemUniqueWhere,
-  handleCartRouteError,
+  handleAuthenticatedRouteError,
   resolveCartIdentity,
   type CartIdentity,
 } from "@/lib/guard";
@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     validateOutputInDev({ schema: z.array(cartItemWithProductSchema), data });
     return jsonSuccess(data);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }
 
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     validateOutputInDev({ schema: z.array(cartItemWithProductSchema), data });
     return jsonSuccess(data, 201);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }
 
@@ -67,6 +67,6 @@ export async function DELETE(request: Request) {
     await prisma.cartItem.deleteMany({ where: whereForIdentity(identity) });
     return jsonSuccess([]);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

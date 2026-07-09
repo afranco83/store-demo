@@ -19,7 +19,7 @@ test("logs in with a seeded demo user and can log out", async ({ page }) => {
   await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
   await page.waitForURL("/account");
-  await expect(page.getByText(DEMO_CUSTOMER_EMAIL)).toBeVisible();
+  await expect(page.getByLabel("Email")).toHaveValue(DEMO_CUSTOMER_EMAIL);
 
   await page.getByRole("button", { name: "Cuenta" }).click();
   await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
@@ -50,7 +50,7 @@ test("registers a new account and lands on the account page already signed in", 
   await page.getByRole("button", { name: "Crear cuenta" }).click();
 
   await page.waitForURL("/account");
-  await expect(page.getByText(uniqueEmail)).toBeVisible();
+  await expect(page.getByLabel("Email")).toHaveValue(uniqueEmail);
 
   // Regresión: una cuenta recién creada (sin pedidos) no debe reventar
   // /account/orders — getOrdersAction/getApiToken intentaban escribir la
@@ -59,4 +59,28 @@ test("registers a new account and lands on the account page already signed in", 
   // can only be modified in a Server Action or Route Handler".
   await page.goto("/account/orders");
   await expect(page.getByText("Todavía no tienes pedidos")).toBeVisible();
+});
+
+test("edits the profile name and sees it persisted after a reload", async ({ page }) => {
+  const uniqueEmail = `e2e-profile-${Date.now()}@store-demo.test`;
+
+  await page.goto("/register");
+  await page.getByLabel("Nombre").fill("Nombre Original");
+  await page.getByLabel("Email").fill(uniqueEmail);
+  await page.getByLabel("Contraseña").fill("Password123!");
+  await page.getByRole("button", { name: "Crear cuenta" }).click();
+  await page.waitForURL("/account");
+
+  const nameInput = page.getByLabel("Nombre");
+  await nameInput.fill("Nombre Actualizado");
+  await page.getByRole("button", { name: "Guardar cambios" }).click();
+
+  await expect(page.getByText("Cambios guardados.")).toBeVisible();
+  await expect(nameInput).toHaveValue("Nombre Actualizado");
+
+  // El nombre se pide fresco a apps/api en cada visita (no se cachea en la
+  // sesión de Auth.js, ver ARCHITECTURE.md §4) — confirma que persiste de
+  // verdad, no que sea solo estado local del formulario.
+  await page.reload();
+  await expect(page.getByLabel("Nombre")).toHaveValue("Nombre Actualizado");
 });

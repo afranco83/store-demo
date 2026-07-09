@@ -3,7 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toCartItemWithProductDto } from "@/lib/mappers";
-import { cartItemUniqueWhere, handleCartRouteError, resolveCartIdentity } from "@/lib/guard";
+import {
+  cartItemUniqueWhere,
+  handleAuthenticatedRouteError,
+  resolveCartIdentity,
+} from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -27,7 +31,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     validateOutputInDev({ schema: cartItemWithProductSchema, data });
     return jsonSuccess(data);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }
 
@@ -38,6 +42,6 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     await prisma.cartItem.delete({ where: cartItemUniqueWhere(identity, productId) });
     return new Response(null, { status: 204 });
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { jsonError, jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
-import { handleCartRouteError, requireUser } from "@/lib/guard";
+import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     validateOutputInDev({ schema: orderSchema, data });
     return jsonSuccess(data);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }
 
@@ -59,6 +59,6 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     validateOutputInDev({ schema: orderSchema, data });
     return jsonSuccess(data);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

@@ -89,4 +89,11 @@ export const handlers = [
   http.post("*/api/auth/register", () => {
     return HttpResponse.json({ data: { user: createUserFixture() } }, { status: 201 });
   }),
+
+  http.get("*/api/users/me", () => {
+    return HttpResponse.json({ data: createUserFixture() });
+  }),
+  http.patch("*/api/users/me", () => {
+    return HttpResponse.json({ data: createUserFixture() });
+  }),
 ];

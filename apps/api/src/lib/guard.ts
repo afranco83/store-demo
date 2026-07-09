@@ -69,10 +69,11 @@ export function cartItemUniqueWhere(identity: CartIdentity, productId: string) {
     : { guestId_productId: { guestId: identity.guestId, productId } };
 }
 
-// Único manejador de errores para los Route Handlers de cart/orders: una
-// identidad ausente o inválida siempre es 401, cualquier otro error se
-// mapea igual que el resto de la API (ver api-response.ts).
-export function handleCartRouteError(error: unknown): Response {
+// Único manejador de errores para cualquier Route Handler autenticado
+// (cart/orders/users): una identidad ausente o inválida siempre es 401,
+// cualquier otro error se mapea igual que el resto de la API (ver
+// api-response.ts).
+export function handleAuthenticatedRouteError(error: unknown): Response {
   if (error instanceof UnauthorizedError) {
     return jsonError("Unauthorized", 401);
   }

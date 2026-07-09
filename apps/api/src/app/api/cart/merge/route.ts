@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { jsonError, jsonSuccess } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toCartItemWithProductDto } from "@/lib/mappers";
-import { handleCartRouteError, requireUser } from "@/lib/guard";
+import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +61,6 @@ export async function POST(request: Request) {
     validateOutputInDev({ schema: z.array(cartItemWithProductSchema), data });
     return jsonSuccess(data);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

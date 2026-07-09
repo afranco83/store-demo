@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { jsonError, jsonSuccess } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
-import { handleCartRouteError, requireUser } from "@/lib/guard";
+import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     validateOutputInDev({ schema: z.array(orderSchema), data });
     return jsonSuccess(data);
   } catch (error) {
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }
 
@@ -71,6 +71,6 @@ export async function POST(request: Request) {
     if (error instanceof EmptyCartError) {
       return jsonError("Cart is empty", 400);
     }
-    return handleCartRouteError(error);
+    return handleAuthenticatedRouteError(error);
   }
 }
