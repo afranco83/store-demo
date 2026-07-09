@@ -103,7 +103,7 @@ describe("CartDrawerContainer", () => {
         expect(
           within(groupB).getByRole("button", { name: "Aumentar cantidad" }),
         ).not.toBeDisabled(),
-      { timeout: 5000 },
+      { timeout: 8000 },
     );
     expect(within(groupA).getByRole("button", { name: "Aumentar cantidad" })).toBeDisabled();
 
@@ -114,7 +114,12 @@ describe("CartDrawerContainer", () => {
         expect(
           within(groupA).getByRole("button", { name: "Aumentar cantidad" }),
         ).not.toBeDisabled(),
-      { timeout: 5000 },
+      { timeout: 8000 },
     );
-  });
+  }, // Timeout del test completo (no solo de cada waitFor individual): con
+  // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest
+  // (5000ms para todo el test) revienta antes de que cualquiera de los dos
+  // llegue a su propio límite — visto en CI (setup de 60s+ en ese run,
+  // frente a ~1s en local), no reproducible en una máquina poco cargada.
+  20000);
 });
