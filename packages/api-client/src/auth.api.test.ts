@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { http, HttpResponse } from "msw";
 import { server } from "@store-demo/testing";
-import { login } from "./auth.api";
+import { login, register } from "./auth.api";
 import { ApiClientError } from "./errors";
 
 describe("auth.api", () => {
@@ -25,5 +25,30 @@ describe("auth.api", () => {
     await expect(login({ email: "wrong@store-demo.test", password: "wrong" })).rejects.toThrow(
       ApiClientError,
     );
+  });
+
+  it("should return the created user on successful registration", async () => {
+    const result = await register({
+      email: "new-customer@store-demo.test",
+      password: "Password123!",
+      name: "New Customer",
+    });
+
+    expect(result.user).toHaveProperty("email");
+  });
+
+  it("should throw ApiClientError when the email is already registered", async () => {
+    server.use(
+      http.post("*/api/auth/register", () => {
+        return HttpResponse.json(
+          { error: { message: "A resource with this value already exists" } },
+          { status: 409 },
+        );
+      }),
+    );
+
+    await expect(
+      register({ email: "taken@store-demo.test", password: "Password123!", name: "Someone" }),
+    ).rejects.toThrow(ApiClientError);
   });
 });

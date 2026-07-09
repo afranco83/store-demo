@@ -55,6 +55,7 @@ export function toCartItemWithProductDto(
   return {
     id: cartItem.id,
     userId: cartItem.userId,
+    guestId: cartItem.guestId,
     productId: cartItem.productId,
     quantity: cartItem.quantity,
     createdAt: cartItem.createdAt,

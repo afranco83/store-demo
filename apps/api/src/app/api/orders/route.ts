@@ -1,32 +1,35 @@
 import { z } from "zod";
 import { orderSchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonError, jsonSuccess, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonError, jsonSuccess } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
+import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
-type RouteParams = { params: Promise<{ userId: string }> };
-
 class EmptyCartError extends Error {}
 
-export async function GET(_request: Request, { params }: RouteParams) {
-  const { userId } = await params;
-  const orders = await prisma.order.findMany({
-    where: { userId },
-    include: { items: true },
-    orderBy: { createdAt: "desc" },
-  });
-  const data = orders.map(toOrderDto);
-  validateOutputInDev({ schema: z.array(orderSchema), data });
-  return jsonSuccess(data);
+export async function GET(request: Request) {
+  try {
+    const { userId } = await requireUser(request);
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      include: { items: true },
+      orderBy: { createdAt: "desc" },
+    });
+    const data = orders.map(toOrderDto);
+    validateOutputInDev({ schema: z.array(orderSchema), data });
+    return jsonSuccess(data);
+  } catch (error) {
+    return handleAuthenticatedRouteError(error);
+  }
 }
 
-export async function POST(_request: Request, { params }: RouteParams) {
-  const { userId } = await params;
-
+export async function POST(request: Request) {
   try {
+    const { userId } = await requireUser(request);
+
     const order = await prisma.$transaction(async (tx) => {
       const cartItems = await tx.cartItem.findMany({
         where: { userId },
@@ -68,6 +71,6 @@ export async function POST(_request: Request, { params }: RouteParams) {
     if (error instanceof EmptyCartError) {
       return jsonError("Cart is empty", 400);
     }
-    return mapPrismaErrorToResponse(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

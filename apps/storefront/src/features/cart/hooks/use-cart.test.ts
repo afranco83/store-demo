@@ -22,7 +22,7 @@ describe("useCart", () => {
 
   it("should expose an error state when the request fails", async () => {
     server.use(
-      http.get("*/api/cart/:userId", () =>
+      http.get("*/api/cart", () =>
         HttpResponse.json({ error: { message: "Cart unavailable" } }, { status: 500 }),
       ),
     );

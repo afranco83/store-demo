@@ -5,3 +5,4 @@ export * from "./cart-item.schema";
 export * from "./order.schema";
 export * from "./auth.schema";
 export * from "./api-envelope.schema";
+export * from "./identity-headers";

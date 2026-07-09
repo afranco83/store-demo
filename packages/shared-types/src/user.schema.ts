@@ -13,3 +13,9 @@ export const userSchema = z.object({
   updatedAt: z.coerce.date(),
 });
 export type User = z.infer<typeof userSchema>;
+
+export const updateProfileRequestSchema = z.object({
+  name: z.string().min(1, "El nombre no puede estar vacío"),
+  email: z.string().email(),
+});
+export type UpdateProfileRequest = z.infer<typeof updateProfileRequestSchema>;

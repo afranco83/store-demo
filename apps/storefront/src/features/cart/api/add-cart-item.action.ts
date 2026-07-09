@@ -3,7 +3,7 @@
 import { addCartItem } from "@store-demo/api-client";
 import type { CartItemWithProduct } from "@store-demo/shared-types";
 
-import { getDemoUserId } from "../lib/get-demo-user-id";
+import { getCartIdentity } from "../lib/get-cart-identity";
 
 export async function addCartItemAction({
   productId,
@@ -12,6 +12,6 @@ export async function addCartItemAction({
   productId: string;
   quantity: number;
 }): Promise<CartItemWithProduct[]> {
-  const userId = await getDemoUserId();
-  return addCartItem({ userId, productId, quantity });
+  const identity = await getCartIdentity();
+  return addCartItem({ identity, productId, quantity });
 }

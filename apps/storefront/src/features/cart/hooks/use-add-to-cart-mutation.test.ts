@@ -34,7 +34,7 @@ describe("useAddToCartMutation", () => {
 
     let capturedBody: unknown;
     server.use(
-      http.post("*/api/cart/:userId", async ({ request }) => {
+      http.post("*/api/cart", async ({ request }) => {
         capturedBody = await request.json();
         return HttpResponse.json({ data: [existingItem] }, { status: 201 });
       }),
@@ -52,7 +52,7 @@ describe("useAddToCartMutation", () => {
 
   it("should expose an error state when the request fails", async () => {
     server.use(
-      http.post("*/api/cart/:userId", () =>
+      http.post("*/api/cart", () =>
         HttpResponse.json({ error: { message: "Cannot add item" } }, { status: 500 }),
       ),
     );

@@ -10,7 +10,11 @@ export default defineConfig({
     environment: "jsdom",
     // Los specs de Playwright (e2e/**) usan su propio test runner, no Vitest.
     exclude: [...configDefaults.exclude, "e2e/**"],
-    setupFiles: ["@store-demo/testing/vitest-setup", "./src/test/msw-setup.ts"],
+    setupFiles: [
+      "@store-demo/testing/vitest-setup",
+      "./src/test/msw-setup.ts",
+      "./src/test/next-headers-mock.ts",
+    ],
     coverage: {
       provider: "v8",
       // AGENTS.md §6: el umbral de cobertura aplica a hooks/servicios de

@@ -20,7 +20,7 @@ describe("CartDrawerContainer", () => {
 
   it("should render the cart items once loaded", async () => {
     const cartItem = createCartItemFixture({ quantity: 2 });
-    server.use(http.get("*/api/cart/:userId", () => HttpResponse.json({ data: [cartItem] })));
+    server.use(http.get("*/api/cart", () => HttpResponse.json({ data: [cartItem] })));
 
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
@@ -30,7 +30,7 @@ describe("CartDrawerContainer", () => {
 
   it("should show an error message when the cart fails to load", async () => {
     server.use(
-      http.get("*/api/cart/:userId", () =>
+      http.get("*/api/cart", () =>
         HttpResponse.json({ error: { message: "Cart unavailable" } }, { status: 500 }),
       ),
     );
@@ -43,7 +43,7 @@ describe("CartDrawerContainer", () => {
 
   it("should prevent decreasing an item's quantity below one", async () => {
     const cartItem = createCartItemFixture({ quantity: 1 });
-    server.use(http.get("*/api/cart/:userId", () => HttpResponse.json({ data: [cartItem] })));
+    server.use(http.get("*/api/cart", () => HttpResponse.json({ data: [cartItem] })));
 
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
@@ -66,8 +66,8 @@ describe("CartDrawerContainer", () => {
     });
 
     server.use(
-      http.get("*/api/cart/:userId", () => HttpResponse.json({ data: [itemA, itemB] })),
-      http.patch("*/api/cart/:userId/:productId", async ({ params }) => {
+      http.get("*/api/cart", () => HttpResponse.json({ data: [itemA, itemB] })),
+      http.patch("*/api/cart/:productId", async ({ params }) => {
         const original = params.productId === itemA.productId ? itemA : itemB;
         if (params.productId === itemA.productId) {
           await itemAResponseGate;
@@ -92,15 +92,34 @@ describe("CartDrawerContainer", () => {
     await user.click(within(groupA).getByRole("button", { name: "Aumentar cantidad" }));
     await user.click(within(groupB).getByRole("button", { name: "Aumentar cantidad" }));
 
-    await waitFor(() =>
-      expect(within(groupB).getByRole("button", { name: "Aumentar cantidad" })).not.toBeDisabled(),
+    // Timeout explícito por encima del default de RTL (1000ms): desde la
+    // Fase 5, cada mutación resuelve su identidad (getCartIdentity ->
+    // getApiToken -> cookies()) antes de llamar a la API, lo que añade
+    // saltos async extra por click — en un runner de CI más cargado que una
+    // máquina local, el default puede no ser suficiente y dar un falso
+    // negativo ajeno al bug real que este test verifica.
+    await waitFor(
+      () =>
+        expect(
+          within(groupB).getByRole("button", { name: "Aumentar cantidad" }),
+        ).not.toBeDisabled(),
+      { timeout: 8000 },
     );
     expect(within(groupA).getByRole("button", { name: "Aumentar cantidad" })).toBeDisabled();
 
     resolveItemAResponse();
 
-    await waitFor(() =>
-      expect(within(groupA).getByRole("button", { name: "Aumentar cantidad" })).not.toBeDisabled(),
+    await waitFor(
+      () =>
+        expect(
+          within(groupA).getByRole("button", { name: "Aumentar cantidad" }),
+        ).not.toBeDisabled(),
+      { timeout: 8000 },
     );
-  });
+  }, // Timeout del test completo (no solo de cada waitFor individual): con
+  // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest
+  // (5000ms para todo el test) revienta antes de que cualquiera de los dos
+  // llegue a su propio límite — visto en CI (setup de 60s+ en ese run,
+  // frente a ~1s en local), no reproducible en una máquina poco cargada.
+  20000);
 });

@@ -47,17 +47,24 @@ model User {
   updatedAt    DateTime   @updatedAt
 }
 
+// userId/guestId son mutuamente excluyentes: un CartItem pertenece a un
+// usuario autenticado (userId) o a un carrito de invitado (guestId), nunca a
+// ambos ni a ninguno. La invariante se valida en apps/api (Fase 5), no a
+// nivel de constraint SQL (SQLite no lo hace cómodo para este alcance).
 model CartItem {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String?
+  guestId   String?
   productId String
   quantity  Int      @default(1)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, productId])
+  @@unique([guestId, productId])
+  @@index([guestId])
 }
 
 model Order {

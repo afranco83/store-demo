@@ -2,9 +2,9 @@
 
 import { removeCartItem } from "@store-demo/api-client";
 
-import { getDemoUserId } from "../lib/get-demo-user-id";
+import { getCartIdentity } from "../lib/get-cart-identity";
 
 export async function removeCartItemAction({ productId }: { productId: string }): Promise<void> {
-  const userId = await getDemoUserId();
-  return removeCartItem({ userId, productId });
+  const identity = await getCartIdentity();
+  return removeCartItem({ identity, productId });
 }

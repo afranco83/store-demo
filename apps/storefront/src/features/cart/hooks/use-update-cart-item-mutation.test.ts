@@ -29,9 +29,7 @@ describe("useUpdateCartItemMutation", () => {
     queryClient.setQueryData(cartQueryKey, [staleItem, otherItem]);
 
     const updatedItem = createCartItemFixture({ productId: "product-1", quantity: 3 });
-    server.use(
-      http.patch("*/api/cart/:userId/:productId", () => HttpResponse.json({ data: updatedItem })),
-    );
+    server.use(http.patch("*/api/cart/:productId", () => HttpResponse.json({ data: updatedItem })));
 
     const { result } = renderHook(() => useUpdateCartItemMutation(), {
       wrapper: createQueryWrapper(queryClient),
@@ -45,7 +43,7 @@ describe("useUpdateCartItemMutation", () => {
 
   it("should expose an error state when the request fails", async () => {
     server.use(
-      http.patch("*/api/cart/:userId/:productId", () =>
+      http.patch("*/api/cart/:productId", () =>
         HttpResponse.json({ error: { message: "Cannot update item" } }, { status: 500 }),
       ),
     );
