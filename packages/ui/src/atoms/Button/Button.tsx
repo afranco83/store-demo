@@ -4,7 +4,10 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "../../utils/cn";
 import { Spinner } from "../Spinner";
 
-const buttonVariants = cva(
+// Exportado (no solo interno): permite aplicar el mismo tratamiento visual a
+// elementos que no pueden ser un <button> real, p. ej. un <Link> de Next
+// (no se puede anidar <button> dentro de <a>, ver ROADMAP.md adenda Fase 4).
+export const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {

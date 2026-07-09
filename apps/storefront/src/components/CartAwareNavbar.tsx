@@ -9,9 +9,11 @@ import { useCartDrawerStore } from "@/features/cart/store/use-cart-drawer-store"
 export function CartAwareNavbar({
   logoSlot,
   navSlot,
+  authSlot,
 }: {
   logoSlot: ReactNode;
   navSlot: ReactNode;
+  authSlot: ReactNode;
 }) {
   const cartQuery = useCart();
   const openCartDrawer = useCartDrawerStore((state) => state.open);
@@ -22,6 +24,7 @@ export function CartAwareNavbar({
     <Navbar
       logoSlot={logoSlot}
       navSlot={navSlot}
+      authSlot={authSlot}
       cartItemCount={cartItemCount}
       onCartClick={openCartDrawer}
       cartLabel="Abrir carrito"

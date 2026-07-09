@@ -9,6 +9,8 @@ import { cn } from "../../utils/cn";
 export interface NavbarProps {
   logoSlot: ReactNode;
   navSlot: ReactNode;
+  /** Login/cuenta — se renderiza a la derecha, junto al carrito. */
+  authSlot?: ReactNode;
   cartItemCount?: number;
   onCartClick: () => void;
   cartLabel?: string;
@@ -19,6 +21,7 @@ export interface NavbarProps {
 export function Navbar({
   logoSlot,
   navSlot,
+  authSlot,
   cartItemCount = 0,
   onCartClick,
   cartLabel = "Open cart",
@@ -37,25 +40,28 @@ export function Navbar({
         {logoSlot}
         <nav className="flex items-center gap-4">{navSlot}</nav>
       </div>
-      <Button
-        type="button"
-        intent="ghost"
-        size="sm"
-        onClick={onCartClick}
-        aria-label={cartLabel}
-        className="relative"
-      >
-        <Icon icon={ShoppingCart} size="md" />
-        {cartItemCount > 0 ? (
-          <Badge
-            intent="accent"
-            size="sm"
-            className="absolute -top-1.5 -right-1.5 min-w-5 justify-center px-1"
-          >
-            {cartItemCount}
-          </Badge>
-        ) : null}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          intent="ghost"
+          size="sm"
+          onClick={onCartClick}
+          aria-label={cartLabel}
+          className="relative"
+        >
+          <Icon icon={ShoppingCart} size="md" />
+          {cartItemCount > 0 ? (
+            <Badge
+              intent="accent"
+              size="sm"
+              className="absolute -top-1.5 -right-1.5 min-w-5 justify-center px-1"
+            >
+              {cartItemCount}
+            </Badge>
+          ) : null}
+        </Button>
+        {authSlot}
+      </div>
     </header>
   );
 }

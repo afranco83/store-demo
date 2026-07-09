@@ -21,10 +21,11 @@ test("logs in with a seeded demo user and can log out", async ({ page }) => {
   await page.waitForURL("/account");
   await expect(page.getByText(DEMO_CUSTOMER_EMAIL)).toBeVisible();
 
-  await page.getByRole("button", { name: "Cerrar sesión" }).click();
+  await page.getByRole("button", { name: "Cuenta" }).click();
+  await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
 
   await page.waitForURL("/");
-  await expect(page.getByRole("link", { name: "Iniciar sesión" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Login" })).toBeVisible();
 });
 
 test("shows an error and does not sign in with invalid credentials", async ({ page }) => {

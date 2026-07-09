@@ -13,4 +13,5 @@ export * from "./molecules/ProductGrid";
 export * from "./molecules/QuantitySelector";
 export * from "./organisms/CartDrawer";
 export * from "./organisms/Navbar";
+export * from "./organisms/UserMenu";
 export { cn } from "./utils/cn";
