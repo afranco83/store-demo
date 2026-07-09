@@ -92,15 +92,29 @@ describe("CartDrawerContainer", () => {
     await user.click(within(groupA).getByRole("button", { name: "Aumentar cantidad" }));
     await user.click(within(groupB).getByRole("button", { name: "Aumentar cantidad" }));
 
-    await waitFor(() =>
-      expect(within(groupB).getByRole("button", { name: "Aumentar cantidad" })).not.toBeDisabled(),
+    // Timeout explícito por encima del default de RTL (1000ms): desde la
+    // Fase 5, cada mutación resuelve su identidad (getCartIdentity ->
+    // getApiToken -> cookies()) antes de llamar a la API, lo que añade
+    // saltos async extra por click — en un runner de CI más cargado que una
+    // máquina local, el default puede no ser suficiente y dar un falso
+    // negativo ajeno al bug real que este test verifica.
+    await waitFor(
+      () =>
+        expect(
+          within(groupB).getByRole("button", { name: "Aumentar cantidad" }),
+        ).not.toBeDisabled(),
+      { timeout: 5000 },
     );
     expect(within(groupA).getByRole("button", { name: "Aumentar cantidad" })).toBeDisabled();
 
     resolveItemAResponse();
 
-    await waitFor(() =>
-      expect(within(groupA).getByRole("button", { name: "Aumentar cantidad" })).not.toBeDisabled(),
+    await waitFor(
+      () =>
+        expect(
+          within(groupA).getByRole("button", { name: "Aumentar cantidad" }),
+        ).not.toBeDisabled(),
+      { timeout: 5000 },
     );
   });
 });
