@@ -26,10 +26,21 @@ export async function getApiToken(): Promise<string | null> {
     return null;
   }
 
-  cookieStore.set(
-    API_TOKEN_COOKIE,
-    token,
-    ownHttpOnlyCookieOptions(API_TOKEN_COOKIE_MAX_AGE_SECONDS),
-  );
+  try {
+    cookieStore.set(
+      API_TOKEN_COOKIE,
+      token,
+      ownHttpOnlyCookieOptions(API_TOKEN_COOKIE_MAX_AGE_SECONDS),
+    );
+  } catch {
+    // next/headers solo permite escribir cookies desde una Server Action
+    // real (mutación) o un Route Handler, nunca durante el render de un
+    // Server Component — p. ej. getOrdersAction llamado directamente desde
+    // OrderHistorySection al renderizar /account/orders, aunque el propio
+    // archivo tenga "use server". El token ya se ha leído bien; solo se
+    // pierde deslizar su expiración en esta lectura de solo-render, se
+    // desliza igual la próxima vez que el usuario dispare una mutación real
+    // (añadir al carrito, etc.).
+  }
   return token;
 }

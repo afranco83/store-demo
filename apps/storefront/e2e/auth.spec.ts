@@ -51,4 +51,12 @@ test("registers a new account and lands on the account page already signed in", 
 
   await page.waitForURL("/account");
   await expect(page.getByText(uniqueEmail)).toBeVisible();
+
+  // Regresión: una cuenta recién creada (sin pedidos) no debe reventar
+  // /account/orders — getOrdersAction/getApiToken intentaban escribir la
+  // cookie api_token durante el render de un Server Component (solo
+  // permitido en Server Actions/Route Handlers reales), lanzando "Cookies
+  // can only be modified in a Server Action or Route Handler".
+  await page.goto("/account/orders");
+  await expect(page.getByText("Todavía no tienes pedidos")).toBeVisible();
 });
