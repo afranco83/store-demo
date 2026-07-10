@@ -17,6 +17,13 @@ export type OrderItem = z.infer<typeof orderItemSchema>;
 export const orderSchema = z.object({
   id: z.string(),
   userId: z.string(),
+  // Email de la cuenta que hizo el pedido, unido desde User (no un snapshot
+  // como los campos shipping* de abajo) — el propio email puede cambiarse
+  // desde "Mi cuenta" tras el pedido, y queremos siempre el valor vigente.
+  // Necesario para que apps/admin identifique al cliente en el listado de
+  // pedidos (Fase 7); antes solo hacía falta el propio userId (el customer
+  // ya sabe que el pedido es suyo).
+  userEmail: z.string().email(),
   status: orderStatusSchema,
   totalCents: z.number().int().nonnegative(),
   shippingFullName: z.string(),

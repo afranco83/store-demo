@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { createCategorySchema, categorySchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonSuccess, jsonZodError, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toCategoryDto } from "@/lib/mappers";
+import { handleAuthenticatedRouteError, requireAdmin } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -21,11 +22,12 @@ export async function POST(request: Request) {
   }
 
   try {
+    await requireAdmin(request);
     const category = await prisma.category.create({ data: parsedBody.data });
     const data = toCategoryDto(category);
     validateOutputInDev({ schema: categorySchema, data });
     return jsonSuccess(data, 201);
   } catch (error) {
-    return mapPrismaErrorToResponse(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

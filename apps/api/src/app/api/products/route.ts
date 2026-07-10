@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { createProductSchema, productSchema } from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonSuccess, jsonZodError, mapPrismaErrorToResponse } from "@/lib/api-response";
+import { jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toProductDto } from "@/lib/mappers";
+import { handleAuthenticatedRouteError, requireAdmin } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +26,12 @@ export async function POST(request: Request) {
   }
 
   try {
+    await requireAdmin(request);
     const product = await prisma.product.create({ data: parsedBody.data });
     const data = toProductDto(product);
     validateOutputInDev({ schema: productSchema, data });
     return jsonSuccess(data, 201);
   } catch (error) {
-    return mapPrismaErrorToResponse(error);
+    return handleAuthenticatedRouteError(error);
   }
 }

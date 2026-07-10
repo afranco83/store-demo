@@ -1,3 +1,7 @@
+import { redirect } from "next/navigation";
+
+// Sin dashboard propio (fuera de alcance del ROADMAP, Fase 7) — la
+// gestión de catálogo es el punto de entrada natural de apps/admin.
 export default function HomePage() {
-  return <main>Store Demo — Admin</main>;
+  redirect("/products");
 }

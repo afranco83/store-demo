@@ -17,6 +17,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@store-demo/api-client": "workspace:*",
     "@store-demo/auth": "workspace:*",
+    "@store-demo/core": "workspace:*",
     "@store-demo/design-tokens": "workspace:*",
     "@store-demo/shared-types": "workspace:*",
     "@store-demo/tailwind-config": "workspace:*",

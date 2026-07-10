@@ -1,16 +1,6 @@
-import type { BadgeProps } from "@store-demo/ui";
-import type { Order, OrderStatus } from "@store-demo/shared-types";
+import type { Order } from "@store-demo/shared-types";
 
-export const ORDER_STATUS_BADGES: Record<
-  OrderStatus,
-  { label: string; intent: BadgeProps["intent"] }
-> = {
-  pending: { label: "Pendiente", intent: "warning" },
-  paid: { label: "Pagado", intent: "accent" },
-  shipped: { label: "Enviado", intent: "accent" },
-  delivered: { label: "Entregado", intent: "success" },
-  cancelled: { label: "Cancelado", intent: "danger" },
-};
+export { ORDER_STATUS_BADGES } from "@store-demo/core";
 
 const orderDateFormatter = new Intl.DateTimeFormat("es-ES", { dateStyle: "long" });
 

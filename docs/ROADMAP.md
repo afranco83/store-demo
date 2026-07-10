@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 6 cerrada en local (2026-07-10)**, en rama `feat/phase-6-checkout`, pendiente de PR; Fase 5 mergeada en `main` (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
+Estado actual: **Fase 7 cerrada en local (2026-07-10)**, en rama `feat/phase-7-admin`, pendiente de PR; Fase 6 mergeada en `main` (PR #7); Fase 5 mergeada (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -227,20 +227,41 @@ Tareas:
 
 ---
 
-## Fase 7 — Admin
+## Fase 7 — Admin _(cerrada en local — 2026-07-10)_
 
 **Objetivo**: segunda app de negocio, reutilizando el design system y los contratos ya construidos.
 
 Tareas:
 
-- [ ] `apps/admin`: bootstrap reutilizando `packages/ui`, `auth`, `api-client`
-- [ ] Component-first: componentes de tabla/formulario de administración que falten en `packages/ui` (probablemente el primer punto donde aparecen organismos nuevos propios de `admin`)
-- [ ] `features/products` (admin): CRUD de productos y categorías
-- [ ] `features/orders` (admin): listado y cambio de estado de pedidos
-- [ ] Guard de rol `admin` a nivel de middleware
-- [ ] Tests de integración de los CRUD + E2E de login admin → editar producto
+- [x] `apps/admin`: bootstrap reutilizando `packages/ui`, `auth`, `api-client` — sin TanStack Query ni Zustand (decisión tomada durante la implementación, ver abajo)
+- [x] Component-first: componentes de tabla/formulario de administración que faltaban en `packages/ui` — `Select` y `Textarea` (átomos), `Table` (molecule, compound component) y `ConfirmDialog` (molecule, mismo patrón de overlay accesible que `CartDrawer`)
+- [x] `features/products` (admin): CRUD de productos y categorías
+- [x] `features/orders` (admin): listado y cambio de estado de pedidos
+- [x] Guard de rol `admin` a nivel de middleware — ampliado también a `apps/api` (ver decisiones abajo)
+- [x] Tests de integración de los CRUD + E2E de login admin → editar producto
 
-**DoD**: un usuario con rol `admin` puede gestionar catálogo y pedidos; un usuario `customer` no puede acceder a `apps/admin`.
+**DoD**: un usuario con rol `admin` puede gestionar catálogo y pedidos; un usuario `customer` no puede acceder a `apps/admin`. **Cumplido**: `pnpm turbo lint typecheck test build --force` en verde en los 20 paquetes/apps del monorepo (36/36 tareas); 29/29 tests de `apps/admin` y suite de `packages/ui` en verde; 9/9 specs E2E nuevos de `apps/admin` (Playwright, Chromium real) en verde, más los 13/13 de `apps/storefront` reverificados tras los cambios en paquetes compartidos (`packages/auth`, `packages/api-client`, `packages/core`).
+
+**Decisiones tomadas con el usuario antes de implementar (plan mode)**, a partir de dos huecos reales detectados durante la exploración (no estaban en el ROADMAP original):
+
+1. **Guard de rol también en `apps/api`, no solo en el middleware de `apps/admin`**: `POST/PATCH/DELETE /api/products` y `/api/categories` no tenían ningún guard — cualquiera podía mutar el catálogo llamando a la API directamente, sin pasar por `apps/admin`. Mismo criterio de la Fase 5 ("nunca confiar en el cliente"): nuevo `requireAdmin`/`ForbiddenError` en `apps/api/src/lib/guard.ts`, y `scopeByOwnership` (antes solo dentro de `orders/[orderId]/route.ts`) promovido al mismo archivo y reutilizado también por el listado `GET /api/orders`, que ahora devuelve todos los pedidos cuando el rol del token es `admin`.
+2. **Imagen de producto como campo de texto (URL), sin widget de subida**: el seed ya sube a Cloudinary vía un script puntual (Fase 2); añadir un flujo de subida interactivo desde el formulario de admin habría sido una dependencia nueva sin caso de uso todavía (YAGNI).
+
+**Notas técnicas no obvias de la Fase 7:**
+
+- **`packages/api-client`'s `products.api.ts`/`categories.api.ts` ganaron un parámetro `token`** en sus mutaciones (`createProduct`, `updateProduct`, `deleteProduct`, y sus equivalentes de categoría), mismo patrón `Authorization: Bearer` que ya usaba `orders.api.ts`. Nadie las llamaba fuera de sus propios tests, cambio de firma seguro.
+- **`packages/auth`'s `withAuthGuard` ganó `requiredRole`/`forbiddenRedirectPath` opcionales**, retrocompatible: `apps/storefront` sigue llamándola sin esos parámetros. Sesión válida pero rol incorrecto → redirect a `/403` (no a `/login`, mensaje engañoso; no al storefront, acoplaría el guard de una app al dominio de otra).
+- **`apps/admin` sin `@tanstack/react-query` ni `zustand`**, desviación deliberada del 1:1 con `apps/storefront`: todo el CRUD de esta fase encaja en Server Actions + `revalidatePath` + `router.refresh()`/`router.push()` (mismo patrón que ya usaba `EditProfileForm` en storefront desde la Fase 5), sin necesitar caché cliente-servidor sincronizada entre vistas. Se añadiría si apareciera una necesidad real, no antes.
+- **`ORDER_STATUS_BADGES` promovido a `packages/core`** (paquete vacío desde la Fase 1): 2ª aparición real del mismo mapeo de dominio (`apps/storefront`'s `format-order.ts` ya lo tenía) — decisión explícita del usuario de extraerlo en vez de duplicarlo una vez más, criterio DRY de `AGENTS.md §1.9`.
+- **RHF + `zodResolver` + campos Zod con `.default()`** (`createProductSchema.stock`): el tipo de entrada del formulario (lo que maneja RHF) hace el campo opcional, aunque la salida validada (`CreateProduct`) siempre lo trae relleno — desajuste conocido entre React Hook Form y los defaults de Zod. Resuelto con el 3er genérico de `useForm<Input, Context, Output>` (soportado desde RHF 7.55+), sin tocar el schema compartido.
+- **RHF + campo Zod opcional con `.min(1)`** (`createCategorySchema.description`): un campo vacío del formulario llega como `""`, no `undefined` — `""` falla `.min(1)` aunque el campo sea `.optional()`. Se normaliza en el propio `register()` con `setValueAs: (value) => value === "" ? undefined : value`, sin tocar el schema.
+- **Quirk de Next.js App Router (redirect de middleware sobre una navegación "soft"/RSC)**: cuando el `signIn()` de una Server Action redirige a una ruta que el middleware vuelve a redirigir (customer autenticado aterrizando en `/products`, redirigido a `/403`), el contenido servido y renderizado ya es el de `/403` (verificado también contra el servidor real vía `curl`, con `307 Location: /403`), pero `page.url()` de Playwright no refleja la URL final en ese encadenado — una navegación completa (`page.goto`) sí la actualiza. El spec `auth.spec.ts` documenta esto y comprueba ambas cosas (contenido visible + navegación completa posterior) en vez de depender solo de la URL.
+- **Puerto 3001 para `apps/admin`** (3000 storefront, 4000 api, 6006 storybook). E2E con patrón `storageState` de Playwright (`e2e/auth.setup.ts`, proyecto `setup` del que depende `chromium`): login una vez, reutilizado entre specs — anticipado ya en `AGENTS.md §6` antes de esta fase.
+- **Gotcha de `.gitignore`**: un patrón con una barra intermedia (`playwright/.auth/`) queda anclado a la raíz del repo en vez de matchear a cualquier profundidad — con `apps/admin/playwright/.auth/` la coincidencia fallaba en silencio (`git status` mostraba el directorio como no rastreado). Corregido a `**/playwright/.auth/`. Patrones de un único segmento (`coverage/`, `node_modules/`) no tienen este problema porque matchean a cualquier profundidad por defecto.
+
+**Adenda — email del cliente en la tabla de pedidos (misma sesión, 2026-07-10):** al probar la fase manualmente, el usuario pidió añadir el email del cliente a la tabla de pedidos de `apps/admin` (antes solo mostraba `shippingFullName`, un snapshot de la dirección de envío, no la cuenta). `orderSchema` (`packages/shared-types`) gana `userEmail: z.string().email()`, unido en tiempo de lectura desde la relación `User` (no un snapshot, a diferencia de los campos `shipping*`: el email de la cuenta puede cambiar después del pedido vía "Mi cuenta", y se quiere siempre el valor vigente). `apps/api`'s `toOrderDto` y los 4 puntos donde se construye un `Order` (creación en checkout, listado, detalle, cambio de estado) pasan a incluir `user: { select: { email: true } }` en la query de Prisma correspondiente. `OrdersTable` de `apps/admin` gana una columna "Email"; `createOrderFixture` de `packages/testing` gana `userEmail` por defecto.
+
+De paso, revisando la tabla con datos reales, el usuario señaló que los emails generados por `apps/storefront/e2e/checkout.spec.ts` (`e2e-checkout-${Date.now()}-${Math.random().toString(36).slice(2)}@store-demo.test`) eran excesivamente largos (~38 caracteres antes del dominio) para lo que hacía falta. Dos iteraciones intermedias (timestamp en base36 + 4 caracteres aleatorios; luego solo 6 caracteres aleatorios) siguieron pareciéndole poco legibles — el problema de fondo no era la longitud en sí, sino que una cadena aleatoria (`sk7z3c`) no es un nombre "friendly". Solución final: `faker.internet.email({ provider: "store-demo.test" })` (mismo generador ya usado en las factories de `packages/testing`), que da nombres reales y legibles (`Valentine.Schneider@store-demo.test`) — Faker ya añade un sufijo numérico por su cuenta cuando detecta que hace falta para evitar colisiones, sin necesidad de gestionarlo a mano. Verificado que los dos tests de `checkout.spec.ts` siguen en verde sin colisión.
 
 ---
 

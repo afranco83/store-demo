@@ -9,7 +9,7 @@ import { prisma } from "@/lib/prisma";
 import { jsonError, jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
-import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
+import { handleAuthenticatedRouteError, requireUser, scopeByOwnership } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +18,10 @@ class SimulatedPaymentDeclinedError extends Error {}
 
 export async function GET(request: Request) {
   try {
-    const { userId } = await requireUser(request);
+    const { userId, role } = await requireUser(request);
     const orders = await prisma.order.findMany({
-      where: { userId },
-      include: { items: true },
+      where: scopeByOwnership({ userId, role }),
+      include: { items: true, user: { select: { email: true } } },
       orderBy: { createdAt: "desc" },
     });
     const data = orders.map(toOrderDto);
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
             })),
           },
         },
-        include: { items: true },
+        include: { items: true, user: { select: { email: true } } },
       });
 
       await tx.cartItem.deleteMany({ where: { userId } });

@@ -10,6 +10,8 @@ import {
 } from "./categories.api";
 import { ApiClientError } from "./errors";
 
+const token = "fake-jwt-token";
+
 describe("categories.api", () => {
   it("should return a list of categories when the request succeeds", async () => {
     const categories = await getCategories();
@@ -24,13 +26,17 @@ describe("categories.api", () => {
   });
 
   it("should create a category and return it", async () => {
-    const category = await createCategory({ slug: "new-category", name: "New Category" });
+    const category = await createCategory({
+      token,
+      input: { slug: "new-category", name: "New Category" },
+    });
 
     expect(category).toHaveProperty("id");
   });
 
   it("should update a category and return it", async () => {
     const category = await updateCategory({
+      token,
       slug: "electronics",
       input: { name: "Updated Name" },
     });
@@ -39,7 +45,7 @@ describe("categories.api", () => {
   });
 
   it("should delete a category without throwing", async () => {
-    await expect(deleteCategory({ slug: "electronics" })).resolves.toBeUndefined();
+    await expect(deleteCategory({ token, slug: "electronics" })).resolves.toBeUndefined();
   });
 
   it("should throw ApiClientError when the server returns an error", async () => {
@@ -50,5 +56,17 @@ describe("categories.api", () => {
     );
 
     await expect(getCategories()).rejects.toThrow(ApiClientError);
+  });
+
+  it("should throw ApiClientError with status 403 when the caller is not an admin", async () => {
+    server.use(
+      http.post("*/api/categories", () => {
+        return HttpResponse.json({ error: { message: "Forbidden" } }, { status: 403 });
+      }),
+    );
+
+    await expect(
+      createCategory({ token, input: { slug: "new-category", name: "New Category" } }),
+    ).rejects.toMatchObject({ status: 403 });
   });
 });

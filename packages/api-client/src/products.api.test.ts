@@ -10,6 +10,8 @@ import {
 } from "./products.api";
 import { ApiClientError } from "./errors";
 
+const token = "fake-jwt-token";
+
 describe("products.api", () => {
   it("should return a list of products when the request succeeds", async () => {
     const products = await getProducts();
@@ -31,26 +33,29 @@ describe("products.api", () => {
 
   it("should create a product and return it", async () => {
     const product = await createProduct({
-      slug: "new-product",
-      name: "New Product",
-      description: "A great product",
-      priceCents: 1000,
-      imageUrl: "https://res.cloudinary.com/demo/image/upload/v1/x.jpg",
-      stock: 5,
-      categoryId: "category-1",
+      token,
+      input: {
+        slug: "new-product",
+        name: "New Product",
+        description: "A great product",
+        priceCents: 1000,
+        imageUrl: "https://res.cloudinary.com/demo/image/upload/v1/x.jpg",
+        stock: 5,
+        categoryId: "category-1",
+      },
     });
 
     expect(product).toHaveProperty("id");
   });
 
   it("should update a product and return it", async () => {
-    const product = await updateProduct({ slug: "headphones", input: { stock: 5 } });
+    const product = await updateProduct({ token, slug: "headphones", input: { stock: 5 } });
 
     expect(product.slug).toBe("headphones");
   });
 
   it("should delete a product without throwing", async () => {
-    await expect(deleteProduct({ slug: "headphones" })).resolves.toBeUndefined();
+    await expect(deleteProduct({ token, slug: "headphones" })).resolves.toBeUndefined();
   });
 
   it("should throw ApiClientError when the product is not found", async () => {
@@ -61,5 +66,28 @@ describe("products.api", () => {
     );
 
     await expect(getProductBySlug({ slug: "missing" })).rejects.toThrow(ApiClientError);
+  });
+
+  it("should throw ApiClientError with status 403 when the caller is not an admin", async () => {
+    server.use(
+      http.post("*/api/products", () => {
+        return HttpResponse.json({ error: { message: "Forbidden" } }, { status: 403 });
+      }),
+    );
+
+    await expect(
+      createProduct({
+        token,
+        input: {
+          slug: "new-product",
+          name: "New Product",
+          description: "A great product",
+          priceCents: 1000,
+          imageUrl: "https://res.cloudinary.com/demo/image/upload/v1/x.jpg",
+          stock: 5,
+          categoryId: "category-1",
+        },
+      }),
+    ).rejects.toMatchObject({ status: 403 });
   });
 });

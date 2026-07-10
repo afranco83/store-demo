@@ -64,10 +64,13 @@ export function toCartItemWithProductDto(
   };
 }
 
-export function toOrderDto(order: OrderModel & { items: OrderItemModel[] }): Order {
+export function toOrderDto(
+  order: OrderModel & { items: OrderItemModel[]; user: { email: string } },
+): Order {
   return {
     id: order.id,
     userId: order.userId,
+    userEmail: order.user.email,
     status: orderStatusSchema.parse(order.status),
     totalCents: order.totalCents,
     shippingFullName: order.shippingFullName,

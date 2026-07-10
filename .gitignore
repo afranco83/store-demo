@@ -20,6 +20,7 @@ storybook-static/
 coverage/
 playwright-report/
 test-results/
+**/playwright/.auth/
 
 # prisma
 *.db
