@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { faker } from "@faker-js/faker";
 
 const API_URL = "http://localhost:4000";
 
@@ -9,7 +10,12 @@ interface ApiProduct {
 }
 
 async function registerAndSignIn(page: import("@playwright/test").Page, name: string) {
-  const uniqueEmail = `e2e-checkout-${Date.now()}-${Math.random().toString(36).slice(2)}@store-demo.test`;
+  // Nombre real generado por Faker (mismo generador ya usado en las
+  // factories de packages/testing) en vez de una cadena aleatoria en
+  // base36 — igual de improbable que colisione entre los dos tests de este
+  // spec que llaman a esto en paralelo, pero legible en cualquier listado
+  // de pedidos.
+  const uniqueEmail = faker.internet.email({ provider: "store-demo.test" });
 
   await page.goto("/register");
   await page.getByLabel("Nombre").fill(name);
