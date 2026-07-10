@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { orderSchema } from "@store-demo/shared-types";
-import type { Order, OrderStatus } from "@store-demo/shared-types";
+import type { Order, OrderStatus, CheckoutRequest } from "@store-demo/shared-types";
 import { fetchJson } from "./http-client";
 
 function authHeaders(token: string): Record<string, string> {
@@ -29,11 +29,20 @@ export async function getOrderById({
   });
 }
 
-export async function createOrder({ token }: { token: string }): Promise<Order> {
+export async function createOrder({
+  token,
+  shippingAddress,
+  payment,
+}: { token: string } & CheckoutRequest): Promise<Order> {
   return fetchJson({
     path: "/api/orders",
     schema: orderSchema,
-    init: { method: "POST", headers: authHeaders(token), cache: "no-store" },
+    init: {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authHeaders(token) },
+      body: JSON.stringify({ shippingAddress, payment }),
+      cache: "no-store",
+    },
   });
 }
 

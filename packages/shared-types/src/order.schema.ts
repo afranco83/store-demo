@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { shippingAddressSchema } from "./shipping-address.schema";
+import { simulatedPaymentSchema } from "./payment.schema";
 
 export const orderStatusSchema = z.enum(["pending", "paid", "shipped", "delivered", "cancelled"]);
 export type OrderStatus = z.infer<typeof orderStatusSchema>;
@@ -17,6 +19,14 @@ export const orderSchema = z.object({
   userId: z.string(),
   status: orderStatusSchema,
   totalCents: z.number().int().nonnegative(),
+  shippingFullName: z.string(),
+  shippingAddressLine1: z.string(),
+  shippingAddressLine2: z.string().nullable(),
+  shippingCity: z.string(),
+  shippingPostalCode: z.string(),
+  shippingCountry: z.string(),
+  shippingCents: z.number().int().nonnegative(),
+  paymentSimulatedSuccess: z.boolean(),
   items: z.array(orderItemSchema),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -27,3 +37,12 @@ export const updateOrderStatusSchema = z.object({
   status: orderStatusSchema,
 });
 export type UpdateOrderStatus = z.infer<typeof updateOrderStatusSchema>;
+
+// Body de POST /api/orders (Fase 6, checkout): la dirección de envío se
+// persiste en el pedido; los datos de pago solo se usan server-side para
+// decidir éxito/fallo simulado y nunca se persisten (ver payment.schema.ts).
+export const checkoutRequestSchema = z.object({
+  shippingAddress: shippingAddressSchema,
+  payment: simulatedPaymentSchema,
+});
+export type CheckoutRequest = z.infer<typeof checkoutRequestSchema>;

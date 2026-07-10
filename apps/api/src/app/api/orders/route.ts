@@ -1,7 +1,12 @@
 import { z } from "zod";
-import { orderSchema } from "@store-demo/shared-types";
+import {
+  orderSchema,
+  checkoutRequestSchema,
+  calculateShippingCents,
+  isSimulatedPaymentDeclined,
+} from "@store-demo/shared-types";
 import { prisma } from "@/lib/prisma";
-import { jsonError, jsonSuccess } from "@/lib/api-response";
+import { jsonError, jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
 import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
@@ -9,6 +14,7 @@ import { handleAuthenticatedRouteError, requireUser } from "@/lib/guard";
 export const dynamic = "force-dynamic";
 
 class EmptyCartError extends Error {}
+class SimulatedPaymentDeclinedError extends Error {}
 
 export async function GET(request: Request) {
   try {
@@ -27,6 +33,12 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const parsedBody = checkoutRequestSchema.safeParse(await request.json());
+  if (!parsedBody.success) {
+    return jsonZodError(parsedBody.error);
+  }
+  const { shippingAddress, payment } = parsedBody.data;
+
   try {
     const { userId } = await requireUser(request);
 
@@ -39,15 +51,33 @@ export async function POST(request: Request) {
         throw new EmptyCartError();
       }
 
-      const totalCents = cartItems.reduce(
+      const subtotalCents = cartItems.reduce(
         (sum, item) => sum + item.product.priceCents * item.quantity,
         0,
       );
 
+      // El fallo simulado se decide y se lanza ANTES de cualquier escritura:
+      // Prisma aborta la transacción entera, así que ni se crea el pedido ni
+      // se vacía el carrito. Los datos de `payment` (número de tarjeta,
+      // cvc...) solo se leen para esta comprobación, nunca se persisten.
+      if (isSimulatedPaymentDeclined(payment.cardNumber)) {
+        throw new SimulatedPaymentDeclinedError();
+      }
+
+      const shippingCents = calculateShippingCents(subtotalCents);
+
       const createdOrder = await tx.order.create({
         data: {
           userId,
-          totalCents,
+          totalCents: subtotalCents + shippingCents,
+          shippingFullName: shippingAddress.fullName,
+          shippingAddressLine1: shippingAddress.addressLine1,
+          shippingAddressLine2: shippingAddress.addressLine2 ?? null,
+          shippingCity: shippingAddress.city,
+          shippingPostalCode: shippingAddress.postalCode,
+          shippingCountry: shippingAddress.country,
+          shippingCents,
+          paymentSimulatedSuccess: true,
           items: {
             create: cartItems.map((item) => ({
               productId: item.productId,
@@ -70,6 +100,9 @@ export async function POST(request: Request) {
   } catch (error) {
     if (error instanceof EmptyCartError) {
       return jsonError("Cart is empty", 400);
+    }
+    if (error instanceof SimulatedPaymentDeclinedError) {
+      return jsonError("Payment was declined. Check your card details and try again.", 402);
     }
     return handleAuthenticatedRouteError(error);
   }

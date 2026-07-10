@@ -37,6 +37,8 @@ export interface CartDrawerProps {
   isLoading?: boolean;
   errorMessage?: string;
   emptyStateAction?: ReactNode;
+  /** Enlace/botón hacia el checkout, renderizado junto al subtotal cuando hay artículos. */
+  checkoutAction?: ReactNode;
   title?: string;
   closeLabel?: string;
   emptyStateTitle?: string;
@@ -53,6 +55,7 @@ export function CartDrawer({
   isLoading = false,
   errorMessage,
   emptyStateAction,
+  checkoutAction,
   title = "Cart",
   closeLabel = "Close cart",
   emptyStateTitle = "Your cart is empty",
@@ -164,11 +167,14 @@ export function CartDrawer({
         )}
 
         {!isLoading && items.length > 0 ? (
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <Typography variant="body" className="font-medium">
-              {subtotalLabel}
-            </Typography>
-            <PriceTag amountCents={subtotalCents} size="lg" />
+          <div className="flex flex-col gap-4 border-t border-gray-200 pt-4">
+            <div className="flex items-center justify-between">
+              <Typography variant="body" className="font-medium">
+                {subtotalLabel}
+              </Typography>
+              <PriceTag amountCents={subtotalCents} size="lg" />
+            </div>
+            {checkoutAction}
           </div>
         ) : null}
       </div>

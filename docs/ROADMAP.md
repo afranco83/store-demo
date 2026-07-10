@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 5 cerrada en local (2026-07-09)**, en rama `feat/phase-5-login-account`, pendiente de PR; Fase 4 mergeada en `main` (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
+Estado actual: **Fase 6 cerrada en local (2026-07-10)**, en rama `feat/phase-6-checkout`, pendiente de PR; Fase 5 mergeada en `main` (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -192,21 +192,38 @@ Verificado tras las cuatro rondas con `pnpm turbo lint typecheck test build --fo
 
 ---
 
-## Fase 6 — Checkout
+## Fase 6 — Checkout _(cerrada en local — 2026-07-10)_
 
 **Objetivo**: cerrar el flujo transaccional principal del storefront.
 
 Tareas:
 
-- [ ] Component-first: pasos/steps del wizard, resumen de pedido y demás moléculas/organismos que falten en `packages/ui`
-- [ ] `features/checkout`: formulario multi-paso con React Hook Form + Zod Resolver
-- [ ] Wizard de checkout gestionado con Zustand (paso actual, validez por paso)
-- [ ] Creación de pedido contra `apps/api` (sin pasarela de pago real — simulada)
-- [ ] Confirmación de pedido + vínculo con `features/orders`
-- [ ] Tests de integración del formulario (validación, envío, errores de servidor)
-- [ ] Spec E2E completo: catálogo → carrito → checkout → confirmación
+- [x] Component-first: `WizardSteps` (molecule nuevo en `packages/ui`, con story y test) para los pasos del checkout; resumen de pedido y línea de carrito reutilizan `OrderSummaryCard`/`PriceTag`/`Typography` ya existentes, sin organismo nuevo
+- [x] `features/checkout`: formulario multi-paso con React Hook Form + Zod Resolver (`ShippingStepForm`, `PaymentStepForm`, `ReviewStep`)
+- [x] Wizard de checkout gestionado con Zustand (`use-checkout-wizard-store`: paso actual, pasos completados, datos acumulados por paso, sin `persist`)
+- [x] Creación de pedido contra `apps/api` (`POST /api/orders` extendido, sin pasarela de pago real — simulada con posibilidad de fallo controlado)
+- [x] Confirmación de pedido + vínculo con `features/orders` (mismo `OrderSummaryCard` que el historial, enlace a `/account/orders`)
+- [x] Tests de integración del formulario (validación, envío, errores de servidor — incluye el camino de pago rechazado)
+- [x] Spec E2E completo: catálogo → carrito → checkout → confirmación, más un segundo spec del camino de fallo/recuperación con la tarjeta simulada
 
-**DoD**: flujo de compra completo funcional y cubierto por E2E, sin errores de validación no controlados.
+**DoD**: flujo de compra completo funcional y cubierto por E2E, sin errores de validación no controlados. **Cumplido**: `pnpm turbo lint typecheck test build --force` en verde en los 19 paquetes/apps del monorepo; 65/65 tests de `apps/storefront` (98.38% cobertura en `features/**/{store,components,lib}`) y 73/73 de `packages/ui`; 13/13 specs E2E (Playwright, Chromium real) en verde, incluidos los 2 nuevos de checkout (compra exitosa con verificación de que el navbar refleja el carrito vacío tras confirmar, y rechazo con la tarjeta mágica seguido de corrección sin perder los datos ya introducidos).
+
+**Decisiones tomadas con el usuario antes de implementar (plan mode)**:
+
+1. **Dirección de envío embebida en `Order`** (no un modelo `Address` propio) — no hay caso de uso de libreta de direcciones todavía.
+2. **Wizard de 3 pasos**: Envío → Pago → Revisión/Confirmación (revisión y confirmación son el mismo paso, dos fases del mismo componente, no dos rutas).
+3. **Envío simulado con tarifa plana + umbral de envío gratis** (`packages/shared-types/src/shipping.ts`, fuente única de verdad importada tanto por `apps/api` como por `apps/storefront`), sin impuestos aparte.
+4. **Pago simulado con fallo controlado**: un "número de tarjeta mágico" (dígito final concreto, `payment.schema.ts`) fuerza un fallo simulado en el servidor — permite testear de verdad el camino de error (mensaje al usuario, reintento sin perder los datos ya introducidos de pasos anteriores) en vez de que el pago simulado tenga éxito siempre.
+
+**Notas técnicas no obvias de la Fase 6:**
+
+- **`POST /api/orders` se extendió, no se creó `/api/checkout`**: el checkout es un concepto de wizard de cliente, no un recurso nuevo de la API — un endpoint paralelo habría duplicado la transacción leer-carrito→calcular→crear→vaciar. El fallo de pago simulado se lanza **antes** de cualquier escritura dentro de la transacción de Prisma, así que ni crea el pedido ni vacía el carrito; los datos de tarjeta solo se leen para esa comprobación, nunca se persisten (ni siquiera el número completo — `Order.paymentSimulatedSuccess` es un booleano de snapshot).
+- **Invalidación de caché de carrito tras confirmar**: `apps/api` vacía el carrito dentro de la misma transacción de `POST /api/orders`, pero la caché de TanStack Query del cliente no se entera sola — sin `queryClient.invalidateQueries({ queryKey: cartQueryKey })` en `ReviewStep` tras el éxito, el navbar/drawer seguirían mostrando los artículos ya comprados. Verificado explícitamente en el spec E2E de compra exitosa.
+- **`features/orders/lib/format-order.ts` nuevo**: se extrajo de `OrderHistorySection` (`ORDER_STATUS_BADGES`, `formatOrderPlacedAtLabel`, `formatOrderItemCountLabel`) para reutilizarlo en la vista de confirmación del checkout — mismo criterio DRY de `AGENTS.md §1.9`, y mismo precedente ya existente de imports cruzados entre features (`features/products` → `features/cart`).
+- **TypeScript no conserva el estrechamiento de tipo dentro de closures**: tras la guarda `if (!shippingAddress || !payment) return null` en `ReviewStep`, referenciar esas variables directamente dentro de la función anidada `handleConfirm` seguía dando `T | null` en el compilador — se reasignan a un objeto `CheckoutRequest` concreto en el punto donde sí están estrechadas, en vez de usar `!` (non-null assertion).
+- **Migración de Prisma con datos de seed existentes**: como los 8 campos nuevos de `Order` son obligatorios y sin default, y ya había filas de seed, hubo que borrar `apps/api/dev.db` y regenerar desde cero (`prisma migrate dev` + `prisma generate` + `prisma db seed`) en vez de migrar los datos existentes — aceptable en una base SQLite de desarrollo, documentado como precedente para futuras migraciones que añadan columnas obligatorias.
+- **`/checkout` protegido por `middleware.ts`** con el mismo `withAuthGuard` que `/account/**`: el checkout exige sesión siempre (decisión ya tomada en la Fase 5), así que se corta en el guard antes de que el usuario invitado llegue a ver el wizard.
+- **Guard de carrito vacío en `CheckoutWizard`**: cubre tanto a quien llega a `/checkout` sin nada en el carrito como a quien recarga la página justo después de confirmar un pedido (el store del wizard no tiene `persist` — se resetea con el reload — y el carrito ya está vacío server-side en ese punto).
 
 ---
 

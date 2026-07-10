@@ -6,3 +6,6 @@ export * from "./order.schema";
 export * from "./auth.schema";
 export * from "./api-envelope.schema";
 export * from "./identity-headers";
+export * from "./shipping-address.schema";
+export * from "./payment.schema";
+export * from "./shipping";

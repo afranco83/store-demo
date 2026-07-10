@@ -11,6 +11,7 @@ export * from "./molecules/OrderSummaryCard";
 export * from "./molecules/ProductCard";
 export * from "./molecules/ProductGrid";
 export * from "./molecules/QuantitySelector";
+export * from "./molecules/WizardSteps";
 export * from "./organisms/CartDrawer";
 export * from "./organisms/Navbar";
 export * from "./organisms/UserMenu";
