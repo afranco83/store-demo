@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { faker } from "@faker-js/faker";
+import { calculateShippingCents } from "@store-demo/shared-types";
 import { prisma } from "../src/lib/prisma";
 import { hashPassword } from "../src/lib/password";
 
@@ -228,13 +229,22 @@ async function seedOrderForCustomerOne({
   }
 
   const orderProducts = products.slice(0, 2);
-  const totalCents = orderProducts.reduce((sum, product) => sum + product.priceCents, 0);
+  const subtotalCents = orderProducts.reduce((sum, product) => sum + product.priceCents, 0);
+  const shippingCents = calculateShippingCents(subtotalCents);
 
   await prisma.order.create({
     data: {
       userId,
       status: "paid",
-      totalCents,
+      totalCents: subtotalCents + shippingCents,
+      shippingFullName: "Cliente Uno",
+      shippingAddressLine1: "Calle Falsa 123",
+      shippingAddressLine2: null,
+      shippingCity: "Madrid",
+      shippingPostalCode: "28080",
+      shippingCountry: "ES",
+      shippingCents,
+      paymentSimulatedSuccess: true,
       items: {
         create: orderProducts.map((product) => ({
           productId: product.id,

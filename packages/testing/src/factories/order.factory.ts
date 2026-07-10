@@ -16,18 +16,26 @@ export function createOrderItemFixture(overrides: Partial<OrderItem> = {}): Orde
 export function createOrderFixture(overrides: Partial<Order> = {}): Order {
   const id = overrides.id ?? faker.string.uuid();
   const items = overrides.items ?? [createOrderItemFixture({ orderId: id })];
-  const totalCents =
-    overrides.totalCents ??
-    items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0);
+  const subtotalCents = items.reduce((sum, item) => sum + item.unitPriceCents * item.quantity, 0);
+  const shippingCents = overrides.shippingCents ?? 0;
+  const totalCents = overrides.totalCents ?? subtotalCents + shippingCents;
 
   return orderSchema.parse({
     id,
     userId: faker.string.uuid(),
     status: "pending",
+    shippingFullName: faker.person.fullName(),
+    shippingAddressLine1: faker.location.streetAddress(),
+    shippingAddressLine2: null,
+    shippingCity: faker.location.city(),
+    shippingPostalCode: faker.location.zipCode(),
+    shippingCountry: "ES",
+    paymentSimulatedSuccess: true,
     createdAt: faker.date.past(),
     updatedAt: faker.date.recent(),
     ...overrides,
     items,
+    shippingCents,
     totalCents,
   });
 }

@@ -72,6 +72,29 @@ model Order {
   userId     String
   status     String      @default("pending")
   totalCents Int
+
+  // Dirección de envío embebida (Fase 6, checkout) — campos planos en vez de
+  // un modelo Address propio: no hay caso de uso de libreta de direcciones
+  // todavía, y SQLite/Prisma no tiene tipos compuestos. Los `@default` no
+  // representan datos válidos: existen solo para que la migración pueda
+  // añadir estas columnas NOT NULL sobre una tabla `Order` con filas
+  // preexistentes (cualquier entorno de desarrollo con seeds de fases
+  // anteriores) sin exigir un reset de la base de datos; `checkoutRequestSchema`
+  // sigue exigiendo valores no vacíos para cualquier pedido nuevo.
+  shippingFullName     String  @default("")
+  shippingAddressLine1 String  @default("")
+  shippingAddressLine2 String?
+  shippingCity         String  @default("")
+  shippingPostalCode   String  @default("")
+  shippingCountry      String  @default("")
+  shippingCents        Int     @default(0)
+
+  // Snapshot explícito de "esta compra pasó por un pago simulado con éxito"
+  // (siempre true en la práctica: un pago simulado fallido nunca llega a
+  // crear el Order, ver POST /api/orders). Ningún dato de tarjeta se
+  // persiste jamás, ni siquiera simulado.
+  paymentSimulatedSuccess Boolean @default(true)
+
   user       User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   items      OrderItem[]
   createdAt  DateTime    @default(now())
