@@ -1,21 +1,38 @@
 ---
 name: frontend-patterns
-description: Patrones de implementación de React/Next.js (composición, hooks reutilizables, performance, formularios, animación, accesibilidad) que AGENTS.md no detalla punto por punto. Usar al escribir componentes/hooks no triviales en apps/storefront o apps/admin. Para las convenciones obligatorias de estado/formularios/estilos de este proyecto, AGENTS.md manda siempre sobre esta skill.
+description: Recetario de patrones de implementación de React/Next.js (composición, hooks reutilizables, performance, formularios, animación, accesibilidad) y proceso de decisión de arquitectura (Server vs. Client, dónde vive el estado, qué componente de packages/ui reutilizar o crear) para un componente/feature no trivial. Usar al escribir código de UI no trivial, o antes de implementarlo si hay una decisión de patrón genuinamente abierta. AGENTS.md manda siempre sobre esta skill si algo la contradice.
 metadata:
-  origin: adaptado de affaan-m/ECC (github.com/affaan-m/ECC/blob/main/skills/frontend-patterns/SKILL.md), mismo origen ya citado en AGENTS.md §12 como fuente de §2
+  origin: adaptado de affaan-m/ECC (github.com/affaan-m/ECC/blob/main/skills/frontend-patterns/SKILL.md), mismo origen ya citado en AGENTS.md §12 como fuente de §2. La sección "Decisiones de arquitectura" absorbe el agente frontend-architect (2026-07-10) — se fusionó porque su naturaleza consultiva/interactiva (preguntas abiertas al usuario) no se beneficiaba de aislar contexto en un subagente, a diferencia de test-reviewer/bug-hunter.
 ---
 
 # Patrones de frontend
 
-Esta skill es un recetario de patrones de implementación de React/Next.js — **no** decide arquitectura ni resuelve dilemas de diseño abiertos (eso es el agente `frontend-architect`, en consulta aislada, `CLAUDE.md`). Las convenciones obligatorias de este proyecto (reparto de estado, formularios, estilos, testing) viven en `AGENTS.md` y ganan siempre si algo de aquí las contradice.
+Esta skill cubre dos cosas relacionadas: un recetario de patrones de implementación de React/Next.js, y el proceso a seguir para decidir qué patrón aplicar en un caso concreto antes de implementarlo. Las convenciones obligatorias de este proyecto (reparto de estado, formularios, estilos, testing) viven en `AGENTS.md` y ganan siempre si algo de aquí las contradice.
 
 ## Cuándo usarla
 
+- Antes de implementar un componente/feature no trivial: qué patrón de estado, Server vs. Client, qué se reutiliza de `packages/ui` (ver "Decisiones de arquitectura" abajo)
 - Componer componentes (composición, patrón compound, render props)
 - Extraer hooks reutilizables (toggle, debounce, lógica de UI pura)
 - Optimizar rendimiento (memoización, code splitting, virtualización)
 - Trabajar con formularios (siempre React Hook Form + Zod en este proyecto, ver abajo)
 - Accesibilidad de patrones interactivos (dropdowns, modales, navegación por teclado)
+
+## Decisiones de arquitectura, antes de implementar
+
+Para un componente o feature no trivial, antes de escribir código: propón, no implementes directamente.
+
+1. Lee las secciones relevantes de `AGENTS.md` (§1 Principios, §5 Estilos si hay componente visual de por medio) y `docs/ARCHITECTURE.md` para el problema concreto.
+2. Busca precedente real ya resuelto en el repo: ¿ya existe una feature o componente que resolvió un problema parecido? (`apps/storefront/src/features/*` para patrones de estado/datos, `packages/ui/src/{atoms,molecules,organisms}` para composición de UI). Prefiere seguir el patrón ya establecido antes que proponer uno nuevo (DRY/YAGNI, `AGENTS.md §1.9`/`§1.10`).
+3. Si el problema requiere un átomo/molécula/organismo que no existe todavía en `packages/ui`, dilo explícitamente (principio "component-first", `AGENTS.md §1.6`) — nunca asumas que se puede maquetar ad-hoc en la página; usa `/new-ui-component` primero.
+4. Aplica el reparto de estado de `AGENTS.md §1.5` sin excepciones: **TanStack Query** para cualquier dato que viva en `apps/api`; **Zustand** para estado de UI mutable con lógica de actualización; **Context** solo para valores semi-estáticos de configuración/DI en un subárbol (sesión, tema), nunca como sustituto de Zustand si acumula lógica. Nunca el mismo dato sincronizado en dos de las tres herramientas a la vez.
+
+Estructura la propuesta así:
+
+- **Propuesta**: el enfoque recomendado, concreto (qué vive dónde, qué se marca `"use client"`, qué componente de `packages/ui` se reutiliza o se crea).
+- **Por qué encaja**: cita la sección exacta de `AGENTS.md`/`ARCHITECTURE.md` o el archivo de precedente que justifica la elección.
+- **Alternativas descartadas**: qué otras opciones se consideraron y por qué se descartan — solo las que de verdad competían, no una lista exhaustiva.
+- **Preguntas abiertas para el usuario**: si queda una decisión genuinamente de diseño (paleta, micro-interacción, naming de dominio, alcance de una nueva variante visual) que no se deduce de una convención ya escrita, formúlala como pregunta concreta — nunca la decidas en silencio y la presentes como hecho. En este proyecto, frontend/design system es un área donde el usuario quiere pesar en la decisión, no solo aprobar el resultado.
 
 ## Patrones de componentes
 
