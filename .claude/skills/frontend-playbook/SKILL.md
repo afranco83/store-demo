@@ -1,11 +1,11 @@
 ---
-name: frontend-patterns
+name: frontend-playbook
 description: Recetario de patrones de implementación de React/Next.js (composición, hooks reutilizables, performance, formularios, animación, accesibilidad) y proceso de decisión de arquitectura (Server vs. Client, dónde vive el estado, qué componente de packages/ui reutilizar o crear) para un componente/feature no trivial. Usar al escribir código de UI no trivial, o antes de implementarlo si hay una decisión de patrón genuinamente abierta. AGENTS.md manda siempre sobre esta skill si algo la contradice.
 metadata:
-  origin: adaptado de affaan-m/ECC (github.com/affaan-m/ECC/blob/main/skills/frontend-patterns/SKILL.md), mismo origen ya citado en AGENTS.md §12 como fuente de §2. La sección "Decisiones de arquitectura" absorbe el agente frontend-architect (2026-07-10) — se fusionó porque su naturaleza consultiva/interactiva (preguntas abiertas al usuario) no se beneficiaba de aislar contexto en un subagente, a diferencia de test-reviewer/bug-hunter.
+  origin: adaptado de affaan-m/ECC (github.com/affaan-m/ECC/blob/main/skills/frontend-patterns/SKILL.md, originalmente "frontend-patterns"), mismo origen ya citado en AGENTS.md §12 como fuente de §2. La sección "Decisiones de arquitectura" absorbe el agente frontend-architect (2026-07-10) — se fusionó porque su naturaleza consultiva/interactiva (preguntas abiertas al usuario) no se beneficiaba de aislar contexto en un subagente, a diferencia de test-reviewer/bug-hunter. Renombrada de frontend-patterns a frontend-playbook (2026-07-10) tras la fusión: "patterns" ya no describía la mitad de proceso de decisión; "playbook" cubre repertorio de patrones + criterio de cuál aplicar, sin sonar al agente genérico de "desarrollo frontend" ya descartado explícitamente en CLAUDE.md.
 ---
 
-# Patrones de frontend
+# Playbook de frontend
 
 Esta skill cubre dos cosas relacionadas: un recetario de patrones de implementación de React/Next.js, y el proceso a seguir para decidir qué patrón aplicar en un caso concreto antes de implementarlo. Las convenciones obligatorias de este proyecto (reparto de estado, formularios, estilos, testing) viven en `AGENTS.md` y ganan siempre si algo de aquí las contradice.
 
