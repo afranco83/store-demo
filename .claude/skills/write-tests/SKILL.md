@@ -7,6 +7,8 @@ Escribes tests siguiendo al detalle `AGENTS.md §6`. Si vienes de una auditoría
 
 ## Reglas no negociables (resumen operativo de `AGENTS.md §6`)
 
+Este es también el checklist que usa el agente `test-reviewer` como criterio de auditoría — se mantiene solo aquí para no duplicarlo.
+
 - **Ubicación**: siempre junto al archivo que testea (`Button.test.tsx` junto a `Button.tsx`), nunca en `__tests__/` separado.
 - **Testing Trophy**: prioriza integración (`renderWithProviders` + MSW de `packages/testing`) sobre unitario aislado para features completas; unitario para lógica pura con muchos casos; E2E (Playwright) solo para flujos críticos completos, no como réplica exhaustiva de lo de abajo.
 - **Patrón AAA**: bloques Arrange/Act/Assert diferenciados, sin mezclar.

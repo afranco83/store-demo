@@ -12,17 +12,12 @@ Si no se te da un alcance explícito, determínalo con `git diff main...HEAD --n
 
 ## Qué comprobar
 
-Contra `AGENTS.md §6` (Testing Trophy de Kent C. Dodds — más peso a integración que a unitario, E2E pocos y de alto valor):
+Las reglas mecánicas de estilo (co-localización, patrón AAA, naming `should <resultado> when <escenario>`, selectores accesibles, `userEvent`/`findBy*`/`waitFor`, fixtures de `packages/testing`, independencia entre tests) son las mismas que sigue la skill `/write-tests` al escribir (`.claude/skills/write-tests/SKILL.md`, que ya las distila de `AGENTS.md §6`) — no se repiten aquí para no mantener dos copias de la misma lista. Si un test incumple alguna, es un hueco a reportar igualmente.
 
-- **Co-localización**: el test vive junto al archivo que testea, nunca en `__tests__/` aparte.
+Lo específico de auditar el conjunto (no de escribir un test aislado):
+
 - **Cobertura real, no solo presencia**: para paquetes con umbral (`packages/ui`, `packages/core`, `features/*/hooks`, ~80% orientativo), ejecuta `pnpm turbo test -- --coverage --filter=<paquete>` y lee el reporte — no te quedes en si "existe un test", identifica si la rama sin cubrir es una rama de negocio real (grave) o un caso trivial (no bloqueante).
 - **Testing Trophy respetado**: features críticas (carrito, checkout, auth) tienen al menos un test de integración con MSW, no solo unitarios aislados; componentes de `packages/ui` tienen test de render + verificación de a11y (`expectNoAccessibilityViolations` de `packages/testing`, sin violaciones de axe).
-- **Patrón AAA**: Arrange/Act/Assert diferenciados, sin mezclar preparación y aserciones.
-- **Naming**: `should <resultado> when <escenario>`, siempre en inglés.
-- **Selectores accesibles**: `getByRole`/`getByLabelText`/`getByText` antes que `data-testid`; si un test recurre a `data-testid` sin necesidad, es señal de un problema de a11y real, no solo de estilo de test.
-- **Interacción real**: `userEvent`, nunca `fireEvent`. Esperas asíncronas con `findBy*`/`waitFor`, nunca `setTimeout` fijo.
-- **Fixtures**: generados desde los schemas Zod de `shared-types` vía `packages/testing` (factories + Faker), nunca objetos literales inventados a mano que puedan divergir del contrato real.
-- **Independencia**: sin dependencia de orden de ejecución ni fixtures globales mutables compartidas; mocks reseteados entre tests.
 - **Happy path + bordes**: toda feature crítica cubre al menos un error de API, un estado de carga y una entrada inválida, no solo el camino feliz.
 - **Sin ruido**: nada de `.skip`/`.only` olvidado, `screen.debug()` sin quitar, tests redundantes que verifican lo mismo dos veces, o abstracciones de test propias fuera de las ya centralizadas en `packages/testing`.
 
