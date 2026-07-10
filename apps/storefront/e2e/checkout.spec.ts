@@ -35,9 +35,15 @@ async function addFirstInStockProductToCart(
   const card = page.getByRole("link", { name: product.name }).locator("xpath=..");
   await card.getByRole("button", { name: "Añadir al carrito" }).click();
   await expect(page.getByRole("dialog", { name: "Carrito" })).toBeVisible();
-  await page.keyboard.press("Escape");
 
   return product;
+}
+
+async function goToCheckoutFromCartDrawer(page: import("@playwright/test").Page) {
+  // Entrada real al checkout (no un `page.goto` directo): el botón vive
+  // dentro del drawer del carrito, ver CartDrawerContainer.tsx.
+  await page.getByRole("link", { name: "Finalizar compra" }).click();
+  await page.waitForURL("/checkout");
 }
 
 async function fillShippingStep(page: import("@playwright/test").Page) {
@@ -63,8 +69,8 @@ test("completes checkout end to end with a valid card and sees the order in the 
 }) => {
   await registerAndSignIn(page, "Cliente E2E Éxito");
   const product = await addFirstInStockProductToCart(page, request);
+  await goToCheckoutFromCartDrawer(page);
 
-  await page.goto("/checkout");
   await fillShippingStep(page);
   await fillPaymentStep(page, "4242424242424242");
   await page.getByRole("button", { name: "Continuar a revisión" }).click();
@@ -94,8 +100,8 @@ test("shows a decline error for the magic card and allows fixing it without losi
 }) => {
   await registerAndSignIn(page, "Cliente E2E Rechazo");
   await addFirstInStockProductToCart(page, request);
+  await goToCheckoutFromCartDrawer(page);
 
-  await page.goto("/checkout");
   await fillShippingStep(page);
   // Tarjeta "mágica" (ver payment.schema.ts): termina en el dígito que fuerza
   // un fallo simulado en el servidor.

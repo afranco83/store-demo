@@ -32,6 +32,34 @@ describe("CartDrawer", () => {
     expect(screen.getByText("59,98 €")).toBeInTheDocument();
   });
 
+  it("should render the checkout action when there are items", () => {
+    renderWithProviders(
+      <CartDrawer
+        isOpen
+        onClose={vi.fn()}
+        items={items}
+        subtotalCents={5998}
+        checkoutAction={<button type="button">Finalizar compra</button>}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: "Finalizar compra" })).toBeInTheDocument();
+  });
+
+  it("should not render the checkout action when the cart is empty", () => {
+    renderWithProviders(
+      <CartDrawer
+        isOpen
+        onClose={vi.fn()}
+        items={[]}
+        subtotalCents={0}
+        checkoutAction={<button type="button">Finalizar compra</button>}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "Finalizar compra" })).not.toBeInTheDocument();
+  });
+
   it("should render an empty state when there are no items", () => {
     renderWithProviders(<CartDrawer isOpen onClose={vi.fn()} items={[]} subtotalCents={0} />);
 

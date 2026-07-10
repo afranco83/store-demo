@@ -28,6 +28,22 @@ describe("CartDrawerContainer", () => {
     await waitFor(() => expect(screen.getByText(cartItem.product.name)).toBeInTheDocument());
   });
 
+  it("should link to /checkout and close the drawer when the checkout button is clicked", async () => {
+    const cartItem = createCartItemFixture({ quantity: 1 });
+    server.use(http.get("*/api/cart", () => HttpResponse.json({ data: [cartItem] })));
+
+    useCartDrawerStore.getState().open();
+    const { user } = renderWithProviders(<CartDrawerContainer />);
+
+    await waitFor(() => expect(screen.getByText(cartItem.product.name)).toBeInTheDocument());
+    const checkoutLink = screen.getByRole("link", { name: "Finalizar compra" });
+    expect(checkoutLink).toHaveAttribute("href", "/checkout");
+
+    await user.click(checkoutLink);
+
+    expect(useCartDrawerStore.getState().isOpen).toBe(false);
+  });
+
   it("should show an error message when the cart fails to load", async () => {
     server.use(
       http.get("*/api/cart", () =>
@@ -116,8 +132,7 @@ describe("CartDrawerContainer", () => {
         ).not.toBeDisabled(),
       { timeout: 8000 },
     );
-  }, // Timeout del test completo (no solo de cada waitFor individual): con
-  // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest
+  }, // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest // Timeout del test completo (no solo de cada waitFor individual): con
   // (5000ms para todo el test) revienta antes de que cualquiera de los dos
   // llegue a su propio límite — visto en CI (setup de 60s+ en ese run,
   // frente a ~1s en local), no reproducible en una máquina poco cargada.

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { CartDrawer, type CartDrawerItem } from "@store-demo/ui";
+import Link from "next/link";
+import { CartDrawer, type CartDrawerItem, buttonVariants, cn } from "@store-demo/ui";
 
 import { useCart } from "../hooks/use-cart";
 import { useRemoveCartItemMutation } from "../hooks/use-remove-cart-item-mutation";
@@ -92,6 +93,18 @@ export function CartDrawerContainer() {
       emptyStateTitle="Tu carrito está vacío"
       emptyStateDescription="Añade productos del catálogo para verlos aquí."
       subtotalLabel="Subtotal"
+      checkoutAction={
+        // `close()` explícito: CartDrawerContainer está montado en el layout
+        // raíz (visible en todas las páginas), así que sin cerrar el drawer
+        // aquí se quedaría abierto por encima de /checkout tras navegar.
+        <Link
+          href="/checkout"
+          onClick={close}
+          className={cn(buttonVariants(), "w-full justify-center")}
+        >
+          Finalizar compra
+        </Link>
+      }
     />
   );
 }

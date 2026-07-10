@@ -33,6 +33,7 @@ const meta = {
     onClose: fn(),
     items,
     subtotalCents: 7997,
+    checkoutAction: <Button className="w-full justify-center">Finalizar compra</Button>,
   },
 } satisfies Meta<typeof CartDrawer>;
 
