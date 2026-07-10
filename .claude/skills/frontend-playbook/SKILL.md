@@ -18,6 +18,8 @@ Esta skill cubre dos cosas relacionadas: un recetario de patrones de implementac
 - Trabajar con formularios (siempre React Hook Form + Zod en este proyecto, ver abajo)
 - Accesibilidad de patrones interactivos (dropdowns, modales, navegación por teclado)
 
+**No es scaffolding**: para crear la estructura de una feature nueva o un componente nuevo de `packages/ui`, usa `/new-feature`/`/new-ui-component` — esta skill entra después, para decidir/aplicar el patrón dentro de ese código ya scaffoldeado.
+
 ## Decisiones de arquitectura, antes de implementar
 
 Para un componente o feature no trivial, antes de escribir código: propón, no implementes directamente.
