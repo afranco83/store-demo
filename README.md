@@ -9,9 +9,20 @@ Monorepo demo que replica un stack y unas prácticas de ingeniería frontend pro
 
 Es una pieza de portfolio, no un producto con usuarios reales. El objetivo es demostrar, sobre un caso de uso concreto (una tienda online), decisiones y prácticas de un equipo de frontend profesional: arquitectura de monorepo, type safety end-to-end (Zod + TypeScript, del backend fake al componente), un design system con Storybook, testing en tres capas (unit/integración/E2E), accesibilidad WCAG 2.1 AA y un pipeline de CI/CD cuidado. El detalle completo está en [`docs/PROJECT_SPECIFICATION.md`](./docs/PROJECT_SPECIFICATION.md).
 
-**Estado actual: Fase 4 — Storefront: Catálogo & Carrito (cerrada en local, pendiente de PR).** `apps/storefront` tiene un flujo real end-to-end: catálogo con filtro por categoría, detalle de producto y carrito persistido contra `apps/api` (Zustand para el drawer, TanStack Query + Server Actions para los datos). `packages/ui` amplió su inventario con moléculas/organismos (ProductCard, PriceTag, QuantitySelector, EmptyState, ProductGrid, CartLineItem, Navbar, CartDrawer), documentados en `apps/storybook`; siguiente fase: Autenticación & Cuenta.
+**Estado actual: Fase 6 — Checkout cerrada en local, [PR #7](https://github.com/afranco83/store-demo/pull/7) pendiente de revisión.** `apps/storefront` cubre el flujo de compra completo: catálogo con filtro por categoría, carrito (invitado o con sesión, con fusión automática al loguearse), login/registro/cuenta con historial de pedidos, y un checkout de 3 pasos (envío → pago simulado → confirmación) que crea el pedido contra `apps/api`. `packages/ui` documenta en `apps/storybook` todo el inventario usado hasta ahora (átomos, `ProductCard`/`CartDrawer`/`UserMenu`/`WizardSteps`/`OrderSummaryCard`...). Siguiente fase: Admin (`apps/admin`).
 
 **Repositorio**: [github.com/afranco83/store-demo](https://github.com/afranco83/store-demo).
+
+## Qué puedes probar
+
+Con `apps/api` y `apps/storefront` levantados (ver "Cómo arrancar"):
+
+- **Catálogo**: `/products`, filtrado por categoría, detalle de producto.
+- **Carrito**: añade productos sin sesión (invitado) o logueado; se fusiona automáticamente al iniciar sesión.
+- **Cuenta**: `/register` / `/login`, edición de nombre/email, historial de pedidos en `/account/orders`.
+- **Checkout**: `/checkout` (o el botón "Finalizar compra" del carrito) — dirección de envío, pago simulado y confirmación. Cualquier tarjeta de 16 dígitos funciona salvo que termine en `1`, que fuerza un rechazo simulado a propósito para probar el camino de error.
+
+Usuarios demo ya seedeados (contraseña `Password123!`): `customer1@store-demo.test`, `customer2@store-demo.test`, `admin@store-demo.test` (rol admin, sin panel propio todavía).
 
 ## Stack tecnológico
 
@@ -42,16 +53,16 @@ Justificación de cada elección en [`docs/PROJECT_SPECIFICATION.md` §2](./docs
 pnpm install
 cp apps/api/.env.example apps/api/.env   # y rellena los valores reales
 # UNSPLASH_ACCESS_KEY: cuenta gratuita de developer en unsplash.com/developers (solo el Access Key, no el Secret Key)
+cp apps/storefront/.env.example apps/storefront/.env
+# AUTH_SECRET: cifra la cookie de sesión de Auth.js — genera uno con `npx auth secret` o `openssl rand -base64 32`
 
 pnpm --filter @store-demo/api exec prisma migrate dev
 pnpm --filter @store-demo/api exec prisma db seed
 
-pnpm turbo dev --filter=@store-demo/api        # backend fake en :4000
-pnpm turbo dev --filter=storefront              # storefront en :3000
-pnpm --filter @store-demo/storybook dev        # design system en :6006
+pnpm turbo dev --filter=@store-demo/api          # backend fake en :4000
+pnpm turbo dev --filter=@store-demo/storefront   # storefront en :3000
+pnpm --filter @store-demo/storybook dev          # design system en :6006
 ```
-
-`apps/storefront/.env.example` no hace falta copiarlo para arrancar en local: sus valores (`API_URL`, `DEMO_USER_EMAIL`/`DEMO_USER_PASSWORD`) ya tienen defaults seguros para el seed. Solo hace falta si se apunta a otra instancia de `apps/api` o a un usuario demo distinto.
 
 ## Cómo verificar
 
@@ -61,7 +72,7 @@ pnpm turbo test                        # solo tests unitarios/integración (Vite
 pnpm turbo test:e2e                    # specs E2E (Playwright)
 ```
 
-Cobertura actual: 100% en `packages/ui` (líneas/funciones/statements/ramas) y 100%/95.23% (líneas-funciones/ramas) en `packages/api-client` — detalle por fase en [`docs/ROADMAP.md`](./docs/ROADMAP.md).
+Cobertura de test exigida (`AGENTS.md §6`): ≥80% en `packages/ui`, `packages/api-client` y `features/**/{hooks,services,store,lib,schemas}` de cada app — en la práctica, la mayoría de paquetes está por encima del 95%. Cifras exactas y actualizadas por fase en [`docs/ROADMAP.md`](./docs/ROADMAP.md) (evita que este README quede desincronizado cada vez que cambian).
 
 ## Documentación
 
@@ -69,7 +80,7 @@ Cobertura actual: 100% en `packages/ui` (líneas/funciones/statements/ramas) y 1
 - [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — decisiones técnicas detalladas (backend fake, auth, design system, testing, CI/CD)
 - [`docs/ROADMAP.md`](./docs/ROADMAP.md) — fases, tareas y criterios de aceptación
 - [`AGENTS.md`](./AGENTS.md) — convenciones de código (válido para cualquier herramienta de codificación)
-- [`CLAUDE.md`](./CLAUDE.md) — contexto y agentes/skills planificados específicos de Claude Code
+- [`CLAUDE.md`](./CLAUDE.md) — contexto operativo del repo para Claude Code, incluidos los agentes/skills ya creados en `.claude/` (2 agentes + 7 skills)
 
 ## Autoría y licencia
 
