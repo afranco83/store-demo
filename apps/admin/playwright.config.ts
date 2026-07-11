@@ -32,7 +32,13 @@ export default defineConfig({
       command: "next start -p 3001",
       url: "http://localhost:3001/login",
       reuseExistingServer: !process.env.CI,
-      env: { API_URL: "http://localhost:4000" },
+      // ...process.env: la doc de Playwright dice literalmente "process.env
+      // by default" — pasar `env` sin el spread REEMPLAZA todo el entorno
+      // heredado en vez de añadirse a él, dejando este proceso sin
+      // AUTH_SECRET/DATABASE_URL/etc. En local nunca se notó porque Next.js
+      // carga su propio .env igualmente; en CI no hay .env y el login real
+      // fallaba con "MissingSecret" (Fase 8, primer run de test:e2e en CI).
+      env: { ...process.env, API_URL: "http://localhost:4000" },
       timeout: 60_000,
     },
   ],
