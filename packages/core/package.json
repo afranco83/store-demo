@@ -9,6 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@store-demo/shared-types": "workspace:*",
+    "@store-demo/ui": "workspace:*"
+  },
   "devDependencies": {
     "@store-demo/eslint-config": "workspace:*",
     "@store-demo/tsconfig": "workspace:*",

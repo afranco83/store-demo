@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  transpilePackages: [
+    "@store-demo/ui",
+    "@store-demo/shared-types",
+    "@store-demo/api-client",
+    "@store-demo/core",
+  ],
   images: {
     remotePatterns: [
       {

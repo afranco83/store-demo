@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { configDefaults, defineConfig } from "vitest/config";
 
@@ -6,6 +7,18 @@ export default defineConfig({
   // propia transformación); fuera del pipeline de Next, Vitest necesita su
   // propio plugin de React para transformar el JSX.
   plugins: [react()],
+  resolve: {
+    // tsconfig.json resuelve "@/*" para tsc/Next.js, pero Vite (el bundler
+    // real de Vitest) no lee automáticamente los `paths` de tsconfig — sin
+    // este alias, cualquier import "@/..." en un componente con test
+    // unitario falla en Vitest aunque tsc/el build de Next.js lo den por
+    // válido. Gap latente nunca ejercitado hasta ahora porque ningún
+    // componente testeado de esta app importaba vía "@/..." (solo lo hacían
+    // páginas Server Component, que no se testean unitariamente).
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
   test: {
     environment: "jsdom",
     // Los specs de Playwright (e2e/**) usan su propio test runner, no Vitest.

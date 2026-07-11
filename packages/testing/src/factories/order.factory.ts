@@ -23,6 +23,7 @@ export function createOrderFixture(overrides: Partial<Order> = {}): Order {
   return orderSchema.parse({
     id,
     userId: faker.string.uuid(),
+    userEmail: faker.internet.email(),
     status: "pending",
     shippingFullName: faker.person.fullName(),
     shippingAddressLine1: faker.location.streetAddress(),

@@ -4,6 +4,7 @@ import { jsonError, mapPrismaErrorToResponse } from "./api-response";
 import { InvalidAuthTokenError, verifyAuthToken } from "./jwt";
 
 export class UnauthorizedError extends Error {}
+export class ForbiddenError extends Error {}
 
 export type CartIdentity =
   { type: "user"; userId: string; role: UserRole } | { type: "guest"; guestId: string };
@@ -60,6 +61,24 @@ export async function requireUser(request: Request): Promise<{ userId: string; r
   return verifyBearerToken(token);
 }
 
+// Guard de administración (Fase 7): gestión de catálogo (products/categories)
+// nunca se confía al cliente/UI de apps/admin — se verifica siempre el rol
+// del token server-side, mismo criterio que requireUser con la identidad.
+export async function requireAdmin(request: Request): Promise<{ userId: string; role: UserRole }> {
+  const identity = await requireUser(request);
+  if (identity.role !== "admin") {
+    throw new ForbiddenError("Admin role required");
+  }
+  return identity;
+}
+
+// Cláusula `where` de alcance por propiedad: un admin ve/edita cualquier
+// pedido, un customer solo los suyos. Compartida por el listado y el detalle
+// de pedidos (antes duplicada en orders/[orderId]/route.ts).
+export function scopeByOwnership({ userId, role }: { userId: string; role: UserRole }) {
+  return role === "admin" ? {} : { userId };
+}
+
 // Construye la cláusula `where` de la clave única compuesta de CartItem
 // según el tipo de identidad — el mismo par (userId_productId /
 // guestId_productId) que necesitan GET/POST/PATCH/DELETE de cart.
@@ -76,6 +95,9 @@ export function cartItemUniqueWhere(identity: CartIdentity, productId: string) {
 export function handleAuthenticatedRouteError(error: unknown): Response {
   if (error instanceof UnauthorizedError) {
     return jsonError("Unauthorized", 401);
+  }
+  if (error instanceof ForbiddenError) {
+    return jsonError("Forbidden", 403);
   }
   return mapPrismaErrorToResponse(error);
 }
