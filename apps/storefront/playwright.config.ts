@@ -37,7 +37,12 @@ export default defineConfig({
       // AUTH_SECRET/DATABASE_URL/etc. En local nunca se notó porque Next.js
       // carga su propio .env igualmente; en CI no hay .env y el login real
       // fallaba con "MissingSecret" (Fase 8, primer run de test:e2e en CI).
-      env: { ...process.env, API_URL: "http://localhost:4000" },
+      // 127.0.0.1 explícito, no "localhost": Node/undici puede intentar
+      // IPv6 (::1) primero al resolver "localhost" en runners Linux, y si
+      // next dev no acepta esa ruta el fetch servidor-a-servidor se queda
+      // colgado en vez de fallar rápido — visto en CI (login real colgado
+      // en /api/auth/callback/credentials, nunca en local).
+      env: { ...process.env, API_URL: "http://127.0.0.1:4000" },
       timeout: 60_000,
     },
   ],
