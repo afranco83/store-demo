@@ -10,18 +10,21 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@store-demo/api-client": "workspace:*",
     "@store-demo/shared-types": "workspace:*",
     "@store-demo/ui": "workspace:*"
   },
   "devDependencies": {
     "@store-demo/eslint-config": "workspace:*",
     "@store-demo/tsconfig": "workspace:*",
+    "@types/node": "26.1.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "eslint": "9.39.4",
     "typescript": "6.0.3"
   },
   "peerDependencies": {
+    "next": "^16.0.0",
     "react": "^19.0.0"
   }
 }

@@ -1,20 +1,11 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { ApiClientError, getCategoryBySlug } from "@store-demo/api-client";
+import { getCategoryBySlug } from "@store-demo/api-client";
+import { fetchOrNotFound } from "@store-demo/core";
 import { Typography } from "@store-demo/ui";
 
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
 
 export const dynamic = "force-dynamic";
-
-async function fetchCategoryOrNotFound(slug: string) {
-  return getCategoryBySlug({ slug }).catch((error: unknown) => {
-    if (error instanceof ApiClientError && error.status === 404) {
-      notFound();
-    }
-    throw error;
-  });
-}
 
 export async function generateMetadata({
   params,
@@ -22,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = await fetchCategoryOrNotFound(slug);
+  const category = await fetchOrNotFound(getCategoryBySlug({ slug }));
 
   return { title: `Editar ${category.name}` };
 }
@@ -30,7 +21,7 @@ export async function generateMetadata({
 export default async function EditCategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const category = await fetchCategoryOrNotFound(slug);
+  const category = await fetchOrNotFound(getCategoryBySlug({ slug }));
 
   return (
     <main className="mx-auto flex max-w-xl flex-col gap-6 px-4 py-10">

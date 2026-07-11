@@ -1,21 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { notFound } from "next/navigation";
-import { ApiClientError } from "@store-demo/api-client";
+import { fetchOrNotFound } from "@store-demo/core";
 import { Badge, PriceTag, Typography } from "@store-demo/ui";
 
 import { getProductBySlug } from "@/features/products/api/products.api";
 import { AddToCartButton } from "@/features/products/components/AddToCartButton";
 import { getStockBadge } from "@/features/products/services/get-stock-badge";
-
-async function fetchProductOrNotFound(slug: string) {
-  return getProductBySlug({ slug }).catch((error: unknown) => {
-    if (error instanceof ApiClientError && error.status === 404) {
-      notFound();
-    }
-    throw error;
-  });
-}
 
 export async function generateMetadata({
   params,
@@ -26,7 +16,7 @@ export async function generateMetadata({
   // Mismo fetch que el componente de página — Next.js deduplica llamadas a
   // fetch idénticas dentro del mismo render (Request Memoization), así que
   // esto no duplica la petición de red real a apps/api.
-  const product = await fetchProductOrNotFound(slug);
+  const product = await fetchOrNotFound(getProductBySlug({ slug }));
 
   return {
     title: product.name,
@@ -37,7 +27,7 @@ export async function generateMetadata({
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const product = await fetchProductOrNotFound(slug);
+  const product = await fetchOrNotFound(getProductBySlug({ slug }));
 
   const stockBadge = getStockBadge(product.stock);
 

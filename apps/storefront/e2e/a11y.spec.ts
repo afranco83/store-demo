@@ -101,5 +101,19 @@ test.describe("private routes (customer session)", () => {
     // EmptyState de carrito vacío) antes de auditar la ruta.
     await expect(page.getByLabel("Nombre completo")).toBeVisible();
     await expectNoSeriousViolations(page);
+
+    // El paso "Envío" completado renderiza el círculo de WizardSteps con
+    // bg-accent-soft/text-accent (mismo token que el Badge "Pagado" cuyo
+    // contraste se corrigió en esta fase) — auditado aquí también, no solo
+    // en el paso inicial, para no dejar sin verificar el otro consumidor
+    // real del token.
+    await page.getByLabel("Nombre completo").fill("Cliente E2E");
+    await page.getByLabel("Dirección", { exact: true }).fill("Calle del Test 42");
+    await page.getByLabel("Ciudad").fill("Madrid");
+    await page.getByLabel("Código postal").fill("28080");
+    await page.getByLabel("País").fill("ES");
+    await page.getByRole("button", { name: "Continuar a pago" }).click();
+    await expect(page.getByLabel("Nombre del titular")).toBeVisible();
+    await expectNoSeriousViolations(page);
   });
 });

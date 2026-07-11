@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from "vitest";
 import { faker } from "@faker-js/faker";
+import { SignJWT } from "jose";
 
 import { signAuthToken } from "./jwt";
 import {
@@ -22,6 +23,12 @@ describe("guard", () => {
   let adminToken: string;
   let customerUserId: string;
   let adminUserId: string;
+  // Token con la forma real de un JWT (header.payload.signature), firmado
+  // con una clave distinta a AUTH_JWT_SECRET — a diferencia de un string que
+  // ni siquiera parsea como JWT, esto ejercita de verdad la rama de fallo de
+  // verificación de firma (InvalidAuthTokenError) que causó el bug real de
+  // autorización de la Fase 5 (ver docs/ROADMAP.md).
+  let tamperedToken: string;
 
   beforeAll(async () => {
     process.env.AUTH_JWT_SECRET = "test-secret";
@@ -29,6 +36,12 @@ describe("guard", () => {
     adminUserId = faker.string.uuid();
     customerToken = await signAuthToken({ userId: customerUserId, role: "customer" });
     adminToken = await signAuthToken({ userId: adminUserId, role: "admin" });
+    tamperedToken = await new SignJWT({ role: "admin" })
+      .setProtectedHeader({ alg: "HS256" })
+      .setSubject(adminUserId)
+      .setIssuedAt()
+      .setExpirationTime("7d")
+      .sign(new TextEncoder().encode("a-different-secret"));
   });
 
   describe("resolveCartIdentity", () => {
@@ -58,6 +71,24 @@ describe("guard", () => {
 
       await expect(resolveCartIdentity(request)).rejects.toThrow(UnauthorizedError);
     });
+
+    it("should resolve the user identity from the token when both a token and a guest id are present", async () => {
+      // Caso real: un carrito de invitado que se fusiona al iniciar sesión
+      // puede seguir mandando la cookie/header de invitado obsoleto junto al
+      // token nuevo — el token siempre gana, nunca se deriva del guestId si
+      // hay una sesión válida.
+      const guestId = faker.string.uuid();
+      const request = buildRequest({
+        authorization: `Bearer ${customerToken}`,
+        "x-guest-id": guestId,
+      });
+
+      await expect(resolveCartIdentity(request)).resolves.toEqual({
+        type: "user",
+        userId: customerUserId,
+        role: "customer",
+      });
+    });
   });
 
   describe("requireUser", () => {
@@ -73,6 +104,12 @@ describe("guard", () => {
     it("should throw UnauthorizedError when there is no bearer token", async () => {
       await expect(requireUser(buildRequest())).rejects.toThrow(UnauthorizedError);
     });
+
+    it("should throw UnauthorizedError, not an unwrapped error, for a well-formed token with an invalid signature", async () => {
+      const request = buildRequest({ authorization: `Bearer ${tamperedToken}` });
+
+      await expect(requireUser(request)).rejects.toThrow(UnauthorizedError);
+    });
   });
 
   describe("requireAdmin", () => {
@@ -86,6 +123,15 @@ describe("guard", () => {
       const request = buildRequest({ authorization: `Bearer ${customerToken}` });
 
       await expect(requireAdmin(request)).rejects.toThrow(ForbiddenError);
+    });
+
+    it("should throw UnauthorizedError, not ForbiddenError, for a well-formed token with an invalid signature", async () => {
+      // Regresión real de la Fase 5: un token manipulado/con firma inválida
+      // debe rechazarse como 401 (identidad no verificada), nunca colarse
+      // hasta el chequeo de rol y devolver 403 o, peor, un 500 sin envolver.
+      const request = buildRequest({ authorization: `Bearer ${tamperedToken}` });
+
+      await expect(requireAdmin(request)).rejects.toThrow(UnauthorizedError);
     });
   });
 

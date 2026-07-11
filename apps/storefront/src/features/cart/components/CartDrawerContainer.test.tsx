@@ -132,8 +132,10 @@ describe("CartDrawerContainer", () => {
         ).not.toBeDisabled(),
       { timeout: 8000 },
     );
-  }, // (5000ms para todo el test) revienta antes de que cualquiera de los dos // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest // Timeout del test completo (no solo de cada waitFor individual): con
-  // llegue a su propio límite — visto en CI (setup de 60s+ en ese run,
-  // frente a ~1s en local), no reproducible en una máquina poco cargada.
+  }, // Timeout del test completo (no solo de cada waitFor individual): con dos
+  // waitFor de 8000ms cada uno en el peor caso, el default de Vitest (5000ms
+  // para todo el test) revienta antes de que cualquiera de los dos llegue a
+  // su propio límite — visto en CI (setup de 60s+ en ese run, frente a ~1s
+  // en local), no reproducible en una máquina poco cargada.
   20000);
 });

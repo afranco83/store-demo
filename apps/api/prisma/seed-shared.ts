@@ -44,6 +44,29 @@ export function toSlug(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+// Campos deterministas de un producto (nombre/slug/descripción/precio/stock)
+// — idénticos entre seed.ts y seed-lighthouse.ts, a diferencia de cómo se
+// resuelve `imageUrl` (Unsplash+Cloudinary real vs. imagen de muestra fija),
+// que sí difiere en forma async y se queda en cada archivo.
+export function buildProductFields({
+  category,
+  index,
+}: {
+  category: (typeof CATEGORIES)[number];
+  index: number;
+}) {
+  const name = `${faker.commerce.productAdjective()} ${faker.commerce.productMaterial()} ${category.productNoun}`;
+  const slug = `${category.slug}-${toSlug(name)}-${index}`;
+
+  return {
+    name,
+    slug,
+    description: faker.commerce.productDescription(),
+    priceCents: faker.number.int({ min: 999, max: 29999 }),
+    stock: faker.number.int({ min: 0, max: 50 }),
+  };
+}
+
 export async function seedCategories() {
   const categories = [];
   for (const { slug, name, description } of CATEGORIES) {

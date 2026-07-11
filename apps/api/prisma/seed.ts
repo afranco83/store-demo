@@ -1,7 +1,8 @@
 import "dotenv/config";
 import {
+  buildProductFields,
   CATEGORIES,
-  faker,
+  DEMO_PASSWORD,
   PRODUCTS_PER_CATEGORY,
   prisma,
   SEED,
@@ -9,7 +10,7 @@ import {
   seedCategories,
   seedOrderForCustomerOne,
   seedUsers,
-  toSlug,
+  faker,
 } from "./seed-shared";
 
 // Catálogo enfocado en streetwear/apparel (no un e-commerce genérico): cada
@@ -91,27 +92,20 @@ async function seedProducts(categories: Awaited<ReturnType<typeof seedCategories
     });
 
     for (let index = 0; index < PRODUCTS_PER_CATEGORY; index += 1) {
-      const name = `${faker.commerce.productAdjective()} ${faker.commerce.productMaterial()} ${categoryConfig.productNoun}`;
-      const slug = `${category.slug}-${toSlug(name)}-${index}`;
+      const { name, slug, description, priceCents, stock } = buildProductFields({
+        category: categoryConfig,
+        index,
+      });
       const photoUrl = photoUrls[index];
       if (!photoUrl) {
         throw new Error(`Not enough Unsplash results for category "${category.slug}"`);
       }
       const imageUrl = await uploadImageToCloudinary({ slug, sourceUrl: photoUrl });
-      const description = faker.commerce.productDescription();
 
       products.push(
         await prisma.product.upsert({
           where: { slug },
-          create: {
-            slug,
-            name,
-            description,
-            priceCents: faker.number.int({ min: 999, max: 29999 }),
-            imageUrl,
-            stock: faker.number.int({ min: 0, max: 50 }),
-            categoryId: category.id,
-          },
+          create: { slug, name, description, priceCents, imageUrl, stock, categoryId: category.id },
           update: { name, description, imageUrl },
         }),
       );
@@ -132,7 +126,7 @@ async function main() {
 
   console.log(`Seeded ${categories.length} categories and ${products.length} products.`);
   console.log(
-    `Demo users (password: Password123!): admin@store-demo.test, customer1@store-demo.test, customer2@store-demo.test`,
+    `Demo users (password: ${DEMO_PASSWORD}): admin@store-demo.test, customer1@store-demo.test, customer2@store-demo.test`,
   );
 }
 

@@ -1,5 +1,6 @@
 import "dotenv/config";
 import {
+  buildProductFields,
   CATEGORIES,
   faker,
   PRODUCTS_PER_CATEGORY,
@@ -9,7 +10,6 @@ import {
   seedCategories,
   seedOrderForCustomerOne,
   seedUsers,
-  toSlug,
 } from "./seed-shared";
 
 // Variante ligera de seed.ts para el workflow de Lighthouse CI (Fase 8):
@@ -29,9 +29,10 @@ async function seedProducts(categories: Awaited<ReturnType<typeof seedCategories
     }
 
     for (let index = 0; index < PRODUCTS_PER_CATEGORY; index += 1) {
-      const name = `${faker.commerce.productAdjective()} ${faker.commerce.productMaterial()} ${categoryConfig.productNoun}`;
-      const slug = `${category.slug}-${toSlug(name)}-${index}`;
-      const description = faker.commerce.productDescription();
+      const { name, slug, description, priceCents, stock } = buildProductFields({
+        category: categoryConfig,
+        index,
+      });
 
       products.push(
         await prisma.product.upsert({
@@ -40,9 +41,9 @@ async function seedProducts(categories: Awaited<ReturnType<typeof seedCategories
             slug,
             name,
             description,
-            priceCents: faker.number.int({ min: 999, max: 29999 }),
+            priceCents,
             imageUrl: SAMPLE_IMAGE_URL,
-            stock: faker.number.int({ min: 0, max: 50 }),
+            stock,
             categoryId: category.id,
           },
           update: { name, description, imageUrl: SAMPLE_IMAGE_URL },
