@@ -50,7 +50,7 @@ describe("ProductsTable", () => {
 
     expect(screen.getByRole("cell", { name: "Classic Tee" })).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "Camisetas" })).toBeInTheDocument();
-    expect(screen.getByRole("cell", { name: "25.00 €" })).toBeInTheDocument();
+    expect(screen.getByText("25,00 €")).toBeInTheDocument();
     expect(screen.getByRole("cell", { name: "10" })).toBeInTheDocument();
   });
 

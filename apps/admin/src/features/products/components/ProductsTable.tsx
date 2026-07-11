@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ConfirmDialog,
+  PriceTag,
   Table,
   TableBody,
   TableCell,
@@ -15,13 +16,12 @@ import {
 import type { Category, Product } from "@store-demo/shared-types";
 
 import { deleteProductAction } from "../api/delete-product.action";
+import { rowActionLinkClassName, rowActionDangerClassName } from "@/lib/row-action-styles";
 
 export interface ProductsTableProps {
   products: Product[];
   categories: Category[];
 }
-
-const CENTS_PER_UNIT = 100;
 
 export function ProductsTable({ products, categories }: ProductsTableProps) {
   const router = useRouter();
@@ -66,19 +66,18 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
             <TableRow key={product.id}>
               <TableCell>{product.name}</TableCell>
               <TableCell>{categoryNameById.get(product.categoryId) ?? "—"}</TableCell>
-              <TableCell>{(product.priceCents / CENTS_PER_UNIT).toFixed(2)} €</TableCell>
+              <TableCell>
+                <PriceTag amountCents={product.priceCents} />
+              </TableCell>
               <TableCell>{product.stock}</TableCell>
               <TableCell>
                 <div className="flex gap-3">
-                  <Link
-                    href={`/products/${product.slug}/edit`}
-                    className="text-sm font-medium text-accent"
-                  >
+                  <Link href={`/products/${product.slug}/edit`} className={rowActionLinkClassName}>
                     Editar
                   </Link>
                   <button
                     type="button"
-                    className="text-sm font-medium text-red-600"
+                    className={rowActionDangerClassName}
                     onClick={() => {
                       setDeleteError(null);
                       setPendingDeleteSlug(product.slug);

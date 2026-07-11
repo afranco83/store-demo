@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   PriceTag,
   Select,
@@ -24,8 +23,15 @@ export interface OrdersTableProps {
 
 const orderDateFormatter = new Intl.DateTimeFormat("es-ES", { dateStyle: "long" });
 
-export function OrdersTable({ orders }: OrdersTableProps) {
-  const router = useRouter();
+export function OrdersTable({ orders: initialOrders }: OrdersTableProps) {
+  // Estado local, sembrado de la prop inicial: la Server Action ya
+  // revalida la ruta (revalidatePath) para la próxima navegación real, así
+  // que aquí basta con reflejar la respuesta confirmada del servidor sin
+  // pedir de nuevo la lista entera — evita tanto el reboteo visual del
+  // <select> (que antes leía la prop `order.status` sin cambiar durante la
+  // petición) como el refetch completo de router.refresh() para actualizar
+  // una sola fila.
+  const [orders, setOrders] = useState(initialOrders);
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [errorByOrderId, setErrorByOrderId] = useState<Record<string, string>>({});
   const [, startTransition] = useTransition();
@@ -44,7 +50,7 @@ export function OrdersTable({ orders }: OrdersTableProps) {
         setErrorByOrderId((current) => ({ ...current, [orderId]: result.error }));
         return;
       }
-      router.refresh();
+      setOrders((current) => current.map((order) => (order.id === orderId ? result.order : order)));
     });
   }
 

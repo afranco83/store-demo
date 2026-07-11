@@ -13,13 +13,6 @@ vi.mock("../api/update-order-status.action", () => ({
   updateOrderStatusAction: vi.fn(),
 }));
 
-const mockRefresh = vi.fn();
-vi.mock("next/navigation", () => ({
-  useRouter() {
-    return { refresh: mockRefresh };
-  },
-}));
-
 const mockedUpdateOrderStatusAction = vi.mocked(updateOrderStatusAction);
 
 const order = createOrderFixture({
@@ -54,14 +47,12 @@ describe("OrdersTable", () => {
     expect(screen.getByText("No hay pedidos todavía.")).toBeInTheDocument();
   });
 
-  it("should update the order status and refresh on change", async () => {
+  it("should update the order status in place once the server confirms it", async () => {
     mockedUpdateOrderStatusAction.mockResolvedValue({ order: { ...order, status: "shipped" } });
     const { user } = renderWithProviders(<OrdersTable orders={[order]} />);
 
-    await user.selectOptions(
-      screen.getByLabelText(`Estado del pedido de ${order.shippingFullName}`),
-      "shipped",
-    );
+    const statusSelect = screen.getByLabelText(`Estado del pedido de ${order.shippingFullName}`);
+    await user.selectOptions(statusSelect, "shipped");
 
     await waitFor(() =>
       expect(mockedUpdateOrderStatusAction).toHaveBeenCalledWith({
@@ -69,19 +60,36 @@ describe("OrdersTable", () => {
         status: "shipped",
       }),
     );
-    await waitFor(() => expect(mockRefresh).toHaveBeenCalledOnce());
+    await waitFor(() => expect(statusSelect).toHaveValue("shipped"));
+  });
+
+  it("should keep the previous status selected while the update is pending", async () => {
+    let resolveUpdate!: (result: Awaited<ReturnType<typeof updateOrderStatusAction>>) => void;
+    mockedUpdateOrderStatusAction.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpdate = resolve;
+      }),
+    );
+    const { user } = renderWithProviders(<OrdersTable orders={[order]} />);
+
+    const statusSelect = screen.getByLabelText(`Estado del pedido de ${order.shippingFullName}`);
+    await user.selectOptions(statusSelect, "shipped");
+
+    expect(statusSelect).toBeDisabled();
+
+    resolveUpdate({ order: { ...order, status: "shipped" } });
+    await waitFor(() => expect(statusSelect).not.toBeDisabled());
+    expect(statusSelect).toHaveValue("shipped");
   });
 
   it("should show a server error next to the row when the update fails", async () => {
     mockedUpdateOrderStatusAction.mockResolvedValue({ error: "No se pudo actualizar." });
     const { user } = renderWithProviders(<OrdersTable orders={[order]} />);
 
-    await user.selectOptions(
-      screen.getByLabelText(`Estado del pedido de ${order.shippingFullName}`),
-      "shipped",
-    );
+    const statusSelect = screen.getByLabelText(`Estado del pedido de ${order.shippingFullName}`);
+    await user.selectOptions(statusSelect, "shipped");
 
     expect(await screen.findByText("No se pudo actualizar.")).toBeInTheDocument();
-    expect(mockRefresh).not.toHaveBeenCalled();
+    expect(statusSelect).toHaveValue("pending");
   });
 });

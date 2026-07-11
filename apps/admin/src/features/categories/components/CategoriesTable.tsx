@@ -15,6 +15,7 @@ import {
 import type { Category } from "@store-demo/shared-types";
 
 import { deleteCategoryAction } from "../api/delete-category.action";
+import { rowActionLinkClassName, rowActionDangerClassName } from "@/lib/row-action-styles";
 
 export interface CategoriesTableProps {
   categories: Category[];
@@ -63,13 +64,13 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
                 <div className="flex gap-3">
                   <Link
                     href={`/categories/${category.slug}/edit`}
-                    className="text-sm font-medium text-accent"
+                    className={rowActionLinkClassName}
                   >
                     Editar
                   </Link>
                   <button
                     type="button"
-                    className="text-sm font-medium text-red-600"
+                    className={rowActionDangerClassName}
                     onClick={() => {
                       setDeleteError(null);
                       setPendingDeleteSlug(category.slug);
