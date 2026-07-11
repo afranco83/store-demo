@@ -14,6 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: "file:./dev.db"
+      # Solo para este run de CI (efímero, sin datos reales) — nunca se leen
+      # de un secreto real del repo porque no protegen nada: apps/storefront
+      # y apps/admin exigen igualmente su propio AUTH_SECRET para poder
+      # arrancar Auth.js, y apps/api el suyo para firmar/verificar el JWT
+      # propio (ver AUTH_JWT_SECRET en jwt.ts). Sin esto, el login real que
+      # ejercitan los specs E2E falla con "MissingSecret" en cuanto
+      # test:e2e se ejecuta de verdad en CI (nunca se había disparado antes
+      # porque test:e2e no corría en CI hasta esta fase).
+      AUTH_SECRET: "ci-e2e-test-secret-not-for-production"
+      AUTH_JWT_SECRET: "ci-e2e-test-secret-not-for-production"
     steps:
       - uses: actions/checkout@v4
 
