@@ -24,6 +24,13 @@ jobs:
       # porque test:e2e no corría en CI hasta esta fase).
       AUTH_SECRET: "ci-e2e-test-secret-not-for-production"
       AUTH_JWT_SECRET: "ci-e2e-test-secret-not-for-production"
+      # A nivel de job, no solo en el webServer.env de cada playwright.config.ts:
+      # `pnpm turbo lint typecheck test build` (más arriba en este mismo job)
+      # ya hace `next build` de storefront/admin ANTES de que exista ningún
+      # override de webServer — si Next.js hornea process.env.API_URL en ese
+      # build (con la variable todavía sin definir en ese punto), el override
+      # posterior en tiempo de arranque no tiene ningún efecto real.
+      API_URL: "http://127.0.0.1:4000"
     steps:
       - uses: actions/checkout@v4
 
