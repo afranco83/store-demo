@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { Typography } from "@store-demo/ui";
 import { logout } from "@store-demo/auth";
+
+export const metadata: Metadata = { title: "Sin permisos" };
 
 export default function ForbiddenPage() {
   return (

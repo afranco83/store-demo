@@ -2,7 +2,7 @@
   --color-accent: #c2410c;
   --color-accent-hover: #9a3412;
   --color-accent-foreground: #ffffff;
-  --color-accent-soft: rgb(194 65 12 / 10%);
+  --color-accent-soft: rgb(194 65 12 / 6%);
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -13,6 +13,12 @@
  * sube de opacidad porque, sobre una superficie oscura, un 10% del acento más
  * claro deja el texto por debajo de 4.5:1. Solo el acento tiene variante dark
  * hoy — el resto de la paleta (grises, semánticos) sigue siendo solo-claro.
+ *
+ * --color-accent-soft en claro bajó de 10% a 6% (Fase 8): un axe real sobre
+ * Badge (bg-accent-soft text-accent, ver packages/ui/src/atoms/Badge)
+ * midió 4.48:1 al 10% — la verificación manual de Fase 3 se quedó justo por
+ * debajo del 4.5:1 exigido. Al 6% el mismo par da >4.5:1 (verificado con el
+ * mismo spec E2E de axe, no solo cálculo a mano).
  */
 @media (prefers-color-scheme: dark) {
   :root {

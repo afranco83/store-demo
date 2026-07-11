@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 7 mergeada en `main` (PR #8, 2026-07-11)**; Fase 6 mergeada en `main` (PR #7); Fase 5 mergeada (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación. Fase 8 (Calidad Transversal), última fase del roadmap, es la siguiente pendiente.
+Estado actual: **Fase 8 (Calidad Transversal), última fase del roadmap, cerrada en local salvo demo pública (2026-07-11)** — las 5 tareas técnicas cumplidas, el despliegue de demo pública diferido explícitamente a una sesión posterior; Fase 7 mergeada en `main` (PR #8, 2026-07-11); Fase 6 mergeada en `main` (PR #7); Fase 5 mergeada (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -284,20 +284,44 @@ Verificado tras los 5 fixes con `pnpm turbo lint typecheck test build --force` e
 
 ---
 
-## Fase 8 — Calidad Transversal
+## Fase 8 — Calidad Transversal _(cerrada en local salvo demo pública — 2026-07-11)_
 
 **Objetivo**: cerrar las garantías de calidad que no se pueden validar app por app de forma aislada.
 
 Tareas:
 
-- [ ] Auditoría de accesibilidad completa (Playwright + axe) sobre todas las rutas de `storefront` y `admin`
-- [ ] Lighthouse CI integrado en el pipeline, presupuestos de Core Web Vitals afinados con datos reales
-- [ ] Revisión de cobertura de tests global (unit + integración + E2E) y cierre de huecos
-- [ ] Documentación avanzada: README por paquete/app, diagramas de arquitectura, decision records (ADR) si aplica
-- [ ] Revisión de bundle size (`@next/bundle-analyzer`) y code-splitting donde falte
-- [ ] Decisión y, si procede, despliegue de demo pública (Vercel)
+- [x] Auditoría de accesibilidad completa (Playwright + axe) sobre todas las rutas de `storefront` y `admin`
+- [x] Lighthouse CI integrado en el pipeline, presupuestos de Core Web Vitals afinados con datos reales
+- [x] Revisión de cobertura de tests global (unit + integración + E2E) y cierre de huecos
+- [x] Documentación avanzada: README por paquete/app, diagramas de arquitectura, decision records (ADR) si aplica
+- [x] Revisión de bundle size (analizador nativo de Turbopack) y code-splitting donde falte
+- [ ] Decisión y, si procede, despliegue de demo pública (Vercel) — **diferido explícitamente a una sesión posterior**, decisión tomada con el usuario al empezar la fase: se evaluará Vercel vs. GitHub Pages (gratuito) con más contexto una vez cerrado el resto
 
-**DoD**: pipelines de CI en verde con los presupuestos definitivos, 0 violaciones a11y serias/críticas en toda la app, documentación de cada paquete/app existente y actualizada.
+**DoD**: pipelines de CI en verde con los presupuestos definitivos (**cumplido** — `ci.yml` y `lighthouse.yml`), 0 violaciones a11y serias/críticas en toda la app (**cumplido** — 18 rutas auditadas, 3 violaciones reales encontradas y corregidas), documentación de cada paquete/app existente y actualizada (**cumplido** — 15 READMEs + 6 ADRs + 2 diagramas Mermaid). `pnpm turbo lint typecheck test build --force --concurrency=4` en verde en los 20 paquetes/apps del monorepo (39/39 tareas — sube de 36 por los 3 packages/apps que ganaron su primer test unitario); 41/41 specs E2E (21 storefront + 20 admin) y Lighthouse CI en verde contra servidores reales.
+
+**Decisión tomada con el usuario antes de implementar**: orden de trabajo el del propio ROADMAP (a11y → Lighthouse → cobertura → documentación → bundle → demo pública); despliegue de demo pública explícitamente diferido a la última tarea. Segunda decisión, ya en la tarea de documentación: los ADRs se adoptan con alcance retroactivo + futuro (se documentan formalmente ~6 decisiones ya tomadas en fases anteriores, no solo las que vengan a partir de ahora).
+
+**Notas técnicas no obvias de la Fase 8:**
+
+- **Ninguna página de `storefront` ni `admin` tenía `<title>`** (violación `document-title` de axe, severidad `serious`, en las 18 rutas): la Metadata API nunca se implementó pese a que `AGENTS.md §9` ya lo exigía desde que se escribió esa sección. Añadida en las dos apps (`metadata` en el layout raíz con `title.template`, `generateMetadata` en las rutas dinámicas `[slug]`).
+- **Dos bugs de contraste WCAG AA reales**, ambos verificados empíricamente con el spec de axe (no solo cálculo a mano, a diferencia de la verificación manual de Fase 3 que se quedó corta): los pasos futuros de `WizardSteps` (`text-gray-400`, 2.6:1) y el token `--color-accent-soft` en claro (10% de opacidad, 4.48:1 en el badge "Pagado" — justo por debajo del 4.5:1 exigido). Corregidos a `text-gray-500` y 6% de opacidad respectivamente.
+- **`apps/admin/playwright.config.ts` arrancaba su servidor E2E con `next start` sin `-p 3001`** (cae al puerto 3000 por defecto): solo "funcionaba" en local porque `apps/storefront` ya solía tener el 3000 ocupado, forzando el auto-incremento de puerto de Next.js. Nunca se detectó porque `ci.yml` no corría `test:e2e` (ver más abajo). Corregido a `next start -p 3001`.
+- **`ci.yml` nunca ejecutaba `test:e2e`**, pese a que `docs/ARCHITECTURE.md §7` decía que sí desde su redacción original — hueco real cerrado: migra+seedea `apps/api` (seed ligero, ver más abajo), instala Chromium y corre `turbo test:e2e --concurrency=1`. La concurrencia 1 es deliberada: `storefront` y `admin` gestionan cada una su propia instancia de `apps/api` vía `webServer` en el puerto 4000 fijo — en paralelo, la segunda en arrancar encuentra el puerto ya ocupado y falla (verificado localmente reproduciendo el fallo antes de fijar `--concurrency=1`).
+- **`apps/admin`'s umbral de cobertura llevaba pasando en vacío desde la Fase 7**: `vitest.config.ts` copió el `include` de `apps/storefront` (`hooks/services/store/lib/schemas`) sin ajustarlo — `admin` no tiene ninguna de esas carpetas (sin TanStack Query ni Zustand, ver `docs/adr/0005-admin-without-query-zustand.md`), así que el glob matcheaba 0 archivos y Vitest daba el umbral del 80% por cumplido sobre un conjunto vacío. Corregido a `features/**/components/**/*.tsx` (donde vive de verdad la lógica testeable de `admin`), cobertura real resultante 96-98%.
+- **Lighthouse CI, presupuestos afinados con datos reales**: CLS y TBT se mantuvieron igual que el valor inicial de `ARCHITECTURE.md` (ya cumplían sin margen que ajustar). LCP subió de 2.5s a 3.2s — el valor inicial no era alcanzable en local (sin CDN/edge caching delante de Cloudinary, preset móvil de Lighthouse por defecto); antes de subir el presupuesto se aplicaron dos fixes reales que bajaron el LCP medido de ~4-5s a ~2.7-3.5s: `ProductCard` (design system) cargaba en diferido incluso la imagen visible sin scroll (nuevo prop `priority`, aplicado solo a la primera card — aplicarlo a las 4 primeras empeoró el resultado, compite por ancho de banda con la propia imagen LCP), y las miniaturas de catálogo servían el original de Cloudinary sin redimensionar (~94KB) en vez de un tamaño acorde a su render real (~9KB vía transformación de URL de Cloudinary, `w_400,q_auto,f_auto`). De paso, la página de detalle de producto usaba `<img>` plano en vez de `next/image` (violación de `AGENTS.md §9`), corregida con `priority` en la imagen principal.
+- **Dataset de Lighthouse/E2E en CI sin depender de Unsplash/Cloudinary reales**: decisión tomada con el usuario — nuevo `prisma/seed-lighthouse.ts` (mismas categorías/usuarios/carrito/pedido que `seed.ts`, extraídos a `seed-shared.ts` para no duplicar, pero con una imagen de muestra pública de Cloudinary en vez de subir vía Unsplash). Evita provisionar 3 secretos nuevos en GitHub Actions solo para que el pipeline arranque, y hace el workflow determinista/rápido.
+- **`@lhci/cli` introdujo una segunda versión de `zod` en el árbol de dependencias** (`chromium-bidi`, transitiva de `lighthouse`/`puppeteer-core`, declara `zod@^3.25.0` como dependencia normal, no peer) — pnpm instaló ambas versiones en paralelo y `@hookform/resolvers`'s `zodResolver` empezó a resolver la incorrecta, rompiendo el build de TypeScript de `apps/storefront` con un error de tipos. Corregido con `overrides: { zod: "4.4.3" }` en `pnpm-workspace.yaml` (pnpm 11 ya no lee `package.json#pnpm`, movido a su nueva ubicación).
+- **`@next/bundle-analyzer` (basado en Webpack) es incompatible con los builds de Turbopack** de este proyecto — descubierto al intentar usarlo, no antes. Sustituido por el analizador nativo de Next 16 (`next experimental-analyze`, compatible con Turbopack), expuesto como `pnpm run analyze` en `storefront`/`admin`. Bundle real inspeccionado en ambas apps: sin chunk individual alarmante (~300KB el mayor, framework/vendor) — no se aplicó `dynamic()` a `CartDrawer`/`UserMenu`/`ConfirmDialog` (candidatos previstos en el plan) porque sus dependencias (Button, Typography, Icon) ya están cargadas por el resto de cada página, así que dividirlos no habría ahorrado peso real (YAGNI: sin evidencia de un problema, no se aplica la solución).
+- **`packages/eslint-config`'s `test.js` (testing-library + `@vitest/eslint-plugin`) solo estaba conectado en `packages/ui`/`packages/api-client`**, pese a que `AGENTS.md §6` lo exige para cualquier archivo `*.test.ts(x)` del repo — hueco real, cerrado en los 5 packages/apps que ganaron test nuevo esta fase (`apps/api`, `apps/admin`, `apps/storefront`, `packages/auth`, `packages/shared-types`). Al activarlo en `apps/storefront` salieron a la luz 13 violaciones preexistentes (`testing-library/prefer-find-by`, `render-result-naming-convention`, un falso positivo de `vitest/valid-expect` sobre `expect.any()`) en tests ya escritos en fases anteriores — corregidas todas.
+- **Cobertura nueva con lógica de dominio real, no solo infraestructura**: `apps/api/src/lib/guard.ts` (`requireUser`/`requireAdmin`/`resolveCartIdentity`/`scopeByOwnership`, con tokens JWT reales vía `signAuthToken`, no mocks) llevaba desde la Fase 5 sin ningún test directo, solo ejercitado indirectamente por E2E; `packages/shared-types`'s `calculateShippingCents` y `packages/auth`'s `ownHttpOnlyCookieOptions` (zona con historial de bugs reales en Fase 5) tampoco tenían test unitario propio. `packages/core` se revisó y se descartó explícitamente (mapeo estático sin ramas).
+- **Dos tests de UX nuevos en `admin`** (cancelar el diálogo de borrado en `CategoriesTable`/`ProductsTable`, hasta ahora sin cubrir) destaparon que `ConfirmDialog` se usaba sin `cancelLabel`, cayendo en el valor por defecto en inglés ("Cancel") en una UI en español — mismo tipo de bug de i18n ya encontrado una vez en Fase 7. Corregido (`cancelLabel="Cancelar"`).
+
+**Hallazgos evaluados y descartados explícitamente, no arreglados:**
+
+- **`CategoryForm`'s rama `description ?? undefined` y una línea de `OrdersTable`** quedaron con cobertura de rama incompleta tras el resto de fixes — revisadas y descartadas: la primera es una diferencia de forma de dato de bajo valor (`null` vs `undefined` en un campo opcional ya cubierto por su caso principal), la segunda parece un artefacto de instrumentación de v8 sobre un _state updater_ funcional dentro de una función ya cubierta por una aserción que solo puede pasar si esa línea se ejecutó.
+- **Rama defensiva inalcanzable en `apps/api/src/lib/guard.ts`** (`throw error` para un error que no sea `InvalidAuthTokenError` dentro de `verifyBearerToken`): `verifyAuthToken` (`jwt.ts`) envuelve siempre cualquier fallo en `InvalidAuthTokenError`, así que esa rama no es alcanzable con el código actual — no se fuerza un test sintético solo para cubrirla.
+
+Verificado tras las cinco tareas con `pnpm turbo lint typecheck test build --force --concurrency=4` en verde (39/39), 41/41 specs E2E (Playwright, Chromium real) y `lhci autorun` en verde contra `apps/api`+`apps/storefront` reales.
 
 ---
 

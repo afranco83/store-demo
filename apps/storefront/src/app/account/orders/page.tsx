@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Typography } from "@store-demo/ui";
 
 import { OrderHistorySection } from "@/features/orders/components/OrderHistorySection";
+
+export const metadata: Metadata = { title: "Mis pedidos" };
 
 export default function AccountOrdersPage() {
   return (

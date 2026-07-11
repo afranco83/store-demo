@@ -25,7 +25,7 @@ describe("CartDrawerContainer", () => {
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
 
-    await waitFor(() => expect(screen.getByText(cartItem.product.name)).toBeInTheDocument());
+    expect(await screen.findByText(cartItem.product.name)).toBeInTheDocument();
   });
 
   it("should link to /checkout and close the drawer when the checkout button is clicked", async () => {
@@ -35,7 +35,7 @@ describe("CartDrawerContainer", () => {
     useCartDrawerStore.getState().open();
     const { user } = renderWithProviders(<CartDrawerContainer />);
 
-    await waitFor(() => expect(screen.getByText(cartItem.product.name)).toBeInTheDocument());
+    expect(await screen.findByText(cartItem.product.name)).toBeInTheDocument();
     const checkoutLink = screen.getByRole("link", { name: "Finalizar compra" });
     expect(checkoutLink).toHaveAttribute("href", "/checkout");
 
@@ -54,7 +54,7 @@ describe("CartDrawerContainer", () => {
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
 
-    await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
   });
 
   it("should prevent decreasing an item's quantity below one", async () => {
@@ -64,7 +64,7 @@ describe("CartDrawerContainer", () => {
     useCartDrawerStore.getState().open();
     renderWithProviders(<CartDrawerContainer />);
 
-    await waitFor(() => expect(screen.getByText(cartItem.product.name)).toBeInTheDocument());
+    expect(await screen.findByText(cartItem.product.name)).toBeInTheDocument();
 
     expect(screen.getByRole("button", { name: "Reducir cantidad" })).toBeDisabled();
   });
@@ -98,7 +98,7 @@ describe("CartDrawerContainer", () => {
     useCartDrawerStore.getState().open();
     const { user } = renderWithProviders(<CartDrawerContainer />);
 
-    await waitFor(() => expect(screen.getByText(itemA.product.name)).toBeInTheDocument());
+    expect(await screen.findByText(itemA.product.name)).toBeInTheDocument();
 
     const [groupA, groupB] = screen.getAllByRole("group");
     if (!groupA || !groupB) {
@@ -132,8 +132,7 @@ describe("CartDrawerContainer", () => {
         ).not.toBeDisabled(),
       { timeout: 8000 },
     );
-  }, // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest // Timeout del test completo (no solo de cada waitFor individual): con
-  // (5000ms para todo el test) revienta antes de que cualquiera de los dos
+  }, // (5000ms para todo el test) revienta antes de que cualquiera de los dos // dos waitFor de 8000ms cada uno en el peor caso, el default de Vitest // Timeout del test completo (no solo de cada waitFor individual): con
   // llegue a su propio límite — visto en CI (setup de 60s+ en ese run,
   // frente a ~1s en local), no reproducible en una máquina poco cargada.
   20000);

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import {
   createCartItemFixture,
   createOrderFixture,
@@ -58,9 +58,7 @@ describe("ReviewStep", () => {
 
     renderWithProviders(<ReviewStep />);
 
-    await waitFor(() =>
-      expect(screen.getByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument(),
-    );
+    expect(await screen.findByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument();
     expect(screen.getByText("Cliente Uno")).toBeInTheDocument();
     expect(screen.getByText("•••• 4242")).toBeInTheDocument();
   });
@@ -74,9 +72,7 @@ describe("ReviewStep", () => {
 
     const { user } = renderWithProviders(<ReviewStep />);
 
-    await waitFor(() =>
-      expect(screen.getByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument(),
-    );
+    expect(await screen.findByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Confirmar pedido" }));
 
     expect(await screen.findByText("¡Gracias por tu pedido!")).toBeInTheDocument();
@@ -93,9 +89,7 @@ describe("ReviewStep", () => {
 
     const { user } = renderWithProviders(<ReviewStep />);
 
-    await waitFor(() =>
-      expect(screen.getByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument(),
-    );
+    expect(await screen.findByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Confirmar pedido" }));
 
     expect(
@@ -115,9 +109,7 @@ describe("ReviewStep", () => {
 
     const { user } = renderWithProviders(<ReviewStep />);
 
-    await waitFor(() =>
-      expect(screen.getByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument(),
-    );
+    expect(await screen.findByText(productLineMatcher(cartItem.product.name))).toBeInTheDocument();
     const editButtons = screen.getAllByRole("button", { name: "Editar" });
     await user.click(editButtons[0]!);
 

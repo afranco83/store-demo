@@ -29,7 +29,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: "next start",
+      command: "next start -p 3001",
       url: "http://localhost:3001/login",
       reuseExistingServer: !process.env.CI,
       env: { API_URL: "http://localhost:4000" },

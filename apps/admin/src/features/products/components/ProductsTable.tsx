@@ -101,6 +101,7 @@ export function ProductsTable({ products, categories }: ProductsTableProps) {
         title="¿Eliminar producto?"
         description="Esta acción no se puede deshacer."
         confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
         isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDeleteSlug(null)}

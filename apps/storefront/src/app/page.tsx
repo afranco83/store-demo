@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { Typography } from "@store-demo/ui";
 
 import { getProducts } from "@/features/products/api/products.api";
 import { ProductGridSection } from "@/features/products/components/ProductGridSection";
 
 const FEATURED_PRODUCTS_LIMIT = 8;
+
+export const metadata: Metadata = {
+  title: "Inicio",
+  description: "Streetwear con estilo: camisetas, gorras y zapatillas.",
+};
 
 // Sin esto, el `revalidate: 60` de getProducts() hace que Next intente
 // pre-renderizar esta página en build time — funciona en local porque

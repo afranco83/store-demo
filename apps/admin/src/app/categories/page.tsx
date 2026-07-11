@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Typography, buttonVariants } from "@store-demo/ui";
 import { getCategories } from "@store-demo/api-client";
@@ -5,6 +6,7 @@ import { getCategories } from "@store-demo/api-client";
 import { CategoriesTable } from "@/features/categories/components/CategoriesTable";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Categorías" };
 
 export default async function CategoriesPage() {
   const categories = await getCategories();

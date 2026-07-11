@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Button, Typography } from "@store-demo/ui";
 import { logout } from "@store-demo/auth";
 
 import { getProfileAction } from "@/features/account/api/get-profile.action";
 import { EditProfileForm } from "@/features/account/components/EditProfileForm";
+
+export const metadata: Metadata = { title: "Mi cuenta" };
 
 export default async function AccountPage() {
   const profile = await getProfileAction();

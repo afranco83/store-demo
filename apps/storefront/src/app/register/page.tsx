@@ -1,7 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Typography } from "@store-demo/ui";
 
 import { RegisterForm } from "@/features/auth/components/RegisterForm";
+
+export const metadata: Metadata = { title: "Crear cuenta" };
 
 export default function RegisterPage() {
   return (

@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Typography } from "@store-demo/ui";
 
 import { CategoryForm } from "@/features/categories/components/CategoryForm";
+
+export const metadata: Metadata = { title: "Nueva categoría" };
 
 export default function NewCategoryPage() {
   return (

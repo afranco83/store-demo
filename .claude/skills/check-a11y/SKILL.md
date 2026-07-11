@@ -1,21 +1,16 @@
 ---
 name: check-a11y
-description: Corre @axe-core/playwright contra una ruta real de apps/storefront (o admin cuando exista) y resume violaciones de accesibilidad. Complementa (no sustituye) las comprobaciones ya existentes a nivel de componente aislado. Usar antes de cerrar el DoD de accesibilidad de una fase, o para auditar una ruta concreta.
+description: Corre @axe-core/playwright contra una ruta real de apps/storefront o apps/admin y resume violaciones de accesibilidad. Complementa (no sustituye) las comprobaciones ya existentes a nivel de componente aislado. Usar antes de cerrar el DoD de accesibilidad de una fase, o para auditar una ruta concreta.
 ---
 
 Audita accesibilidad a nivel de **ruta real renderizada**, no de componente aislado — eso ya lo cubren `vitest-axe` (co-localizado en cada componente de `packages/ui`, vía `expectNoAccessibilityViolations` de `packages/testing`) y el addon a11y de Storybook (`AGENTS.md §8`). Esta skill detecta problemas que solo aparecen al componer varios componentes en una página real: landmarks duplicados, orden de foco roto entre organismos, jerarquía de encabezados incoherente entre secciones.
 
-## Estado real de la dependencia
-
-`@axe-core/playwright` **no está instalado todavía** en este repo (verificar con `grep axe apps/storefront/package.json`) — solo `vitest-axe` en `packages/testing`/`packages/ui`. La primera vez que se use esta skill:
-
-1. Añadir `@axe-core/playwright` como devDependency de `apps/storefront` (el paquete que ya tiene `playwright.config.ts` y `e2e/*.spec.ts`).
-2. Comprobar peso/mantenimiento de la dependencia antes de fijarla (`AGENTS.md §9`, "peso de dependencias").
+`@axe-core/playwright` ya está instalado como devDependency en `apps/storefront` y `apps/admin` (Fase 8: `apps/storefront/e2e/a11y.spec.ts` y `apps/admin/e2e/a11y.spec.ts` cubren ya todas las rutas de ambas apps como parte del gate normal — usa esta skill para auditar una ruta nueva que no esté ahí todavía, o para reproducir/depurar una violación puntual).
 
 ## Cómo correrlo
 
-1. Identifica la ruta a auditar (p. ej. `/`, `/products/[slug]`, `/cart`, `/account`) y si necesita sesión (usar `storageState` de Playwright si ya existe, `AGENTS.md §6`, en vez de repetir login).
-2. Escribe (o reutiliza si ya existe) un spec en `apps/storefront/e2e/` que navegue a la ruta y ejecute `new AxeBuilder({ page }).analyze()`.
+1. Identifica la ruta a auditar (p. ej. `/`, `/products/[slug]`, `/cart`, `/account`) y si necesita sesión (`apps/admin` reutiliza el `storageState` del proyecto `setup`, `AGENTS.md §6`; `apps/storefront` no tiene proyecto `setup` — login manual por test, ver `a11y.spec.ts`).
+2. Escribe (o reutiliza si ya existe) un spec en `apps/storefront/e2e/` o `apps/admin/e2e/` que navegue a la ruta y ejecute `new AxeBuilder({ page }).analyze()`.
 3. Ejecuta con Playwright real (Chromium), nunca contra un mock de la página.
 
 ## Cómo reportar

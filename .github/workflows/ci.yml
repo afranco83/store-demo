@@ -27,3 +27,19 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm turbo lint typecheck test build
+
+      - name: Set up the database for E2E (lightweight seed, no Unsplash/Cloudinary calls)
+        working-directory: apps/api
+        run: |
+          pnpm exec prisma migrate deploy
+          pnpm run db:seed:lighthouse
+
+      - name: Install Playwright browsers
+        working-directory: apps/storefront
+        run: pnpm exec playwright install --with-deps chromium
+
+      # --concurrency=1: apps/storefront y apps/admin gestionan cada una su
+      # propia instancia de apps/api vía webServer (playwright.config.ts,
+      # puerto 4000 fijo) — en paralelo, la segunda en arrancar encuentra el
+      # puerto ya ocupado y falla (reuseExistingServer es false en CI).
+      - run: pnpm turbo test:e2e --concurrency=1

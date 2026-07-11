@@ -16,6 +16,11 @@ export interface ProductCardProps {
   stockBadge?: { label: string; intent?: BadgeProps["intent"] };
   onAddToCart?: () => void;
   addToCartLabel?: string;
+  // Espejo del prop `priority` de next/image, sin depender de Next.js
+  // (packages/ui es ciego al framework, AGENTS.md §1.3): las cards visibles
+  // sin scroll (candidatas a LCP) lo marcan para no cargar su imagen en
+  // diferido, igual criterio que AGENTS.md §9 aplica a next/image.
+  priority?: boolean;
   className?: string;
   ref?: Ref<HTMLDivElement>;
 }
@@ -27,6 +32,7 @@ export function ProductCard({
   stockBadge,
   onAddToCart,
   addToCartLabel = "Add to cart",
+  priority = false,
   className,
   ref,
 }: ProductCardProps) {
@@ -36,7 +42,13 @@ export function ProductCard({
       className={cn("flex flex-col gap-3 rounded-lg border border-gray-200 p-3", className)}
     >
       <div className="relative aspect-square overflow-hidden rounded-md bg-gray-100">
-        <img src={imageUrl} alt={name} loading="lazy" className="size-full object-cover" />
+        <img
+          src={imageUrl}
+          alt={name}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : undefined}
+          className="size-full object-cover"
+        />
         {stockBadge ? (
           <Badge intent={stockBadge.intent} className="absolute top-2 right-2">
             {stockBadge.label}

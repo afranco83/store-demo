@@ -1,6 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
+overrides:
+  # Fase 8: chromium-bidi (dependencia transitiva de @lhci/cli/puppeteer-core,
+  # ver package.json de apps/storefront) trae su propia copia de zod@3.25.x,
+  # que sin este override pnpm resolvía de forma ambigua para
+  # @hookform/resolvers y rompía el build de TypeScript (zodResolver
+  # detectaba dos versiones de zod incompatibles). Todo el repo usa zod 4.
+  zod: 4.4.3
 allowBuilds:
   "@prisma/engines": true
   better-sqlite3: true

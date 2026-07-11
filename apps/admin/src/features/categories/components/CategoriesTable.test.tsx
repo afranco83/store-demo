@@ -60,6 +60,17 @@ describe("CategoriesTable", () => {
     await waitFor(() => expect(mockRefresh).toHaveBeenCalledOnce());
   });
 
+  it("should close the dialog without deleting when the cancel button is clicked", async () => {
+    const { user } = renderWithProviders(<CategoriesTable categories={[category]} />);
+
+    await user.click(screen.getByRole("button", { name: "Eliminar" }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Cancelar" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mockedDeleteCategoryAction).not.toHaveBeenCalled();
+  });
+
   it("should show the server error when deletion fails", async () => {
     mockedDeleteCategoryAction.mockResolvedValue({ error: "No se puede eliminar." });
     const { user } = renderWithProviders(<CategoriesTable categories={[category]} />);

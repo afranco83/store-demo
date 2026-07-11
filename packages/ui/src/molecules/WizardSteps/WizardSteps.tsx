@@ -49,7 +49,7 @@ export function WizardSteps({
                     "flex size-8 shrink-0 items-center justify-center rounded-full border text-sm font-medium",
                     isCurrent && "border-accent bg-accent text-accent-foreground",
                     isCompleted && "border-accent bg-accent-soft text-accent",
-                    !isCurrent && !isCompleted && "border-gray-200 text-gray-400",
+                    !isCurrent && !isCompleted && "border-gray-200 text-gray-500",
                   )}
                 >
                   {isCompleted ? (
@@ -63,7 +63,7 @@ export function WizardSteps({
                   className={cn(
                     "font-medium",
                     (isCurrent || isCompleted) && "text-gray-900",
-                    !isCurrent && !isCompleted && "text-gray-400",
+                    !isCurrent && !isCompleted && "text-gray-500",
                   )}
                 >
                   {step.label}

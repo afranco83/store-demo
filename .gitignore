@@ -22,6 +22,9 @@ playwright-report/
 test-results/
 **/playwright/.auth/
 
+# lighthouse ci
+.lighthouseci/
+
 # prisma
 *.db
 *.db-journal

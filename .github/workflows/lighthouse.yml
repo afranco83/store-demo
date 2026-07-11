@@ -1,0 +1,46 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: lighthouse-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "file:./dev.db"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Set up the database (lightweight seed, no Unsplash/Cloudinary calls)
+        working-directory: apps/api
+        run: |
+          pnpm exec prisma migrate deploy
+          pnpm run db:seed:lighthouse
+
+      - name: Start apps/api
+        working-directory: apps/api
+        run: |
+          pnpm dev &
+          npx wait-on http://localhost:4000/api/health --timeout 60000
+
+      - name: Build apps/storefront
+        run: pnpm turbo build --filter=@store-demo/storefront
+
+      - name: Run Lighthouse CI
+        working-directory: apps/storefront
+        run: pnpm exec lhci autorun
