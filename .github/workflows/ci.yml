@@ -24,12 +24,6 @@ jobs:
       # porque test:e2e no corría en CI hasta esta fase).
       AUTH_SECRET: "ci-e2e-test-secret-not-for-production"
       AUTH_JWT_SECRET: "ci-e2e-test-secret-not-for-production"
-      # A nivel de job, no solo en el webServer.env de cada playwright.config.ts:
-      # `pnpm turbo lint typecheck test build` (más arriba en este mismo job)
-      # ya hace `next build` de storefront/admin ANTES de que exista ningún
-      # override de webServer — si Next.js hornea process.env.API_URL en ese
-      # build (con la variable todavía sin definir en ese punto), el override
-      # posterior en tiempo de arranque no tiene ningún efecto real.
       API_URL: "http://127.0.0.1:4000"
     steps:
       - uses: actions/checkout@v4
@@ -59,4 +53,17 @@ jobs:
       # propia instancia de apps/api vía webServer (playwright.config.ts,
       # puerto 4000 fijo) — en paralelo, la segunda en arrancar encuentra el
       # puerto ya ocupado y falla (reuseExistingServer es false en CI).
-      - run: pnpm turbo test:e2e --concurrency=1
+      #
+      # --env-mode=loose: causa raíz real de varios intentos fallidos de
+      # esta misma fase — Turborepo 2.x filtra por defecto (env-mode strict)
+      # cualquier variable de entorno no declarada explícitamente en el
+      # `env` de la tarea en turbo.json. `test:e2e` no declara ninguna, así
+      # que DATABASE_URL/AUTH_SECRET/AUTH_JWT_SECRET/API_URL (definidas más
+      # arriba a nivel de job) se descartaban antes de llegar al proceso
+      # real de Playwright/Next.js, aunque `build` sí las recibía (declara
+      # "env": ["DATABASE_URL"]). Confirmado leyendo el log de un run real:
+      # apps/api arrancaba sin DATABASE_URL solo dentro de test:e2e, nunca
+      # en el build. loose (no declarar cada variable una a una en
+      # turbo.json) es el modo recomendado por Turborepo para E2E/tareas de
+      # integración, donde la pureza estricta de caché de build no aplica.
+      - run: pnpm turbo test:e2e --concurrency=1 --env-mode=loose

@@ -20,11 +20,6 @@ export const authConfig = {
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [],
-  // Diagnóstico temporal (Fase 8): el login real se cuelga en CI
-  // (GitHub Actions) en /api/auth/callback/credentials sin ningún error
-  // explícito — activa el log verboso interno de Auth.js solo en CI para
-  // ver en qué paso concreto se detiene, sin ruido en local/producción.
-  debug: process.env.CI === "true",
   // Auth.js v5 rechaza el Host header salvo que confíe en la plataforma
   // (Vercel, etc.) o se le diga explícitamente — self-hosted en localhost
   // (`next start`/E2E, y despliegues detrás de un proxy propio) necesita

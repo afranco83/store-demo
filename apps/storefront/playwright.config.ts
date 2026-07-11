@@ -35,13 +35,12 @@ export default defineConfig({
       // by default" — pasar `env` sin el spread REEMPLAZA todo el entorno
       // heredado en vez de añadirse a él, dejando este proceso sin
       // AUTH_SECRET/DATABASE_URL/etc. En local nunca se notó porque Next.js
-      // carga su propio .env igualmente; en CI no hay .env y el login real
-      // fallaba con "MissingSecret" (Fase 8, primer run de test:e2e en CI).
-      // 127.0.0.1 explícito, no "localhost": Node/undici puede intentar
-      // IPv6 (::1) primero al resolver "localhost" en runners Linux, y si
-      // next dev no acepta esa ruta el fetch servidor-a-servidor se queda
-      // colgado en vez de fallar rápido — visto en CI (login real colgado
-      // en /api/auth/callback/credentials, nunca en local).
+      // carga su propio .env igualmente; en CI no hay .env, así que esto
+      // era una capa real del problema — aunque no la única (ver
+      // --env-mode=loose en ci.yml para la causa raíz completa: Turborepo
+      // descartaba estas variables antes de que llegaran siquiera aquí).
+      // 127.0.0.1 explícito por si acaso, no "localhost" — no confirmado
+      // como necesario una vez arreglada la causa raíz, pero inofensivo.
       env: { ...process.env, API_URL: "http://127.0.0.1:4000" },
       timeout: 60_000,
     },
