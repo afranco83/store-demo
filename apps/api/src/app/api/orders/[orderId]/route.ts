@@ -3,7 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { jsonError, jsonSuccess, jsonZodError } from "@/lib/api-response";
 import { validateOutputInDev } from "@/lib/validate-output";
 import { toOrderDto } from "@/lib/mappers";
-import { handleAuthenticatedRouteError, requireUser, scopeByOwnership } from "@/lib/guard";
+import {
+  handleAuthenticatedRouteError,
+  requireAdmin,
+  requireUser,
+  scopeByOwnership,
+} from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
 
@@ -36,10 +41,12 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   try {
-    const { userId, role } = await requireUser(request);
-    const existingOrder = await prisma.order.findFirst({
-      where: { id: orderId, ...scopeByOwnership({ userId, role }) },
-    });
+    // Solo admin puede cambiar el estado de un pedido (Fase 7) — a
+    // diferencia de GET, aquí no basta con que el pedido sea del propio
+    // caller: cambiar el estado de fulfillment es una acción exclusiva de
+    // administración, nunca self-service del customer.
+    await requireAdmin(request);
+    const existingOrder = await prisma.order.findFirst({ where: { id: orderId } });
     if (!existingOrder) {
       return jsonError("Order not found", 404);
     }
