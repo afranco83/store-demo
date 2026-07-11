@@ -14,6 +14,55 @@
 - **Commits**: Conventional Commits, validados con `commitlint` + hook `commit-msg` de Husky. `lint-staged` corre ESLint + Prettier en pre-commit sobre el diff.
 - **Versionado interno**: Changesets para versionar `packages/*` de forma independiente y generar changelogs, aunque no se publiquen a npm (uso interno para practicar el flujo).
 
+### 1.1 Dependencias entre apps y packages
+
+```mermaid
+graph LR
+  subgraph apps
+    storefront[apps/storefront]
+    admin[apps/admin]
+    api[apps/api]
+    storybook[apps/storybook]
+  end
+
+  subgraph packages
+    ui[packages/ui]
+    auth[packages/auth]
+    apiClient[packages/api-client]
+    sharedTypes[packages/shared-types]
+    core[packages/core]
+    designTokens[packages/design-tokens]
+    tailwindConfig[packages/tailwind-config]
+  end
+
+  storefront --> ui
+  storefront --> auth
+  storefront --> apiClient
+  storefront --> core
+  storefront --> sharedTypes
+  storefront --> designTokens
+  storefront --> tailwindConfig
+
+  admin --> ui
+  admin --> auth
+  admin --> apiClient
+  admin --> core
+  admin --> sharedTypes
+  admin --> designTokens
+  admin --> tailwindConfig
+
+  storybook --> ui
+  storybook --> designTokens
+  storybook --> tailwindConfig
+
+  auth --> apiClient
+  auth --> sharedTypes
+  apiClient --> sharedTypes
+  api --> sharedTypes
+```
+
+`packages/ui` es una hoja del grafo (no depende de ningún otro paquete interno, ver §2.2) — `apps/storefront`/`apps/admin` hacen fetch HTTP real a `apps/api` (proceso Next.js independiente, no una dependencia de build) vía `packages/api-client`, nunca lo importan como paquete.
+
 ## 2. Design System
 
 **No hay diseños previos en Figma.** El design system se construye de forma iterativa, a la par que se necesita para cada página; Storybook es el registro visual vivo del proyecto, no un catálogo pre-diseñado. Esto tiene una consecuencia directa de flujo de trabajo (ver §2.3).
@@ -78,6 +127,37 @@ Las features consumen `api-client` desde sus hooks de TanStack Query (`features/
 
 ## 4. Autenticación (`packages/auth`) _(implementado en Fase 5)_
 
+### 4.1 Los dos JWT independientes
+
+El punto que más cuesta seguir solo en prosa: hay **dos** JWT distintos, con secretos distintos, que nunca se mezclan.
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant SF as apps/storefront
+    participant AJS as Auth.js (packages/auth)
+    participant API as apps/api
+
+    U->>SF: envía el formulario de login
+    SF->>AJS: authorize(credentials)
+    AJS->>API: POST /api/auth/login
+    API-->>AJS: JWT propio (signAuthToken, AUTH_JWT_SECRET)
+    AJS-->>SF: cookie de sesión de Auth.js (AUTH_SECRET, cifrada)
+    AJS-->>SF: cookie httpOnly "api_token" (el JWT de apps/api, aparte)
+
+    Note over SF,API: Petición posterior a una ruta protegida
+
+    U->>SF: navega a /account
+    SF->>AJS: middleware — ¿hay sesión de Auth.js?
+    AJS-->>SF: sí → continúa
+    SF->>SF: Server Action lee "api_token" (getApiToken())
+    SF->>API: GET /api/users/me (Authorization: Bearer <api_token>)
+    API->>API: verifyAuthToken() — guard propio, independiente del middleware
+    API-->>SF: datos del usuario
+```
+
+`api_token` **nunca** pasa por el callback `session()` de Auth.js ni llega a `useSession()`/al cliente — solo se lee server-side. Esto es lo que permite que `apps/api` (un proceso Next.js totalmente independiente, en otro origen) verifique la identidad por su cuenta, sin confiar en el guard de middleware de `apps/storefront`/`apps/admin` (defensa en profundidad, `AGENTS.md §10`).
+
 - **Auth.js (NextAuth) v5**, Credentials Provider contra `apps/api` (`POST /api/auth/login`). `authorize()` llama a `login()` de `api-client`; si las credenciales son válidas, el `token` que ya emite `apps/api` (`signAuthToken`) se guarda en su **propia cookie httpOnly** (`api_token`, `packages/auth/src/cookies.ts`) — deliberadamente **no** viaja dentro del JWT cifrado que gestiona Auth.js ni se expone en el objeto `session()`, así que nunca llega a `useSession()`/al cliente. `getApiToken()` (server-only) es el único punto de lectura para Server Actions que necesitan llamar a `apps/api` en nombre del usuario.
 - Estrategia de sesión: JWT (sin sesión en base de datos). `JWT_EXPIRATION` de `apps/api` es de **7 días** (no 30, como se decidió inicialmente — ajustado en una revisión de código posterior) porque no hay revocación/blacklist de tokens: es la única forma de acotar la ventana de exposición de un token filtrado o usado tras logout. Para que un usuario activo no note esa ventana corta, `getApiToken()` (`packages/auth/src/get-api-token.ts`) desliza el `maxAge` de la cookie `api_token` en cada lectura — igual que el `updateAge` con el que Auth.js renueva su propia sesión — así que ambas cookies quedan alineadas sin compartir secreto ni tener que refrescar el JWT de Auth.js. **Matiz real, no solo teórico**: `cookies().set()` de `next/headers` solo funciona dentro de una Server Action invocada de verdad (formulario o llamada desde un Client Component) o un Route Handler, nunca durante el render de un Server Component — una Server Action de solo lectura llamada directamente desde un Server Component (p. ej. `getOrdersAction` desde `OrderHistorySection`) sigue siendo "render", no una invocación de acción. El intento de deslizar la cookie en ese camino se envuelve en un `try/catch` que falla en silencio (`get-api-token.ts`); se detectó en pruebas manuales, no en tests (jsdom no reproduce esta restricción de Next).
 - Roles: `customer` y `admin`, incluidos en el JWT firmado por `apps/api` y en el `session.user.role` que expone Auth.js.
@@ -110,7 +190,7 @@ Señal de alarma: un Context que empieza a acumular múltiples acciones de actua
 - **Integración** (Vitest + Testing Library + MSW): una feature completa montada con sus providers reales (`packages/testing` expone un `renderWithProviders` que envuelve QueryClientProvider, tema, etc.), interceptando red con MSW.
 - **E2E** (Playwright): flujos de usuario end-to-end contra `apps/api` real. Mínimo: navegación de catálogo → añadir al carrito → checkout completo (storefront), login → CRUD de producto (admin).
 - **Accesibilidad**: `@axe-core/playwright` en los mismos specs E2E críticos + addon a11y de Storybook en cada historia de `packages/ui`. Objetivo: 0 violaciones "serias" o "críticas" de axe en las rutas principales.
-- **Performance**: Lighthouse CI en GitHub Actions sobre `storefront` (build de producción), con presupuestos iniciales: LCP < 2.5s, CLS < 0.1, INP < 200ms, TBT < 200ms. Los presupuestos se afinan en Fase 8.
+- **Performance**: Lighthouse CI (`.github/workflows/lighthouse.yml`, `apps/storefront/lighthouserc.cjs`) sobre `storefront` (build de producción, preset móvil por defecto de Lighthouse) en `/`, `/products` y `/products/[slug]`. Presupuestos afinados con datos reales en Fase 8: CLS < 0.1 y TBT < 200ms se mantuvieron tal cual (ya cumplían sin margen que ajustar); LCP subió de 2.5s a 3.2s — el valor inicial no era alcanzable en un entorno local sin CDN/edge caching delante de Cloudinary, se revisa a la baja si la demo pública (última tarea de Fase 8) despliega con CDN real. INP no se audita (Lighthouse no la mide de forma fiable en una página sin interacción real de usuario, es una métrica de campo); TBT actúa de proxy de laboratorio. El dataset del workflow se seedea con `apps/api/prisma/seed-lighthouse.ts` (misma estructura que el seed real, pero con una imagen de muestra pública de Cloudinary en vez de subir vía Unsplash) para no depender de secretos externos ni de su cuota en cada run de CI.
 
 `packages/testing` centraliza: `renderWithProviders`, setup de servidor MSW (`setupServer`), factories de datos de dominio (usando los mismos schemas Zod de `shared-types` para generar fixtures válidas por construcción, con valores realistas generados por `@faker-js/faker` en vez de placeholders repetidos — ver `AGENTS.md` §6).
 
@@ -118,8 +198,8 @@ Señal de alarma: un Context que empieza a acumular múltiples acciones de actua
 
 Workflows mínimos:
 
-- `ci.yml`: en cada PR — install (con cache de pnpm), `turbo lint typecheck test build` en paralelo vía Turborepo, y `test:e2e` (Playwright) contra un build de preview.
-- `lighthouse.yml`: tras build de `storefront`, corre Lighthouse CI y falla si se rompe un presupuesto.
+- `ci.yml`: en cada PR — install (con cache de pnpm), `turbo lint typecheck test build` en paralelo vía Turborepo, luego migra+seedea `apps/api` (dataset ligero, ver §6) e instala los navegadores de Playwright, y corre `turbo test:e2e --concurrency=1` (serializado a propósito: `storefront` y `admin` gestionan cada una su propia instancia de `apps/api` vía `webServer`, puerto 4000 fijo — en paralelo la segunda encuentra el puerto ya ocupado). Fase 8 cerró el hueco real de que `test:e2e` nunca se ejecutaba en CI.
+- `lighthouse.yml`: migra y seedea `apps/api` (dataset ligero, ver §6), levanta `apps/api`, hace build de `storefront` y corre Lighthouse CI — falla si se rompe un presupuesto.
 - `changesets.yml` (opcional, Fase 8): automatiza el versionado de paquetes al mergear a la rama principal.
 
 No hay despliegue real a producción (no hay "producción"); como mucho, un despliegue de demo a Vercel para poder enlazar el proyecto desde GitHub/CV — a decidir en Fase 8.

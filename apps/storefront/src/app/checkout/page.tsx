@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import { Typography } from "@store-demo/ui";
 
 import { CheckoutWizard } from "@/features/checkout/components/CheckoutWizard";
+
+export const metadata: Metadata = { title: "Finalizar compra" };
 
 export default function CheckoutPage() {
   return (

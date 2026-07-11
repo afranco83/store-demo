@@ -7,13 +7,16 @@
   "types": "./src/index.ts",
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage"
   },
   "devDependencies": {
     "@store-demo/eslint-config": "workspace:*",
     "@store-demo/tsconfig": "workspace:*",
+    "@vitest/coverage-v8": "4.1.10",
     "eslint": "9.39.4",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
   },
   "dependencies": {
     "zod": "4.4.3"

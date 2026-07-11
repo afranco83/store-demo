@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
+
 import { getCategories } from "@/features/products/api/categories.api";
 import { getProducts } from "@/features/products/api/products.api";
 import { CategoryFilterNav } from "@/features/products/components/CategoryFilterNav";
 import { ProductGridSection } from "@/features/products/components/ProductGridSection";
 import { productsSearchParamsSchema } from "@/features/products/schemas/products-search-params.schema";
+
+export const metadata: Metadata = {
+  title: "Catálogo",
+  description: "Explora el catálogo completo de camisetas, gorras y zapatillas.",
+};
 
 export default async function ProductsPage({
   searchParams,

@@ -1,4 +1,11 @@
 {
   "extends": "@store-demo/tsconfig/react-library.json",
+  "compilerOptions": {
+    // fetch-or-not-found.ts importa @store-demo/api-client, cuyo tsconfig
+    // propio (types: ["node"]) no aplica aquí — tsc resuelve su fuente TS
+    // cruda como parte de esta compilación (mismo patrón "types": "./src"
+    // de todo el monorepo) y necesita "process" (config.ts) disponible.
+    "types": ["node"]
+  },
   "include": ["src"]
 }

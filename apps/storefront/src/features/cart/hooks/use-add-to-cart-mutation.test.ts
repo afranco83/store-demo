@@ -17,14 +17,14 @@ describe("useAddToCartMutation", () => {
     const queryClient = createTestQueryClient();
     const wrapper = createQueryWrapper(queryClient);
 
-    const cart = renderHook(() => useCart(), { wrapper });
-    await waitFor(() => expect(cart.result.current.isSuccess).toBe(true));
+    const { result: cartResult } = renderHook(() => useCart(), { wrapper });
+    await waitFor(() => expect(cartResult.current.isSuccess).toBe(true));
 
-    const mutation = renderHook(() => useAddToCartMutation(), { wrapper });
-    mutation.result.current.mutate({ productId: "product-1", quantity: 1 });
+    const { result: mutationResult } = renderHook(() => useAddToCartMutation(), { wrapper });
+    mutationResult.current.mutate({ productId: "product-1", quantity: 1 });
 
-    await waitFor(() => expect(mutation.result.current.isSuccess).toBe(true));
-    expect(queryClient.getQueryData(cartQueryKey)).toEqual(mutation.result.current.data);
+    await waitFor(() => expect(mutationResult.current.isSuccess).toBe(true));
+    expect(queryClient.getQueryData(cartQueryKey)).toEqual(mutationResult.current.data);
   });
 
   it("should add to the existing quantity already in the cart instead of overwriting it", async () => {

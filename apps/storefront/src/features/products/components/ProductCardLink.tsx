@@ -6,9 +6,18 @@ import type { Product } from "@store-demo/shared-types";
 
 import { useAddToCartMutation } from "../../cart/hooks/use-add-to-cart-mutation";
 import { useCartDrawerStore } from "../../cart/store/use-cart-drawer-store";
+import { buildCloudinaryThumbnailUrl } from "../services/build-cloudinary-thumbnail-url";
 import { getStockBadge } from "../services/get-stock-badge";
 
-export function ProductCardLink({ product }: { product: Product }) {
+const THUMBNAIL_WIDTH_PX = 480;
+
+export function ProductCardLink({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  priority?: boolean;
+}) {
   const addToCartMutation = useAddToCartMutation();
   const openCartDrawer = useCartDrawerStore((state) => state.open);
 
@@ -28,10 +37,11 @@ export function ProductCardLink({ product }: { product: Product }) {
       />
       <ProductCard
         name={product.name}
-        imageUrl={product.imageUrl}
+        imageUrl={buildCloudinaryThumbnailUrl(product.imageUrl, THUMBNAIL_WIDTH_PX)}
         priceCents={product.priceCents}
         stockBadge={getStockBadge(product.stock)}
         addToCartLabel="Añadir al carrito"
+        priority={priority}
         onAddToCart={
           product.stock > 0
             ? () =>

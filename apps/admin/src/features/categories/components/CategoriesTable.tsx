@@ -94,6 +94,7 @@ export function CategoriesTable({ categories }: CategoriesTableProps) {
         title="¿Eliminar categoría?"
         description="Esta acción no se puede deshacer."
         confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
         isConfirming={isDeleting}
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDeleteSlug(null)}

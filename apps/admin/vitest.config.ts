@@ -28,20 +28,20 @@ export default defineConfig({
     ],
     coverage: {
       provider: "v8",
-      // AGENTS.md §6: el umbral de cobertura aplica a hooks/servicios de
-      // dominio, no a componentes de composición Server/Client (esos se
-      // validan por integración/E2E, no por cobertura unitaria exhaustiva).
-      // Igual que en apps/storefront, las Server Actions de `features/**/api`
-      // quedan fuera de este umbral: envuelven signIn()/redirect()/cookies(),
-      // se validan mockeadas desde el componente (ver LoginForm.test.tsx) y
-      // de extremo a extremo en los specs E2E, no por cobertura unitaria.
-      include: [
-        "src/features/**/hooks/**/*.ts",
-        "src/features/**/services/**/*.ts",
-        "src/features/**/store/**/*.ts",
-        "src/features/**/lib/**/*.ts",
-        "src/features/**/schemas/**/*.ts",
-      ],
+      // A diferencia de apps/storefront, apps/admin no tiene carpetas
+      // hooks/services/store/lib/schemas (sin TanStack Query ni Zustand,
+      // ver docs/adr/0005-admin-without-query-zustand.md) — su lógica
+      // testeable en aislado vive en los Client Components de
+      // features/**/components (formularios RHF+Zod, tablas con acciones),
+      // ya cubiertos por test de integración real (renderWithProviders +
+      // userEvent). Antes de Fase 8 este include apuntaba a las carpetas de
+      // apps/storefront por error de copia — el umbral llevaba pasando en
+      // vacío (0/0 archivos) desde la Fase 7 sin comprobar nada de verdad.
+      // Las Server Actions de `features/**/api` siguen fuera del umbral:
+      // envuelven signIn()/redirect()/cookies(), se validan mockeadas desde
+      // el componente (ver LoginForm.test.tsx) y de extremo a extremo en los
+      // specs E2E, no por cobertura unitaria.
+      include: ["src/features/**/components/**/*.tsx"],
       exclude: ["src/**/*.stories.tsx", "src/**/*.test.{ts,tsx}"],
       thresholds: {
         lines: 80,

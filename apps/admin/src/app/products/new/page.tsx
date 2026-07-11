@@ -1,9 +1,11 @@
+import type { Metadata } from "next";
 import { Typography } from "@store-demo/ui";
 import { getCategories } from "@store-demo/api-client";
 
 import { ProductForm } from "@/features/products/components/ProductForm";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Nuevo producto" };
 
 export default async function NewProductPage() {
   const categories = await getCategories();

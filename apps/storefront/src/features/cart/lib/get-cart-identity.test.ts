@@ -27,6 +27,9 @@ describe("getCartIdentity", () => {
   it("should create and persist a new guest id when there is neither session nor guest cookie", async () => {
     const identity = await getCartIdentity();
 
+    // expect.any(String) es un asymmetric matcher válido de Vitest; la regla
+    // vitest/valid-expect lo confunde con un modificador desconocido.
+    // eslint-disable-next-line vitest/valid-expect
     expect(identity).toEqual({ guestId: expect.any(String) });
 
     const cookieStore = await cookies();

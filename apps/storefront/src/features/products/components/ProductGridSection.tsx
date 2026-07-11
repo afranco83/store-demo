@@ -17,8 +17,12 @@ export function ProductGridSection({ products }: { products: Product[] }) {
 
   return (
     <ProductGrid>
-      {products.map((product) => (
-        <ProductCardLink key={product.id} product={product} />
+      {products.map((product, index) => (
+        // Solo la primera card (candidata real a LCP) se marca priority —
+        // medido con Lighthouse (Fase 8): marcar varias con fetchPriority
+        // "high" a la vez compite por ancho de banda con la propia imagen
+        // LCP y empeora el resultado en vez de mejorarlo.
+        <ProductCardLink key={product.id} product={product} priority={index === 0} />
       ))}
     </ProductGrid>
   );

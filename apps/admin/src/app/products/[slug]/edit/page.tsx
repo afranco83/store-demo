@@ -1,21 +1,28 @@
-import { notFound } from "next/navigation";
-import { ApiClientError, getCategories, getProductBySlug } from "@store-demo/api-client";
+import type { Metadata } from "next";
+import { getCategories, getProductBySlug } from "@store-demo/api-client";
+import { fetchOrNotFound } from "@store-demo/core";
 import { Typography } from "@store-demo/ui";
 
 import { ProductForm } from "@/features/products/components/ProductForm";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await fetchOrNotFound(getProductBySlug({ slug }));
+
+  return { title: `Editar ${product.name}` };
+}
+
 export default async function EditProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   const [product, categories] = await Promise.all([
-    getProductBySlug({ slug }).catch((error: unknown) => {
-      if (error instanceof ApiClientError && error.status === 404) {
-        notFound();
-      }
-      throw error;
-    }),
+    fetchOrNotFound(getProductBySlug({ slug })),
     getCategories(),
   ]);
 

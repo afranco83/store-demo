@@ -9,9 +9,11 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "db:seed:lighthouse": "tsx prisma/seed-lighthouse.ts",
     "db:reset": "prisma migrate reset"
   },
   "dependencies": {
@@ -37,6 +39,8 @@
     "eslint": "9.39.4",
     "prisma": "7.8.0",
     "tsx": "4.23.0",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "4.1.10",
+    "@vitest/coverage-v8": "4.1.10"
   }
 }

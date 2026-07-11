@@ -70,7 +70,7 @@ describe("CheckoutWizard", () => {
 
     // Antes de la corrección, esta vista se habría quedado mostrando la
     // confirmación del pedido anterior indefinidamente.
-    await waitFor(() => expect(screen.getByLabelText("Nombre completo")).toBeInTheDocument());
+    expect(await screen.findByLabelText("Nombre completo")).toBeInTheDocument();
     expect(screen.queryByText("¡Gracias por tu pedido!")).not.toBeInTheDocument();
     expect(useCheckoutWizardStore.getState().confirmedOrder).toBeNull();
   });
