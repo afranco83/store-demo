@@ -2,7 +2,7 @@
 
 Desglose por fases con tareas y criterios de aceptación (Definition of Done). Cada fase depende de que la anterior cumpla su DoD. Las fases sustituyen a la numeración de `PROJECT_SPECIFICATION_v0.1.md`: se inserta backend antes del storefront y se separa "calidad transversal" al final como fase propia.
 
-Estado actual: **Fase 8 (Calidad Transversal), última fase del roadmap, cerrada en local salvo demo pública (2026-07-11)** — las 5 tareas técnicas cumplidas, el despliegue de demo pública diferido explícitamente a una sesión posterior; Fase 7 mergeada en `main` (PR #8, 2026-07-11); Fase 6 mergeada en `main` (PR #7); Fase 5 mergeada (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
+Estado actual: **Fase 8 (Calidad Transversal), última fase del roadmap, mergeada en `main` (PR #10, 2026-07-11)** — las 5 tareas técnicas cumplidas, el despliegue de demo pública diferido explícitamente a una sesión posterior (única tarea que queda pendiente de todo el roadmap); Fase 7 mergeada en `main` (PR #8, 2026-07-11); Fase 6 mergeada en `main` (PR #7); Fase 5 mergeada (PR #5); Fase 4 mergeada (PR #4); Fase 3 mergeada (PR #3); Fase 2 mergeada (PR #2) y Fase 1 mergeada (PR #1); Fase 0 cerrada el 2026-07-07, con aprobación explícita del usuario de v1.0 de toda la documentación.
 
 ---
 
@@ -284,7 +284,7 @@ Verificado tras los 5 fixes con `pnpm turbo lint typecheck test build --force` e
 
 ---
 
-## Fase 8 — Calidad Transversal _(cerrada en local salvo demo pública — 2026-07-11)_
+## Fase 8 — Calidad Transversal _(mergeada en `main` — PR #10, 2026-07-11 — salvo demo pública)_
 
 **Objetivo**: cerrar las garantías de calidad que no se pueden validar app por app de forma aislada.
 
