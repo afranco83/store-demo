@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "storybook-static/**"],
-      "env": ["DATABASE_URL"]
+      "env": ["DATABASE_URL", "DATABASE_AUTH_TOKEN", "AUTH_SECRET", "AUTH_JWT_SECRET", "API_URL"]
     },
     "dev": {
       "cache": false,

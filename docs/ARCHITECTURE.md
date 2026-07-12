@@ -202,7 +202,7 @@ Workflows mínimos:
 - `lighthouse.yml`: migra y seedea `apps/api` (dataset ligero, ver §6), levanta `apps/api`, hace build de `storefront` y corre Lighthouse CI — falla si se rompe un presupuesto.
 - `changesets.yml` (opcional, Fase 8): automatiza el versionado de paquetes al mergear a la rama principal.
 
-No hay despliegue real a producción (no hay "producción"); como mucho, un despliegue de demo a Vercel para poder enlazar el proyecto desde GitHub/CV — a decidir en Fase 8.
+No hay despliegue real a producción (no hay "producción"), solo una demo pública para poder enlazar el proyecto desde GitHub/CV. Decisión tomada en Fase 8 (2026-07-12, ver adenda de `docs/ROADMAP.md`): **Vercel** para las 3 apps (`storefront`, `admin`, `api`), cada una como proyecto independiente sobre el mismo repo (Root Directory `apps/storefront`/`apps/admin`/`apps/api`) — se descarta GitHub Pages porque el proyecto depende de Server Components con fetch en servidor, Server Actions y middleware, incompatibles con un export estático. `apps/api` migró su datasource de `better-sqlite3` (fichero local) a **Turso (libSQL)**, ya que las funciones serverless de Vercel no tienen filesystem persistente; `apps/api/src/lib/prisma.ts` usa `@prisma/adapter-libsql`, compatible tanto con `file:./dev.db` en local como con una URL `libsql://...-turso.io` en producción, sin cambiar el schema de Prisma. Sin dominio propio por ahora (solo `*.vercel.app`), aunque el dominio ya registrado en Cloudflare por el usuario queda como opción futura sin re-trabajo. El aprovisionamiento real de Turso y la creación de los 3 proyectos en Vercel son pasos manuales pendientes de ejecución por el usuario.
 
 ## 8. Flujo de trabajo de desarrollo — Worktrees
 

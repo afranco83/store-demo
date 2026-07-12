@@ -1,6 +1,6 @@
 # @store-demo/api
 
-Backend fake (`:4000`) — Next.js Route Handlers + Prisma + SQLite, en vez de mocks estáticos. No es un microservicio real de producción: existe para que `apps/storefront`/`apps/admin` consuman datos reales tipados de extremo a extremo (Zod en el borde, ver `AGENTS.md §1.1`).
+Backend fake (`:4000`) — Next.js Route Handlers + Prisma + SQLite (vía libSQL), en vez de mocks estáticos. No es un microservicio real de producción: existe para que `apps/storefront`/`apps/admin` consuman datos reales tipados de extremo a extremo (Zod en el borde, ver `AGENTS.md §1.1`).
 
 Identidad derivada siempre de un JWT propio verificado server-side (`Authorization: Bearer`, `src/lib/jwt.ts`) — nunca de un `userId` que el cliente ponga en la URL/body. `src/lib/guard.ts` centraliza `requireUser`/`requireAdmin`/`resolveCartIdentity` (usuario o invitado) y el guard de administración de `products`/`categories` (Fase 7).
 
@@ -10,7 +10,7 @@ Identidad derivada siempre de un JWT propio verificado server-side (`Authorizati
 
 ## Base de datos
 
-SQLite local (`dev.db`, gitignored). Migraciones con Prisma.
+SQLite local en fichero (`dev.db`, gitignored) vía el adapter de Prisma `@prisma/adapter-libsql` (`src/lib/prisma.ts`). Migraciones con Prisma.
 
 ```bash
 cp apps/api/.env.example apps/api/.env
@@ -22,6 +22,8 @@ pnpm --filter @store-demo/api run db:seed              # seed real (Unsplash + C
 # o, sin credenciales externas (usado por el workflow de Lighthouse CI):
 pnpm --filter @store-demo/api run db:seed:lighthouse
 ```
+
+**Contra Turso (demo pública en Vercel)**: el mismo `@libsql/client` abre tanto `file:./dev.db` (local) como una URL remota `libsql://...-turso.io` sin cambiar código — solo hace falta fijar `DATABASE_URL` a la URL de Turso y `DATABASE_AUTH_TOKEN` al token generado (`turso db tokens create`). Ver `docs/ARCHITECTURE.md §7` y la adenda de Fase 8 en `docs/ROADMAP.md` para el detalle de la decisión y el runbook de despliegue.
 
 `prisma/seed-shared.ts` centraliza categorías/usuarios/carrito/pedido de ejemplo, compartidos entre `seed.ts` (fotos reales) y `seed-lighthouse.ts` (imagen de muestra fija, sin llamadas externas).
 

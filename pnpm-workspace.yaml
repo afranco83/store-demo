@@ -10,7 +10,9 @@ overrides:
   zod: 4.4.3
 allowBuilds:
   "@prisma/engines": true
-  better-sqlite3: true
+  # Dependencia opcional transitiva de `prisma` (no de apps/api directamente,
+  # que ya migró a @prisma/adapter-libsql/Turso) — no necesita build nativo.
+  better-sqlite3: false
   esbuild: true
   msw: true
   prisma: true
