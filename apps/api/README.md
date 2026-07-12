@@ -4,6 +4,8 @@ Backend fake (`:4000`) — Next.js Route Handlers + Prisma + SQLite (vía libSQL
 
 Identidad derivada siempre de un JWT propio verificado server-side (`Authorization: Bearer`, `src/lib/jwt.ts`) — nunca de un `userId` que el cliente ponga en la URL/body. `src/lib/guard.ts` centraliza `requireUser`/`requireAdmin`/`resolveCartIdentity` (usuario o invitado) y el guard de administración de `products`/`categories` (Fase 7).
 
+**Demo pública**: [store-demo-api.vercel.app](https://store-demo-api.vercel.app) (consumida por `storefront`/`admin`, no pensada para navegarse directamente salvo `/api/health`).
+
 ## Rutas
 
 `auth/{login,register}`, `products`, `products/[slug]`, `categories`, `categories/[slug]`, `cart`, `cart/[productId]`, `cart/merge`, `orders`, `orders/[orderId]`, `users/me`, `health`.

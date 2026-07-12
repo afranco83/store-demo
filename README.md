@@ -6,11 +6,19 @@
 
 Monorepo demo que replica un stack y unas prácticas de ingeniería frontend profesionales (React, Next.js, TypeScript, Zod, TanStack Query, Zustand, Turborepo...). No es un producto real: es un entorno controlado para demostrar arquitectura, testing, accesibilidad, performance y DX de nivel profesional.
 
+## Demo pública
+
+- 🛍️ **Storefront**: [store-demo-storefront-kappa.vercel.app](https://store-demo-storefront-kappa.vercel.app)
+- 🛠️ **Admin**: [store-demo-admin.vercel.app](https://store-demo-admin.vercel.app)
+- 🔌 **API**: [store-demo-api.vercel.app](https://store-demo-api.vercel.app)
+
+Usuarios demo (contraseña `Password123!`): `customer1@store-demo.test` / `customer2@store-demo.test` (clientes), `admin@store-demo.test` (rol admin, entra en el panel de `admin`). Desplegado en Vercel con [Turso](https://turso.tech) (libSQL) como base de datos — detalle de la decisión en [`docs/ARCHITECTURE.md` §7](./docs/ARCHITECTURE.md).
+
 ## Por qué existe este proyecto
 
 Es una pieza de portfolio, no un producto con usuarios reales. El objetivo es demostrar, sobre un caso de uso concreto (una tienda online), decisiones y prácticas de un equipo de frontend profesional: arquitectura de monorepo, type safety end-to-end (Zod + TypeScript, del backend fake al componente), un design system con Storybook, testing en tres capas (unit/integración/E2E), accesibilidad WCAG 2.1 AA y un pipeline de CI/CD cuidado. El detalle completo está en [`docs/PROJECT_SPECIFICATION.md`](./docs/PROJECT_SPECIFICATION.md).
 
-**Estado actual: Fase 8 (Calidad Transversal), última fase del roadmap, mergeada en `main` (PR #10) salvo demo pública.** `apps/storefront` cubre el flujo de compra completo (catálogo, carrito con invitado/fusión al loguearse, cuenta, checkout de 3 pasos) y `apps/admin` es la segunda app de negocio (CRUD de productos/categorías, gestión de pedidos, rol `admin`). `packages/ui` documenta en `apps/storybook` todo el inventario de componentes. El despliegue de demo pública (Vercel vs. GitHub Pages) es la única tarea pendiente de todo el roadmap. Detalle completo por fase en [`docs/ROADMAP.md`](./docs/ROADMAP.md).
+**Estado actual: roadmap completo cerrado, incluida la demo pública (2026-07-13).** `apps/storefront` cubre el flujo de compra completo (catálogo, carrito con invitado/fusión al loguearse, cuenta, checkout de 3 pasos) y `apps/admin` es la segunda app de negocio (CRUD de productos/categorías, gestión de pedidos, rol `admin`). `packages/ui` documenta en `apps/storybook` todo el inventario de componentes. Detalle completo por fase en [`docs/ROADMAP.md`](./docs/ROADMAP.md).
 
 **Repositorio**: [github.com/afranco83/store-demo](https://github.com/afranco83/store-demo).
 

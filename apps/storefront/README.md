@@ -2,6 +2,8 @@
 
 Tienda pública (`:3000`) — primera app de negocio del monorepo. Catálogo (filtro por categoría), carrito (invitado o con sesión, fusión automática al loguearse), cuenta (login/registro/edición de perfil, historial de pedidos) y checkout de 3 pasos (envío → pago simulado → confirmación).
 
+**Demo pública**: [store-demo-storefront-kappa.vercel.app](https://store-demo-storefront-kappa.vercel.app)
+
 Organización por dominio (`src/features/{products,cart,auth,account,orders,checkout}`, `AGENTS.md §1.2`), Server Components por defecto, TanStack Query para estado de servidor y Zustand para estado de UI del carrito/wizard de checkout (`docs/ARCHITECTURE.md §5`).
 
 ## Qué puedes probar

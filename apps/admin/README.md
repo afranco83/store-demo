@@ -4,6 +4,8 @@ Panel de administración (`:3001`) — segunda app de negocio del monorepo, boot
 
 Solo accesible con rol `admin` (Auth.js + guard de middleware + `requireAdmin` en `apps/api`, defensa en profundidad — ver `docs/ARCHITECTURE.md §4`); una sesión `customer` autenticada es redirigida a `/403`.
 
+**Demo pública**: [store-demo-admin.vercel.app](https://store-demo-admin.vercel.app) (usuario admin: `admin@store-demo.test` / `Password123!`)
+
 ## Rutas
 
 - `/login`, `/403` — públicas.
