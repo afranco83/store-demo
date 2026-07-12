@@ -23,7 +23,7 @@ pnpm --filter @store-demo/api run db:seed              # seed real (Unsplash + C
 pnpm --filter @store-demo/api run db:seed:lighthouse
 ```
 
-**Contra Turso (demo pública en Vercel)**: el mismo `@libsql/client` abre tanto `file:./dev.db` (local) como una URL remota `libsql://...-turso.io` sin cambiar código — solo hace falta fijar `DATABASE_URL` a la URL de Turso y `DATABASE_AUTH_TOKEN` al token generado (`turso db tokens create`). Ver `docs/ARCHITECTURE.md §7` y la adenda de Fase 8 en `docs/ROADMAP.md` para el detalle de la decisión y el runbook de despliegue.
+**Contra Turso (demo pública en Vercel)**: el mismo `@libsql/client` abre tanto `file:./dev.db` (local) como una URL remota `libsql://...-turso.io` sin cambiar código — solo hace falta fijar `DATABASE_URL` a la URL de Turso y `DATABASE_AUTH_TOKEN` al token generado (`turso db tokens create`). **`prisma migrate deploy`/`db seed` no funcionan contra `libsql://`** (el motor de migraciones de Prisma no reconoce ese esquema, solo el adapter de runtime lo hace) — para aplicar migraciones nuevas a Turso hay que ejecutar cada `migration.sql` directamente contra la base vía `@libsql/client`, no con los scripts `db:migrate`/`db:seed` de este `package.json`. Ver `docs/ARCHITECTURE.md §7` y la adenda de Fase 8 en `docs/ROADMAP.md` para el detalle de la decisión y el runbook completo.
 
 `prisma/seed-shared.ts` centraliza categorías/usuarios/carrito/pedido de ejemplo, compartidos entre `seed.ts` (fotos reales) y `seed-lighthouse.ts` (imagen de muestra fija, sin llamadas externas).
 
