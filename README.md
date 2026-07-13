@@ -14,7 +14,7 @@ Monorepo demo que replica un stack y unas prácticas de ingeniería frontend pro
 - 🛠️ **Admin**: [store-demo-admin.vercel.app](https://store-demo-admin.vercel.app)
 - 🔌 **API**: [store-demo-api.vercel.app](https://store-demo-api.vercel.app)
 
-Usuarios demo (contraseña `Password123!`): `customer1@store-demo.test` / `customer2@store-demo.test` (clientes), `admin@store-demo.test` (rol admin, entra en el panel de `admin`). Desplegado en Vercel con [Turso](https://turso.tech) (libSQL) como base de datos — detalle de la decisión en [`docs/ARCHITECTURE.md` §7](./docs/ARCHITECTURE.md).
+Usuarios demo (contraseña `Password123!`): `customer1@store-demo.test` / `customer2@store-demo.test` (clientes), `admin@store-demo.test` (rol admin, entra en el panel de `admin`). Desplegado en Vercel con [Turso](https://turso.tech) (libSQL) como base de datos — detalle de la decisión en [`docs/ARCHITECTURE.md` §7](./docs/ARCHITECTURE.md). Estas credenciales son intencionadamente públicas para que cualquiera pueda probar la demo; el dataset de producción (pedidos/productos/categorías) se restaura automáticamente cada 6h ([`reset-demo-data.yml`](./.github/workflows/reset-demo-data.yml)) para que cualquier cambio hecho desde el panel de `admin` sea temporal.
 
 ## Por qué existe este proyecto
 

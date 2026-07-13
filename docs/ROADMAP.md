@@ -377,6 +377,24 @@ Con el roadmap completo ya cerrado (Fase 8), primera pieza de trabajo fuera de f
 
 ---
 
+## Post-roadmap — Reset periódico del dataset de demo _(cerrada — 2026-07-13)_
+
+Origen: el usuario planteaba poner el repositorio de GitHub en privado y, al investigar el motivo, salió a la luz un problema real distinto y más urgente — `README.md`/`apps/*/README.md` documentan en abierto las credenciales de los 3 usuarios seedeados (`admin@store-demo.test`, `customer1@store-demo.test`, `customer2@store-demo.test`, contraseña `Password123!`), y `admin@store-demo.test` tiene acceso de escritura real al panel de `admin` en producción, sobre la misma Turso que consume `storefront`.
+
+**Decisiones tomadas con el usuario**:
+
+- Poner el repo en privado **no cierra el problema real**: el panel de `admin` en Vercel sigue siendo público con esas mismas credenciales, independientemente de la visibilidad del repositorio en GitHub — el vector de ataque no pasa por leer el `README.md`, pasa por navegar directamente a la URL pública del panel.
+- Se descartó un modo "solo lectura" permanente en `admin`: bloquearía también a los visitantes legítimos (recruiters) que quieren probar el CRUD real, que es justo el valor de mostrar la demo.
+- Solución elegida: **reset periódico** vía GitHub Actions (`schedule:`, cada 6h) que borra pedidos/carritos/productos/categorías y vuelve a sembrar el dataset determinista de `seed-shared.ts` — cualquier vandalismo dura como mucho hasta el siguiente ciclo, sin sacrificar ninguna funcionalidad visible de la demo.
+
+**Implementación**: `apps/api/prisma/reset-demo-data.ts` (nuevo script `db:reset-demo-data`) + `.github/workflows/reset-demo-data.yml` (primer workflow del repo con `schedule:`, también disparable a mano con `workflow_dispatch`). El script borra en el orden que exigen las FK `Restrict` de `schema.prisma` (`Order` → `CartItem` → `Product` → `Category`) y reseedea reusando `seedCategories`/`seedUsers`/`seedCartForCustomerTwo`/`seedOrderForCustomerOne` de `seed-shared.ts`, con su propia copia de `searchUnsplashPhotos`/`uploadImageToCloudinary`/`seedProducts` — mismo criterio de duplicación deliberada que ya existía entre `seed.ts` y `seed-lighthouse.ts` (ver comentario en `seed-shared.ts`): la demo pública debe conservar fotos reales de producto tras cada reset, así que reusar la variante de imagen fija de Lighthouse habría reintroducido el problema de "imagen única poco apropiada" ya resuelto en la Fase 8. Los usuarios demo no se borran — no hay gestión de usuarios en `apps/admin` (solo CRUD de productos/categorías y gestión de pedidos), así que no hay superficie de vandalismo sobre `User` que proteger, y conservarlos evita invalidar sesiones activas de otros visitantes a mitad de un reset.
+
+Requiere 5 secrets nuevos, añadidos a mano por el usuario (no por el agente, por tratarse de credenciales de producción): `PROD_TURSO_DATABASE_URL`, `PROD_TURSO_AUTH_TOKEN`, `UNSPLASH_ACCESS_KEY`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_UPLOAD_PRESET` — primer uso de secrets reales en el repo (los 3 workflows previos, `ci.yml`/`lighthouse.yml`/`release.yml`, solo usan `file:./dev.db` local o no necesitan secretos). **Decisión tomada con el usuario**: Environment secrets del Environment `production` (`environment: production` en el job de `reset-demo-data.yml`), no Repository secrets — al ser credenciales de escritura real sobre la Turso de producción, quedan aisladas del resto de workflows del repo en vez de accesibles por defecto a cualquiera. Sin protection rule de _required reviewers_: bloquearía cada ejecución programada (`schedule:`) esperando aprobación manual, inutilizando el automatismo.
+
+Verificado localmente contra `dev.db` (SQLite de desarrollo, nunca contra la Turso de producción): dos ejecuciones consecutivas de `pnpm --filter @store-demo/api run db:reset-demo-data` dejan siempre 3 categorías/15 productos/2 cart items/1 pedido/2 líneas de pedido, sin errores de constraint. `lint`/`typecheck` de `apps/api` en verde. Sin test unitario dedicado: `prisma/*.ts` está fuera del `include` de cobertura de `vitest.config.ts` desde antes (mismo criterio que `seed.ts`/`seed-lighthouse.ts` — scripts de infraestructura, no lógica de dominio).
+
+---
+
 ## Backlog / candidatos a fases futuras (fuera de v1)
 
 Ninguno comprometido todavía — se reevalúan solo si aparece una necesidad concreta que lo justifique, no por adelantado (YAGNI, `AGENTS.md §10`). Repriorizado el 2026-07-13 (retomando esta sección, hasta entonces sin tocar desde su redacción original) con un único criterio nuevo explícito: dado que este repo es una carta de presentación técnica (`docs/PROJECT_SPECIFICATION.md §1`, [[project-store-demo]]), pesa a favor de un candidato que el resultado sea _visible_ para quien revisa el repo/la demo pública, no solo tooling interno.
