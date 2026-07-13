@@ -400,10 +400,16 @@ Ninguno comprometido todavía — se reevalúan solo si aparece una necesidad co
 
 Detectado el 2026-07-13 al revisar la gestión de Notion del proyecto: mejoras concretas sobre lo ya construido, sin comprometer todavía ninguna. A diferencia del backlog de arriba, no son apuestas arquitectónicas nuevas.
 
-- Home: añadir Hero.
+- ~~Home: añadir Hero~~ — **cerrada el 2026-07-13**, ver adenda debajo.
 - ~~Layout: añadir Footer~~ — **cerrada el 2026-07-13**, ver adenda debajo.
 - Página de detalle de producto: añadir productos relacionados.
 - Mejoras de SEO.
+
+**Adenda — "Home: añadir Hero", cerrada el 2026-07-13.** Decisiones tomadas con el usuario: Hero tipográfico sin imagen (evita repetir el riesgo de calidad de fuentes de imágenes de stock ya sufrido en el seed de productos, Fase 2) con un único CTA ("Ver catálogo" → `/products`).
+
+Nueva molécula `Hero` en `packages/ui/src/molecules/Hero` (component-first): slots `eyebrow`/`title`/`description`/`action`, fondo con gradiente (`bg-linear-to-br from-accent to-accent-hover`, sintaxis de gradientes de Tailwind v4 — primer uso de gradiente en el proyecto, verificado con el CSS real servido por el dev server, no solo por compilación) y texto en `text-accent-foreground`. A diferencia del footer, **no hizo falta ningún token nuevo**: `--color-accent`/`--color-accent-hover`/`--color-accent-foreground` ya tenían contraste verificado para ambos temas desde la Fase 3, y el Hero sí hereda `prefers-color-scheme` (no es una superficie forzada a un tema fijo como el footer).
+
+`apps/storefront/src/app/page.tsx` reestructura la copy ya existente en el patrón eyebrow/headline/descripción (antes un `<h1>Store Demo</h1>` + tagline suelto): eyebrow "Store Demo", headline "Streetwear con estilo", descripción con el mismo texto que ya usaba `metadata.description`. Un único `<h1>` en la página (dentro del propio `Hero`), sin duplicar con ningún heading de `ProductGridSection`.
 
 **Adenda — "Layout: añadir Footer", cerrada el 2026-07-13.** Al revisar la tarea se confirmó que `SiteFooter`/`AdminFooter` ya existían pero eran solo un wrapper mínimo con el `VersionBadge` centrado — ningún contenido de navegación. Decisiones tomadas con el usuario: footer enriquecido tipo e-commerce solo en `storefront` (columnas de navegación + enlace a GitHub + copyright, fondo oscuro con acento de marca), `admin` se deja igual de minimalista que estaba (los paneles de admin no llevan footer de marketing).
 
