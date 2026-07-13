@@ -3,6 +3,7 @@
   --color-accent-hover: #9a3412;
   --color-accent-foreground: #ffffff;
   --color-accent-soft: rgb(194 65 12 / 6%);
+  --color-accent-on-dark: #f0672a;
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -19,6 +20,15 @@
  * midió 4.48:1 al 10% — la verificación manual de Fase 3 se quedó justo por
  * debajo del 4.5:1 exigido. Al 6% el mismo par da >4.5:1 (verificado con el
  * mismo spec E2E de axe, no solo cálculo a mano).
+ *
+ * --color-accent-on-dark (añadido en el enriquecimiento del footer, post-roadmap):
+ * primer caso real del patrón que este comentario ya anticipaba ("más tokens
+ * con variante de tema"), pero para una superficie *siempre* oscura (el footer
+ * de storefront, bg-gray-900), no ligada a prefers-color-scheme del SO — usar
+ * --color-accent ahí fallaría AA si el SO está en claro, porque ese valor solo
+ * se aclara cuando el propio SO está en dark. Mismo valor que --color-accent en
+ * dark mode (#f0672a); contraste verificado a mano sobre gray-900 (#111827):
+ * 5.64:1, pasa AA para texto normal.
  */
 @media (prefers-color-scheme: dark) {
   :root {

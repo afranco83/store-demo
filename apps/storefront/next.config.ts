@@ -9,6 +9,11 @@ const rootPackageJson = JSON.parse(
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: rootPackageJson.version,
+    // Mismo fallback que apps/storefront/src/lib/site-url.ts — inyectado
+    // aquí para que esté disponible incluso sin configurar la env var real
+    // en Vercel (igual que NEXT_PUBLIC_APP_VERSION de arriba).
+    NEXT_PUBLIC_SITE_URL:
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://store-demo-storefront-kappa.vercel.app",
   },
   transpilePackages: [
     "@store-demo/ui",

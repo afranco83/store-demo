@@ -5,7 +5,7 @@ Valores personalizados mínimos y justificados de la marca (acento `#c2410c` + t
 Dos formatos del mismo valor, cada uno para su consumidor:
 
 - `index.ts`: constantes TS simples (para código que necesite el valor en JS/TS).
-- `tokens.css`: custom properties + bloque `@theme` para Tailwind v4 (consumido por `packages/tailwind-config`). Incluye variantes dark de `--color-accent*` (el acento a secas no llega a AA sobre fondos oscuros) y un `--color-accent-soft` propio, ambos verificados con Lighthouse/axe reales (Fase 3 y Fase 8, ver adendas de `docs/ROADMAP.md`).
+- `tokens.css`: custom properties + bloque `@theme` para Tailwind v4 (consumido por `packages/tailwind-config`). Incluye variantes dark de `--color-accent*` (el acento a secas no llega a AA sobre fondos oscuros) ligadas a `prefers-color-scheme`, un `--color-accent-soft` propio, y `--color-accent-on-dark` (post-roadmap, footer enriquecido de storefront) para superficies _siempre_ oscuras que no dependen del tema del SO — los tres, verificados con Lighthouse/axe reales o cálculo manual de contraste (Fase 3, Fase 8 y adenda post-roadmap, ver `docs/ROADMAP.md`).
 
 ## Cómo verificar
 

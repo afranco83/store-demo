@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import { Typography } from "@store-demo/ui";
+import Link from "next/link";
+import { buttonVariants, Hero } from "@store-demo/ui";
 
 import { getProducts } from "@/features/products/api/products.api";
 import { ProductGridSection } from "@/features/products/components/ProductGridSection";
 
 const FEATURED_PRODUCTS_LIMIT = 8;
+const TITLE = "Inicio";
+const DESCRIPTION = "Streetwear con estilo: camisetas, gorras y zapatillas.";
 
 export const metadata: Metadata = {
-  title: "Inicio",
-  description: "Streetwear con estilo: camisetas, gorras y zapatillas.",
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: { title: TITLE, description: DESCRIPTION },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
 // Sin esto, el `revalidate: 60` de getProducts() hace que Next intente
@@ -23,14 +28,16 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10">
-      <div className="flex flex-col gap-2">
-        <Typography as="h1" variant="display">
-          Store Demo
-        </Typography>
-        <Typography variant="body" className="text-gray-600">
-          Streetwear con estilo: camisetas, gorras y zapatillas.
-        </Typography>
-      </div>
+      <Hero
+        eyebrow="Store Demo"
+        title="Streetwear con estilo"
+        description="Camisetas, gorras y zapatillas pensadas para el día a día."
+        action={
+          <Link href="/products" className={buttonVariants({ intent: "secondary", size: "lg" })}>
+            Ver catálogo
+          </Link>
+        }
+      />
       <ProductGridSection products={products.slice(0, FEATURED_PRODUCTS_LIMIT)} />
     </main>
   );

@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("loads the home page", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Store Demo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Streetwear con estilo" })).toBeVisible();
 });
 
 test("loads the catalog page", async ({ page }) => {
@@ -23,5 +23,9 @@ test("loads a product detail page from the catalog", async ({ page }) => {
   // cards del listado a la vez).
   await page.waitForURL(/\/products\/.+/);
 
-  await expect(page.getByRole("button", { name: "Añadir al carrito" })).toBeVisible();
+  // Scoped a main: la sección de "también te puede interesar" añade sus
+  // propios botones "Añadir al carrito" por cada producto relacionado.
+  await expect(
+    page.locator("main").getByRole("button", { name: "Añadir al carrito" }),
+  ).toBeVisible();
 });

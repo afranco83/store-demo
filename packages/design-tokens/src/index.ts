@@ -2,7 +2,10 @@ export const colors = {
   accent: "#c2410c",
   accentHover: "#9a3412",
   accentForeground: "#ffffff",
-  accentSoft: "rgb(194 65 12 / 10%)",
+  accentSoft: "rgb(194 65 12 / 6%)",
+  // Para superficies siempre oscuras (no ligadas a prefers-color-scheme del SO),
+  // p. ej. el footer de storefront. Ver tokens.css para el detalle de contraste.
+  accentOnDark: "#f0672a",
 } as const;
 
 // El acento base no llega a AA sobre fondos oscuros (ver tokens.css); esta

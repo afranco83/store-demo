@@ -25,7 +25,13 @@ test("browses the catalog, filters by category and adds a product to the cart", 
   }
 
   await page.goto("/products");
-  await page.getByRole("link", { name: category.name }).click();
+  // Scoped al nav de filtros: el footer (presente en toda la app) también
+  // enlaza a cada categoría por nombre desde su columna "Tienda", así que
+  // buscar el link sin scope es ambiguo desde que existe.
+  await page
+    .getByRole("navigation", { name: "Filtrar por categoría" })
+    .getByRole("link", { name: category.name })
+    .click();
   await expect(page).toHaveURL(`/products?category=${category.slug}`);
 
   const productsResponse = await request.get(
@@ -44,7 +50,9 @@ test("browses the catalog, filters by category and adds a product to the cart", 
   await page.waitForURL(`/products/${product.slug}`);
   await expect(page.getByRole("heading", { name: product.name })).toBeVisible();
 
-  await page.getByRole("button", { name: "Añadir al carrito" }).click();
+  // Scoped a main: la sección de "también te puede interesar" añade sus
+  // propios botones "Añadir al carrito" por cada producto relacionado.
+  await page.locator("main").getByRole("button", { name: "Añadir al carrito" }).click();
 
   const cartDrawer = page.getByRole("dialog", { name: "Carrito" });
   await expect(cartDrawer).toBeVisible();
