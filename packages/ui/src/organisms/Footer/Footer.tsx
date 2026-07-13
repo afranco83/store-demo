@@ -50,7 +50,12 @@ export function Footer({
       <div className="border-t border-gray-800">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-4 text-xs text-gray-400 sm:flex-row">
           <div>{bottomStart}</div>
-          <div className="flex items-center gap-4 [&_a:hover]:text-accent-on-dark">{bottomEnd}</div>
+          {/* Sin selector [&_a:hover] genérico aquí a propósito: bottomEnd
+              mezcla enlaces con tratamientos de hover distintos (GitHub vs.
+              VersionBadge), y ese selector ganaría por especificidad CSS al
+              hover:text-white que VersionBadge define en su propia clase —
+              cada enlace se encarga de su propio hover. */}
+          <div className="flex items-center gap-4">{bottomEnd}</div>
         </div>
       </div>
     </footer>

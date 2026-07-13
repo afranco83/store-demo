@@ -7,7 +7,13 @@ import { getCategories } from "@/features/products/api/categories.api";
 const version = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 
 export async function SiteFooter() {
-  const [session, categories] = await Promise.all([auth(), getCategories()]);
+  // allSettled, no all: el footer se monta en el root layout de todas las
+  // páginas — un fallo de sesión o de apps/api aquí no debe tumbar el sitio
+  // entero (no hay global-error.tsx que lo cubra). Se degrada mostrando el
+  // footer sin esas secciones en vez de propagar el error.
+  const [sessionResult, categoriesResult] = await Promise.allSettled([auth(), getCategories()]);
+  const session = sessionResult.status === "fulfilled" ? sessionResult.value : null;
+  const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
 
   return (
     <Footer
@@ -61,6 +67,7 @@ export async function SiteFooter() {
             href="https://github.com/afranco83/store-demo"
             target="_blank"
             rel="noopener noreferrer"
+            className="text-gray-300 transition-colors hover:text-accent-on-dark"
           >
             GitHub
           </a>

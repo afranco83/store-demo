@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("loads the home page", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Store Demo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Streetwear con estilo" })).toBeVisible();
 });
 
 test("loads the catalog page", async ({ page }) => {

@@ -32,9 +32,14 @@ export async function generateMetadata({
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
+  // getProducts() es solo para "también te puede interesar" — un fallo ahí
+  // no debe romper la página de un producto que sí existe y se resolvió
+  // bien, así que su error se aísla del de fetchOrNotFound (que si no,
+  // haría fallar Promise.all entero y mostraría un error genérico en vez
+  // del producto real).
   const [product, allProducts] = await Promise.all([
     fetchOrNotFound(getProductBySlug({ slug })),
-    getProducts(),
+    getProducts().catch(() => []),
   ]);
 
   const stockBadge = getStockBadge(product.stock);
