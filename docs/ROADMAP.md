@@ -356,6 +356,23 @@ Verificado tras las cinco tareas con `pnpm turbo lint typecheck test build --for
 
 ---
 
+## Post-roadmap — Versionamiento automático _(cerrada — 2026-07-13)_
+
+Con el roadmap completo ya cerrado (Fase 8), primera pieza de trabajo fuera de fase: automatizar el versionado del monorepo a partir de los Conventional Commits ya validados por commitlint, en vez de versionar a mano.
+
+**Decisiones tomadas con el usuario**:
+
+- **Versión única para todo el monorepo**, no una por app: las 3 apps (`storefront`/`admin`/`api`) se despliegan juntas desde el mismo repo y no hay paquetes publicados a npm que necesiten versión independiente — separar versiones habría triplicado tags/changelogs sin ningún consumidor real que lo necesite.
+- **`semantic-release`** (no Changesets, ya reservado en el backlog de más abajo para el caso distinto de publicar paquetes a npm) con la convención Angular estándar: `feat`→minor, `fix`/`perf`→patch, `BREAKING CHANGE`/`feat!`/`fix!`→major; `docs`/`chore`/`refactor`/`test`/`style` no generan release.
+- **GitHub Release** por cada versión (además de tag + `CHANGELOG.md`), visible en la pestaña Releases del repo — coherente con el objetivo de portfolio del proyecto.
+- **Badge de versión en el footer** de `storefront`/`admin`, enlazando a la Release correspondiente — nuevo átomo `VersionBadge` en `packages/ui` siguiendo el workflow component-first (`AGENTS.md` principio 6), ya que no existía ningún componente de footer previo.
+
+**Implementación**: `.releaserc.json` en la raíz + `.github/workflows/release.yml`, disparado por `workflow_run` tras el éxito de `ci.yml` sobre `main` (nunca se etiqueta una versión sobre código sin verificar). La versión se expone a cada app en build time (`NEXT_PUBLIC_APP_VERSION`, inyectada en `next.config.ts` desde el `package.json` raíz) y se renderiza vía `VersionBadge` en `SiteFooter`/`AdminFooter`. Sin tags previos en el repo, la primera ejecución de `semantic-release` publica `v1.0.0` automáticamente (comportamiento estándar de la herramienta ante un repo sin releases previas), coincidiendo temáticamente con el cierre del roadmap.
+
+**Corrección de documentación asociada**: `docs/ARCHITECTURE.md §7` mencionaba desde su redacción original un `changesets.yml` "opcional, Fase 8" que nunca se llegó a crear (no existía en `.github/workflows/`, y el propio backlog de este documento solo listaba Changesets para publicación de paquetes a npm, un caso distinto). Sustituido por la descripción real de `release.yml`.
+
+---
+
 ## Backlog / candidatos a fases futuras (fuera de v1)
 
 - Internacionalización (i18n)

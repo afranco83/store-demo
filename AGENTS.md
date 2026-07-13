@@ -262,7 +262,7 @@ vi.mock("next/navigation", () => ({
 
 ## 7. Commits, ramas y worktrees
 
-- Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`...), validado por commitlint.
+- Conventional Commits (`feat:`, `fix:`, `chore:`, `refactor:`, `test:`, `docs:`...), validado por commitlint. Desde el versionado automático post-roadmap (`semantic-release`, ver `docs/ROADMAP.md`), el tipo del commit tiene una consecuencia real más allá del changelog: `feat`→minor, `fix`/`perf`→patch, `BREAKING CHANGE`/`feat!`/`fix!`→major; `docs`/`chore`/`refactor`/`test`/`style` no disparan versión — elegir bien el tipo importa.
 - Una rama por feature/fase, PR (aunque sea de un solo revisor) antes de mergear a la rama principal.
 - No usar `git commit --no-verify` ni saltarse hooks salvo excepción explícita y justificada.
 - Trabajo en paralelo (varias fases/features/spikes a la vez) se hace con **git worktrees**, no cambiando de rama sobre el mismo directorio con cambios sin commitear a medias. Ver `ARCHITECTURE.md` §8.

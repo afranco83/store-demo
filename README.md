@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/afranco83/store-demo/actions/workflows/ci.yml/badge.svg)](https://github.com/afranco83/store-demo/actions/workflows/ci.yml)
 [![Lighthouse CI](https://github.com/afranco83/store-demo/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/afranco83/store-demo/actions/workflows/lighthouse.yml)
+[![Release](https://github.com/afranco83/store-demo/actions/workflows/release.yml/badge.svg)](https://github.com/afranco83/store-demo/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/afranco83/store-demo)](https://github.com/afranco83/store-demo/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 Monorepo demo que replica un stack y unas prácticas de ingeniería frontend profesionales (React, Next.js, TypeScript, Zod, TanStack Query, Zustand, Turborepo...). No es un producto real: es un entorno controlado para demostrar arquitectura, testing, accesibilidad, performance y DX de nivel profesional.
