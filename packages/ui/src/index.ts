@@ -7,6 +7,7 @@ export * from "./atoms/Select";
 export * from "./atoms/Spinner";
 export * from "./atoms/Textarea";
 export * from "./atoms/Typography";
+export * from "./atoms/VersionBadge";
 export * from "./molecules/CartLineItem";
 export * from "./molecules/ConfirmDialog";
 export * from "./molecules/EmptyState";
