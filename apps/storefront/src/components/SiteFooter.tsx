@@ -74,7 +74,11 @@ export async function SiteFooter() {
           <VersionBadge
             version={version}
             href={`https://github.com/afranco83/store-demo/releases/tag/v${version}`}
-            className="text-gray-500 hover:text-white"
+            // El text-gray-500 por defecto de VersionBadge (pensado para
+            // fondos claros) da 3.67:1 sobre el bg-gray-900 del footer —
+            // falla AA (4.5:1). gray-400 da 6.82:1 (verificado con axe real
+            // en CI, no solo cálculo manual).
+            className="text-gray-400 hover:text-white"
           />
         </>
       }

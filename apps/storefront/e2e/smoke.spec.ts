@@ -23,5 +23,9 @@ test("loads a product detail page from the catalog", async ({ page }) => {
   // cards del listado a la vez).
   await page.waitForURL(/\/products\/.+/);
 
-  await expect(page.getByRole("button", { name: "Añadir al carrito" })).toBeVisible();
+  // Scoped a main: la sección de "también te puede interesar" añade sus
+  // propios botones "Añadir al carrito" por cada producto relacionado.
+  await expect(
+    page.locator("main").getByRole("button", { name: "Añadir al carrito" }),
+  ).toBeVisible();
 });
