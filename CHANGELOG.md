@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/afranco83/store-demo/compare/v1.0.0...v1.0.1) (2026-07-13)
+
+### Bug Fixes
+
+- **turbo:** declarar package.json raíz como globalDependency ([3793368](https://github.com/afranco83/store-demo/commit/379336859880a7caec3b3aee482e9e7e23eb727c))
+
 # 1.0.0 (2026-07-13)
 
 ### Bug Fixes
