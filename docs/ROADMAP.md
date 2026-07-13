@@ -402,8 +402,14 @@ Detectado el 2026-07-13 al revisar la gestión de Notion del proyecto: mejoras c
 
 - ~~Home: añadir Hero~~ — **cerrada el 2026-07-13**, ver adenda debajo.
 - ~~Layout: añadir Footer~~ — **cerrada el 2026-07-13**, ver adenda debajo.
-- Página de detalle de producto: añadir productos relacionados.
+- ~~Página de detalle de producto: añadir productos relacionados~~ — **cerrada el 2026-07-13**, ver adenda debajo.
 - Mejoras de SEO.
+
+**Adenda — "Detalle: añadir relacionados", cerrada el 2026-07-13.** Criterio de "relacionado" elegido: misma categoría que el producto actual, excluyéndolo a sí mismo, límite de 4 — sin señales más sofisticadas (compras conjuntas, etc.), no hay datos de comportamiento real que las soporte en una demo.
+
+Nueva función pura `getRelatedProducts` en `apps/storefront/src/features/products/services` (mismo patrón que `getStockBadge`/`buildCloudinaryThumbnailUrl` ya existentes: lógica de dominio separada de I/O, con su propio test unitario con Faker). La página de detalle (`apps/storefront/src/app/products/[slug]/page.tsx`) pasó a pedir también `getProducts()` (todos los productos, en paralelo con `getProductBySlug`) y filtrar en memoria — sin endpoint nuevo ni columna nueva en el schema: con solo 15 productos en el catálogo, filtrar en memoria es más simple que añadir un parámetro de exclusión/relación a la API. **Sin componente de `packages/ui` nuevo**: la sección reutiliza `ProductGrid` + `ProductCardLink` (ya usados en la home y en `/products`), solo con un `<h2>` de sección — no se creó ninguna abstracción nueva para una composición de piezas que ya existían (criterio AHA, `AGENTS.md §1`). La sección no se renderiza en absoluto si no hay productos relacionados (p. ej. la única unidad de su categoría), en vez de reusar el `EmptyState` de `ProductGridSection` (pensado para "catálogo vacío", no para este contexto).
+
+Verificado con el gate completo en verde (100% cobertura en la función nueva) y con los dev servers reales: `curl` sobre una página de detalle real confirmó productos de la misma categoría real (Gorras) en la sección, no solo en el test.
 
 **Adenda — "Home: añadir Hero", cerrada el 2026-07-13.** Decisiones tomadas con el usuario: Hero tipográfico sin imagen (evita repetir el riesgo de calidad de fuentes de imágenes de stock ya sufrido en el seed de productos, Fase 2) con un único CTA ("Ver catálogo" → `/products`).
 
