@@ -1,3 +1,9 @@
+# [1.2.0](https://github.com/afranco83/store-demo/compare/v1.1.0...v1.2.0) (2026-07-13)
+
+### Features
+
+- **api:** reset periódico del dataset de la demo pública ([b4c6129](https://github.com/afranco83/store-demo/commit/b4c6129e397ee9e9e126acf989a75db79cc9e4cc))
+
 # [1.1.0](https://github.com/afranco83/store-demo/compare/v1.0.1...v1.1.0) (2026-07-13)
 
 ### Bug Fixes
