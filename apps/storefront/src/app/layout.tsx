@@ -5,6 +5,7 @@ import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/700.css";
 import "./globals.css";
 
+import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { CartDrawerContainer } from "@/features/cart/components/CartDrawerContainer";
 import { QueryProvider } from "@/providers/QueryProvider";
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <QueryProvider>
           <SiteHeader />
           {children}
+          <SiteFooter />
           <CartDrawerContainer />
         </QueryProvider>
       </body>

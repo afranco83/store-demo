@@ -5,6 +5,7 @@ import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/700.css";
 import "./globals.css";
 
+import { AdminFooter } from "@/components/AdminFooter";
 import { AdminHeader } from "@/components/AdminHeader";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <AdminHeader />
         {children}
+        <AdminFooter />
       </body>
     </html>
   );
