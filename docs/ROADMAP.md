@@ -403,7 +403,21 @@ Detectado el 2026-07-13 al revisar la gestión de Notion del proyecto: mejoras c
 - ~~Home: añadir Hero~~ — **cerrada el 2026-07-13**, ver adenda debajo.
 - ~~Layout: añadir Footer~~ — **cerrada el 2026-07-13**, ver adenda debajo.
 - ~~Página de detalle de producto: añadir productos relacionados~~ — **cerrada el 2026-07-13**, ver adenda debajo.
-- Mejoras de SEO.
+- ~~Mejoras de SEO~~ — **cerrada el 2026-07-13**, ver adenda debajo.
+
+**Adenda — "Mejoras de SEO", cerrada el 2026-07-13.** Alcance elegido con el usuario (los 4 bloques posibles, sin recortar ninguno): fundamentos técnicos, Open Graph/Twitter Card, JSON-LD y gate de SEO en Lighthouse CI. Auditoría previa (con un agente `Explore` de solo lectura) confirmó que no había nada de esto hoy — ni `robots.ts`/`sitemap.ts`, ni Open Graph, ni JSON-LD, ni favicon — y detectó de paso un hueco real fuera del scope pedido: **`apps/admin` es indexable en producción** (desplegado públicamente sin `noindex`), corregido también por ser una corrección de una línea y directamente relacionada.
+
+**Fundamentos técnicos**: `apps/storefront/src/lib/site-url.ts` (constante `SITE_URL`, inyectada también en `next.config.ts` como `NEXT_PUBLIC_SITE_URL` con la URL real de producción como fallback — mismo patrón que `NEXT_PUBLIC_APP_VERSION`), `metadataBase` en el root layout, `robots.ts` (disallow de `/checkout`/`/account`, sin valor de SEO) y `sitemap.ts` (rutas estáticas + una entrada por producto real, `force-dynamic` por el mismo motivo que `products/page.tsx`: el `revalidate: 60` de `getProducts()` rompería el build en CI si Next intentara pre-renderizarlo). Favicon/apple-touch-icon generados por código (`icon.tsx`/`apple-icon.tsx` vía `ImageResponse` de `next/og`, comparten un helper `renderLogoMark` para no duplicar el JSX). Añadido de paso: `<h1>` real en `/products` (la auditoría detectó que no tenía ninguno) y `noindex` en `apps/admin`.
+
+**Open Graph / Twitter Card**: `openGraph`/`twitter` en el root layout (siteName, locale, tipo de card) y en cada página relevante (home, catálogo, detalle de producto). Imágenes generadas por código con `ImageResponse`, no fuentes de imagen nuevas: `opengraph-image.tsx` de la home reusa el mismo gradiente de marca que el Hero (decisión explícita, mismo criterio que evitó el riesgo de imágenes de stock); `products/[slug]/opengraph-image.tsx` reutiliza la foto Cloudinary real del producto (ya vetada en el seed) compuesta con nombre y precio — mayor calidad de preview social sin sourcing nuevo. `twitter-image.tsx` reexporta el mismo generador que `opengraph-image.tsx` en vez de duplicar el JSX (DRY).
+
+**JSON-LD**: `Product` (nombre, descripción, imagen, oferta con precio/disponibilidad) + `BreadcrumbList` (Inicio > Catálogo > producto) en `/products/[slug]`, en un único `<script type="application/ld+json">` con `@graph`. Escapado explícito de `<` en el JSON serializado (`<`) para evitar que una descripción de producto con `</script>` literal rompa el documento — mismo patrón recomendado por la documentación de Next.js para este caso.
+
+**Gate de Lighthouse CI**: nueva assertion `"categories:seo": ["error", { minScore: 1 }]` en `lighthouserc.cjs`, además de las ya existentes de performance — exigible de verdad tras cerrar todo lo anterior, no un presupuesto relajado.
+
+Verificado con el gate completo en verde (aislado por paquete: la ejecución conjunta de `storefront`+`admin` sufrió la misma flakiness de contención de CPU ya documentada en fases anteriores, sin relación con este cambio) y con los dev servers reales: `curl` confirmó `robots.txt`/`sitemap.xml` con contenido real, las imágenes generadas (`file` confirmó PNG 1200×630/32×32 reales, no placeholders rotos), el JSON-LD con datos reales de un producto real, y el `noindex` de `apps/admin` en `/login`.
+
+**Con esto, las 4 tareas de "Pulido pendiente" quedan cerradas.**
 
 **Adenda — "Detalle: añadir relacionados", cerrada el 2026-07-13.** Criterio de "relacionado" elegido: misma categoría que el producto actual, excluyéndolo a sí mismo, límite de 4 — sin señales más sofisticadas (compras conjuntas, etc.), no hay datos de comportamiento real que las soporte en una demo.
 

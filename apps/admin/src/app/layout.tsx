@@ -11,6 +11,9 @@ import { AdminHeader } from "@/components/AdminHeader";
 export const metadata: Metadata = {
   title: { default: "Store Demo Admin", template: "%s | Store Demo Admin" },
   description: "Panel de administración de catálogo y pedidos de Store Demo.",
+  // Desplegado públicamente (docs/ROADMAP.md) pero es un panel privado, no
+  // contenido a indexar — hueco real detectado en la auditoría de SEO.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

@@ -59,6 +59,11 @@ module.exports = {
         // página única sin interacción real del usuario (es una métrica de
         // campo) — Lighthouse no emite un audit puntuable para ella aquí;
         // total-blocking-time es el proxy de laboratorio ya usado arriba.
+
+        // Categoría SEO (post-roadmap, mejoras de SEO): 1.0 exigible de
+        // verdad tras añadir metadataBase/robots.ts/sitemap.ts/Open
+        // Graph/JSON-LD — no es un presupuesto relajado "por si acaso".
+        "categories:seo": ["error", { minScore: 1 }],
       },
     },
     upload: {

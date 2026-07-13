@@ -8,6 +8,7 @@ import { AddToCartButton } from "@/features/products/components/AddToCartButton"
 import { ProductCardLink } from "@/features/products/components/ProductCardLink";
 import { getRelatedProducts } from "@/features/products/services/get-related-products";
 import { getStockBadge } from "@/features/products/services/get-stock-badge";
+import { SITE_URL } from "@/lib/site-url";
 
 export async function generateMetadata({
   params,
@@ -23,6 +24,8 @@ export async function generateMetadata({
   return {
     title: product.name,
     description: product.description,
+    openGraph: { title: product.name, description: product.description },
+    twitter: { title: product.name, description: product.description },
   };
 }
 
@@ -36,9 +39,41 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
   const stockBadge = getStockBadge(product.stock);
   const relatedProducts = getRelatedProducts(allProducts, product);
+  const productUrl = `${SITE_URL}/products/${product.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Product",
+        name: product.name,
+        description: product.description,
+        image: product.imageUrl,
+        offers: {
+          "@type": "Offer",
+          url: productUrl,
+          priceCurrency: "EUR",
+          price: (product.priceCents / 100).toFixed(2),
+          availability:
+            product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: "Catálogo", item: `${SITE_URL}/products` },
+          { "@type": "ListItem", position: 3, name: product.name, item: productUrl },
+        ],
+      },
+    ],
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
       <main className="mx-auto grid max-w-4xl gap-8 px-4 py-10 sm:grid-cols-2">
         <div className="relative aspect-square w-full overflow-hidden rounded-lg">
           <Image

@@ -6,10 +6,14 @@ import { getProducts } from "@/features/products/api/products.api";
 import { ProductGridSection } from "@/features/products/components/ProductGridSection";
 
 const FEATURED_PRODUCTS_LIMIT = 8;
+const TITLE = "Inicio";
+const DESCRIPTION = "Streetwear con estilo: camisetas, gorras y zapatillas.";
 
 export const metadata: Metadata = {
-  title: "Inicio",
-  description: "Streetwear con estilo: camisetas, gorras y zapatillas.",
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: { title: TITLE, description: DESCRIPTION },
+  twitter: { title: TITLE, description: DESCRIPTION },
 };
 
 // Sin esto, el `revalidate: 60` de getProducts() hace que Next intente
