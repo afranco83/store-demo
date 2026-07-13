@@ -1,0 +1,44 @@
+name: Reset Demo Data
+
+# Restaura periódicamente el dataset de la demo pública en producción
+# (Turso) al estado semilla determinista, protegiéndola del vandalismo que
+# permiten las credenciales de admin documentadas en abierto en README.md
+# (ver docs/ROADMAP.md, adenda "Reset periódico del dataset de demo").
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: reset-demo-data
+  cancel-in-progress: false
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      DATABASE_URL: ${{ secrets.PROD_TURSO_DATABASE_URL }}
+      DATABASE_AUTH_TOKEN: ${{ secrets.PROD_TURSO_AUTH_TOKEN }}
+      UNSPLASH_ACCESS_KEY: ${{ secrets.UNSPLASH_ACCESS_KEY }}
+      CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+      CLOUDINARY_UPLOAD_PRESET: ${{ secrets.CLOUDINARY_UPLOAD_PRESET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Regenerar cliente de Prisma
+        working-directory: apps/api
+        run: pnpm exec prisma generate
+
+      - name: Restaurar dataset de demo sobre la Turso de producción
+        working-directory: apps/api
+        run: pnpm run db:reset-demo-data

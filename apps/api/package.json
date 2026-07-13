@@ -14,7 +14,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:seed:lighthouse": "tsx prisma/seed-lighthouse.ts",
-    "db:reset": "prisma migrate reset"
+    "db:reset": "prisma migrate reset",
+    "db:reset-demo-data": "tsx prisma/reset-demo-data.ts"
   },
   "dependencies": {
     "@libsql/client": "0.17.4",
