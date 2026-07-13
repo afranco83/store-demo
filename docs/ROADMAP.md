@@ -371,6 +371,8 @@ Con el roadmap completo ya cerrado (Fase 8), primera pieza de trabajo fuera de f
 
 **Corrección de documentación asociada**: `docs/ARCHITECTURE.md §7` mencionaba desde su redacción original un `changesets.yml` "opcional, Fase 8" que nunca se llegó a crear (no existía en `.github/workflows/`, y el propio backlog de este documento solo listaba Changesets para publicación de paquetes a npm, un caso distinto). Sustituido por la descripción real de `release.yml`.
 
+**Nota técnica**: el primer run real de `release.yml` falló en `pnpm install --frozen-lockfile` con `PrismaConfigEnvError: Cannot resolve environment variable: DATABASE_URL` — mismo hallazgo ya documentado en la adenda de despliegue en Vercel de la Fase 8 (`pnpm install` en la raíz dispara el `postinstall` de _todos_ los workspaces, incluido el `prisma generate` de `apps/api`, aunque este workflow no toque `apps/api` en ningún momento). Se me pasó trasladar ese mismo fix a `release.yml` al crearlo. Corregido añadiendo el mismo placeholder `DATABASE_URL="file:./dev.db"` ya usado en `ci.yml`/Vercel.
+
 ---
 
 ## Backlog / candidatos a fases futuras (fuera de v1)

@@ -19,6 +19,14 @@ jobs:
   release:
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     runs-on: ubuntu-latest
+    env:
+      # pnpm install en la raíz dispara el postinstall de todos los
+      # workspaces, incluido el de apps/api (prisma generate), que exige
+      # DATABASE_URL para poder cargar prisma.config.ts aunque este
+      # workflow no toque apps/api en ningún momento — mismo hallazgo que
+      # ya documentó la Fase 8 para el despliegue en Vercel (ver adenda de
+      # docs/ROADMAP.md). Placeholder, nunca se conecta de verdad.
+      DATABASE_URL: "file:./dev.db"
     steps:
       - uses: actions/checkout@v4
         with:
