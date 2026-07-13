@@ -18,6 +18,7 @@ export * from "./molecules/QuantitySelector";
 export * from "./molecules/Table";
 export * from "./molecules/WizardSteps";
 export * from "./organisms/CartDrawer";
+export * from "./organisms/Footer";
 export * from "./organisms/Navbar";
 export * from "./organisms/UserMenu";
 export { cn } from "./utils/cn";

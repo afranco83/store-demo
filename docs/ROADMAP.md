@@ -379,12 +379,36 @@ Con el roadmap completo ya cerrado (Fase 8), primera pieza de trabajo fuera de f
 
 ## Backlog / candidatos a fases futuras (fuera de v1)
 
-- Internacionalización (i18n)
-- Feature flags
-- Analítica de producto
-- Publicación real de paquetes a npm vía Changesets
-- App interna de gestión de git worktrees (monitorización, creación, edición y borrado), para no depender de comandos manuales de `git worktree` durante el desarrollo en paralelo (ver `ARCHITECTURE.md` §8). No comprometida todavía: se evalúa cuando el multitasking manual empiece a doler de verdad.
-- Testing de regresión visual automatizada (p. ej. Chromatic/Percy sobre las historias de Storybook de `packages/ui`). No comprometido: en principio la pirámide actual (unitario/integración + E2E de `AGENTS.md` §6) se considera suficiente para el alcance de este proyecto; se reevalúa solo si aparecen regresiones visuales reales que ese testing no atrape.
+Ninguno comprometido todavía — se reevalúan solo si aparece una necesidad concreta que lo justifique, no por adelantado (YAGNI, `AGENTS.md §10`). Repriorizado el 2026-07-13 (retomando esta sección, hasta entonces sin tocar desde su redacción original) con un único criterio nuevo explícito: dado que este repo es una carta de presentación técnica (`docs/PROJECT_SPECIFICATION.md §1`, [[project-store-demo]]), pesa a favor de un candidato que el resultado sea _visible_ para quien revisa el repo/la demo pública, no solo tooling interno.
+
+**Candidatos preferentes** (mayor valor de showcase, primeros en considerarse si se retoma el backlog):
+
+- Internacionalización (i18n) — patrón real y visible en App Router, no solo tooling interno.
+- Feature flags / experimentación — demuestra un patrón de "progressive delivery" que se nota en el código.
+- Analítica de producto — integración típica de un stack profesional, coste de implementación moderado.
+- Testing de regresión visual automatizada (p. ej. Chromatic sobre las historias de Storybook ya existentes en `packages/ui`) — coste bajo (Storybook ya está montado), demuestra una práctica de QA madura. Reemplaza la exclusión anterior ("la pirámide actual se considera suficiente"): sigue siendo cierto que no cubre un hueco de calidad real detectado, pero el cálculo de prioridad ya no es solo "¿hace falta?" sino también "¿aporta como showcase con poco esfuerzo?".
+
+**Candidatos aparcados** (sin cambio de fondo, o de menor valor de showcase por ser tooling no visible externamente):
+
+- Publicación real de paquetes a npm vía Changesets — matizado el 2026-07-13: con `semantic-release` ya cubriendo el versionado único de todo el monorepo (ver "Post-roadmap" más abajo), añadir Changesets encima solo tendría sentido si el objetivo pasa a ser publicar `packages/ui` de verdad como paquete independiente — un alcance distinto a "versionar", no una simple ejecución de esta línea tal cual estaba escrita.
+- App interna de gestión de git worktrees (monitorización, creación, edición y borrado), para no depender de comandos manuales de `git worktree` durante el desarrollo en paralelo (ver `ARCHITECTURE.md` §8). No comprometida todavía: se evalúa cuando el multitasking manual empiece a doler de verdad; además, por su naturaleza de herramienta-para-la-herramienta, no aporta valor de showcase visible a un revisor externo.
 - "Tests como documentación viva" para stakeholders no técnicos (specs en Gherkin/Cucumber). No comprometido por la misma razón: añadiría una herramienta y un lenguaje de specs nuevos sin una necesidad concreta todavía; Storybook ya cumple parcialmente ese rol de documentación de `packages/ui`.
-- Skills genéricas transversales reutilizables entre proyectos sobre este mismo stack (React + Next.js + TypeScript + Zod + TanStack Query + Zustand), separadas de las skills específicas de `store_demo`. No comprometido: hoy solo existe un proyecto sobre este stack, así que no hay forma de saber qué parte de las skills planificadas en `CLAUDE.md` es realmente transversal y cuál es específica de este repo sin haberlo comprobado en un segundo proyecto real; extraerlas ahora sería abstracción prematura (mismo criterio YAGNI de `AGENTS.md §10`). Se reevalúa si aparece un segundo proyecto sobre este stack.
-- Workflows/automatizaciones adicionales a la CI ya prevista (`ci.yml`, `ARCHITECTURE.md`) — p. ej. hooks o rutinas programadas que disparen agentes/skills automáticamente ante ciertos eventos. No comprometido: no hay hoy un proceso manual concreto que esté doliendo lo bastante como para justificar la automatización; se reevalúa si surge uno.
+- Skills genéricas transversales reutilizables entre proyectos sobre este mismo stack (React + Next.js + TypeScript + Zod + TanStack Query + Zustand), separadas de las skills específicas de `store_demo`. No comprometido: hoy solo existe un proyecto sobre este stack, así que no hay forma de saber qué parte de las skills planificadas en `CLAUDE.md` es realmente transversal y cuál es específica de este repo sin haberlo comprobado en un segundo proyecto real; extraerlas ahora sería abstracción prematura (mismo criterio YAGNI). Se reevalúa si aparece un segundo proyecto sobre este stack.
+- Workflows/automatizaciones adicionales a la CI ya prevista (`ci.yml`, `ARCHITECTURE.md`) — p. ej. hooks o rutinas programadas que disparen agentes/skills automáticamente ante ciertos eventos. No comprometido: no hay hoy un proceso manual concreto que esté doliendo lo bastante como para justificar la automatización; además es tooling no visible externamente. Se reevalúa si surge un proceso manual doloroso de verdad.
+
+## Pulido pendiente (deuda de producto, distinta del backlog de fases futuras)
+
+Detectado el 2026-07-13 al revisar la gestión de Notion del proyecto: mejoras concretas sobre lo ya construido, sin comprometer todavía ninguna. A diferencia del backlog de arriba, no son apuestas arquitectónicas nuevas.
+
+- Home: añadir Hero.
+- ~~Layout: añadir Footer~~ — **cerrada el 2026-07-13**, ver adenda debajo.
+- Página de detalle de producto: añadir productos relacionados.
+- Mejoras de SEO.
+
+**Adenda — "Layout: añadir Footer", cerrada el 2026-07-13.** Al revisar la tarea se confirmó que `SiteFooter`/`AdminFooter` ya existían pero eran solo un wrapper mínimo con el `VersionBadge` centrado — ningún contenido de navegación. Decisiones tomadas con el usuario: footer enriquecido tipo e-commerce solo en `storefront` (columnas de navegación + enlace a GitHub + copyright, fondo oscuro con acento de marca), `admin` se deja igual de minimalista que estaba (los paneles de admin no llevan footer de marketing).
+
+Siguiendo el workflow component-first (`CLAUDE.md`), se creó primero el organism `Footer` en `packages/ui/src/organisms/Footer` (slots para marca/columnas/barra inferior, mismo patrón "tonto" que `Navbar` — no depende de Next, la app consumidora inyecta los `<Link>`), con story + test + 100% cobertura. `apps/storefront/src/components/SiteFooter.tsx` lo consume con datos reales: categorías vía `getCategories()` (las 3 reales del seed — Camisetas, Gorras, Zapatillas — nunca hardcodeadas), y columna "Cuenta" condicional según `auth()` (mismo patrón que `SiteHeader`).
+
+**Detalle técnico no obvio**: el fondo oscuro es _siempre_ oscuro (decisión de diseño, no ligado al tema del SO), pero `--color-accent` de `packages/design-tokens` solo se aclara lo suficiente para AA cuando el propio SO está en dark (`prefers-color-scheme`) — con el SO en claro, el acento normal falla contraste sobre ese fondo. Se añadió un token nuevo `--color-accent-on-dark` (mismo valor que la variante dark, `#f0672a`, pero fuera del `@media`) para superficies siempre oscuras; contraste verificado a mano sobre `gray-900` (#111827): **5.64:1**, pasa AA texto normal. Documentado como convención general en `AGENTS.md §5` (mismo criterio que ya preveía este caso desde la Fase 3) para cuando aparezca otra superficie siempre-oscura.
+
+Verificado con `pnpm turbo lint typecheck test build --filter=@store-demo/design-tokens --filter=@store-demo/ui --filter=@store-demo/storefront --force` en verde, y con los dev servers reales (`apps/api` + `apps/storefront`) — el HTML servido se inspeccionó con `curl` para confirmar que las 3 categorías, el estado de sesión y los tokens de color correctos llegaban al DOM real, no solo a los tests. Esa misma verificación real destapó un bug real antes de darlo por cerrado: el `className="text-lg"` pasado a `Typography variant="heading"` no sobreescribía `sm:text-3xl` (twMerge deduplica por variante+breakpoint exacto, no entre breakpoints distintos) — el nombre de marca se habría visto desproporcionado en desktop. Corregido con `text-lg sm:text-lg`. De paso se corrigió un valor obsoleto encontrado en `packages/design-tokens/src/index.ts` (`accentSoft` seguía en `10%` pese a que `tokens.css` ya había bajado a `6%` en la Fase 8 — el mirror TS nunca se usa en código real, así que no rompía nada, pero quedaba desincronizado).
