@@ -1,3 +1,17 @@
+# [1.1.0](https://github.com/afranco83/store-demo/compare/v1.0.1...v1.1.0) (2026-07-13)
+
+### Bug Fixes
+
+- corregir 5 bugs reales encontrados en /code-review high + bug-hunter sobre la PR ([1959fb7](https://github.com/afranco83/store-demo/commit/1959fb72d813eaa62edb7b0ffa7329bdc41198e6))
+- **e2e:** corregir el fallo real de CI en la PR (contraste + locators ambiguos ([b2bf906](https://github.com/afranco83/store-demo/commit/b2bf906f8e8457372a0e6bf08a3414f81cc53709))
+
+### Features
+
+- **storefront:** añadir SEO técnico, Open Graph/Twitter, JSON-LD y gate de Lighthouse ([8168f72](https://github.com/afranco83/store-demo/commit/8168f72abbc0f1001f461785ab5f8d0ac8b01f1b))
+- **storefront:** mostrar productos relacionados en el detalle de producto ([1c075a4](https://github.com/afranco83/store-demo/commit/1c075a408a778ee24362e390ad0618d0c2fb5c96))
+- **ui:** añadir molécula Hero y usarla en la home de storefront ([2b663b5](https://github.com/afranco83/store-demo/commit/2b663b5ccabb7de9f150736341df80eb93e7e0d8))
+- **ui:** añadir organism Footer y enriquecer el footer de storefront ([14c89e7](https://github.com/afranco83/store-demo/commit/14c89e7a934ecacdf33d3b4832b2cf8a802387ab))
+
 ## [1.0.1](https://github.com/afranco83/store-demo/compare/v1.0.0...v1.0.1) (2026-07-13)
 
 ### Bug Fixes
