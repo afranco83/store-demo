@@ -1,21 +1,18 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { EmptyState, WizardSteps, buttonVariants } from "@store-demo/ui";
 
+import { Link } from "@/i18n/navigation";
 import { useCart } from "../../cart/hooks/use-cart";
 import { useCheckoutWizardStore } from "../store/use-checkout-wizard-store";
 import { ShippingStepForm } from "./ShippingStepForm";
 import { PaymentStepForm } from "./PaymentStepForm";
 import { ReviewStep } from "./ReviewStep";
 
-const STEPS = [
-  { id: "shipping", label: "Envío" },
-  { id: "payment", label: "Pago" },
-  { id: "review", label: "Revisión" },
-];
+const STEP_IDS = ["shipping", "payment", "review"] as const;
 
 const STEP_COMPONENTS = {
   shipping: ShippingStepForm,
@@ -24,11 +21,14 @@ const STEP_COMPONENTS = {
 } as const;
 
 export function CheckoutWizard() {
+  const t = useTranslations("checkout");
   const cartQuery = useCart();
   const currentStepId = useCheckoutWizardStore((state) => state.currentStepId);
   const completedStepIds = useCheckoutWizardStore((state) => state.completedStepIds);
   const confirmedOrder = useCheckoutWizardStore((state) => state.confirmedOrder);
   const reset = useCheckoutWizardStore((state) => state.reset);
+
+  const steps = STEP_IDS.map((id) => ({ id, label: t(`steps.${id}`) }));
 
   // El store del wizard es un singleton a nivel de módulo: sobrevive a
   // cualquier navegación cliente dentro de la misma pestaña (p. ej. el botón
@@ -60,11 +60,11 @@ export function CheckoutWizard() {
     return (
       <EmptyState
         icon={ShoppingBag}
-        title="Tu carrito está vacío"
-        description="Añade productos del catálogo antes de continuar con el pago."
+        title={t("emptyCartTitle")}
+        description={t("emptyCartDescription")}
         action={
           <Link href="/products" className={buttonVariants({})}>
-            Ver catálogo
+            {t("viewCatalog")}
           </Link>
         }
       />
@@ -77,11 +77,11 @@ export function CheckoutWizard() {
     <div className="flex flex-col gap-8">
       {!confirmedOrder && (
         <WizardSteps
-          steps={STEPS}
+          steps={steps}
           currentStepId={currentStepId}
           completedStepIds={completedStepIds}
-          navLabel="Progreso del checkout"
-          completedStepLabel="Completado"
+          navLabel={t("navLabel")}
+          completedStepLabel={t("completedStepLabel")}
         />
       )}
       <StepComponent />

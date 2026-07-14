@@ -9,6 +9,7 @@ describe("OrderSummaryCard", () => {
     const { container } = renderWithProviders(
       <OrderSummaryCard
         orderId="clx1a2b3c4d5e6f7g8h9"
+        title={(shortOrderId) => `Pedido #${shortOrderId}`}
         placedAtLabel="12 de julio de 2026"
         statusBadge={{ label: "Pendiente", intent: "warning" }}
         totalCents={5998}
@@ -23,6 +24,7 @@ describe("OrderSummaryCard", () => {
     renderWithProviders(
       <OrderSummaryCard
         orderId="clx1a2b3c4d5e6f7g8h9"
+        title={(shortOrderId) => `Pedido #${shortOrderId}`}
         placedAtLabel="12 de julio de 2026"
         statusBadge={{ label: "Enviado", intent: "accent" }}
         totalCents={5998}

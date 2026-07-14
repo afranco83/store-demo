@@ -1,16 +1,18 @@
 import { PackageSearch } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { EmptyState, ProductGrid } from "@store-demo/ui";
 import type { Product } from "@store-demo/shared-types";
 
 import { ProductCardLink } from "./ProductCardLink";
 
-export function ProductGridSection({ products }: { products: Product[] }) {
+export async function ProductGridSection({ products }: { products: Product[] }) {
   if (products.length === 0) {
+    const t = await getTranslations("products");
     return (
       <EmptyState
         icon={PackageSearch}
-        title="No hay productos en esta categoría"
-        description="Prueba a elegir otra categoría del catálogo."
+        title={t("emptyCategoryTitle")}
+        description={t("emptyCategoryDescription")}
       />
     );
   }

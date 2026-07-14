@@ -1,4 +1,4 @@
-import type { Ref } from "react";
+import type { ReactNode, Ref } from "react";
 
 import type { BadgeProps } from "../../atoms/Badge";
 import { Badge } from "../../atoms/Badge";
@@ -8,20 +8,27 @@ import { cn } from "../../utils/cn";
 
 export interface OrderSummaryCardProps {
   orderId: string;
+  /** Título de la card (p. ej. "Pedido #clx1a2b3" / "Order #clx1a2b3") —
+   * construido por la app consumidora, que conoce el idioma activo. */
+  title: (shortOrderId: string) => ReactNode;
   placedAtLabel: string;
   statusBadge: { label: string; intent?: BadgeProps["intent"] };
   totalCents: number;
   itemCountLabel: string;
+  /** Locale de formateo del precio (ver PriceTag), default "es-ES". */
+  priceLocale?: string;
   className?: string;
   ref?: Ref<HTMLDivElement>;
 }
 
 export function OrderSummaryCard({
   orderId,
+  title,
   placedAtLabel,
   statusBadge,
   totalCents,
   itemCountLabel,
+  priceLocale,
   className,
   ref,
 }: OrderSummaryCardProps) {
@@ -35,14 +42,14 @@ export function OrderSummaryCard({
     >
       <div className="flex flex-col gap-1">
         <Typography as="p" variant="body" className="font-medium">
-          {`Pedido #${orderId.slice(0, 8)}`}
+          {title(orderId.slice(0, 8))}
         </Typography>
         <Typography variant="caption">{placedAtLabel}</Typography>
         <Typography variant="caption">{itemCountLabel}</Typography>
       </div>
       <div className="flex flex-col items-end gap-2">
         <Badge intent={statusBadge.intent}>{statusBadge.label}</Badge>
-        <PriceTag amountCents={totalCents} />
+        <PriceTag amountCents={totalCents} locale={priceLocale} />
       </div>
     </div>
   );

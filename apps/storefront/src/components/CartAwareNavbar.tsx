@@ -10,10 +10,12 @@ export function CartAwareNavbar({
   logoSlot,
   navSlot,
   authSlot,
+  cartLabel,
 }: {
   logoSlot: ReactNode;
   navSlot: ReactNode;
   authSlot: ReactNode;
+  cartLabel: string;
 }) {
   const cartQuery = useCart();
   const openCartDrawer = useCartDrawerStore((state) => state.open);
@@ -27,7 +29,7 @@ export function CartAwareNavbar({
       authSlot={authSlot}
       cartItemCount={cartItemCount}
       onCartClick={openCartDrawer}
-      cartLabel="Abrir carrito"
+      cartLabel={cartLabel}
     />
   );
 }

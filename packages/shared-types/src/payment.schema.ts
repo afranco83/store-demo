@@ -1,11 +1,13 @@
 import { z } from "zod";
 
+// Sin mensajes de error custom a propósito: ver el mismo comentario en
+// shipping-address.schema.ts.
 export const simulatedPaymentSchema = z.object({
-  cardholderName: z.string().min(1, "El nombre del titular no puede estar vacío"),
-  cardNumber: z.string().regex(/^\d{16}$/, "La tarjeta debe tener 16 dígitos"),
-  expiryMonth: z.string().regex(/^(0[1-9]|1[0-2])$/, "Mes de caducidad inválido"),
-  expiryYear: z.string().regex(/^\d{4}$/, "Año de caducidad inválido"),
-  cvc: z.string().regex(/^\d{3,4}$/, "CVC inválido"),
+  cardholderName: z.string().min(1),
+  cardNumber: z.string().regex(/^\d{16}$/),
+  expiryMonth: z.string().regex(/^(0[1-9]|1[0-2])$/),
+  expiryYear: z.string().regex(/^\d{4}$/),
+  cvc: z.string().regex(/^\d{3,4}$/),
 });
 export type SimulatedPayment = z.infer<typeof simulatedPaymentSchema>;
 

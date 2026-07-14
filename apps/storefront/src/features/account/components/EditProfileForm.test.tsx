@@ -1,11 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
-import {
-  createUserFixture,
-  expectNoAccessibilityViolations,
-  renderWithProviders,
-} from "@store-demo/testing";
+import { createUserFixture, expectNoAccessibilityViolations } from "@store-demo/testing";
 
+import { renderWithProviders } from "@/test/render-with-intl";
 import { updateProfileAction } from "../api/update-profile.action";
 import { EditProfileForm } from "./EditProfileForm";
 

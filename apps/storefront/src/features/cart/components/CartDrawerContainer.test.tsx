@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { screen, waitFor, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
-import { createCartItemFixture, renderWithProviders, server } from "@store-demo/testing";
+import { createCartItemFixture, server } from "@store-demo/testing";
 
+import { renderWithProviders } from "@/test/render-with-intl";
 import { useCartDrawerStore } from "../store/use-cart-drawer-store";
 import { CartDrawerContainer } from "./CartDrawerContainer";
 
@@ -132,8 +133,7 @@ describe("CartDrawerContainer", () => {
         ).not.toBeDisabled(),
       { timeout: 8000 },
     );
-  }, // Timeout del test completo (no solo de cada waitFor individual): con dos
-  // waitFor de 8000ms cada uno en el peor caso, el default de Vitest (5000ms
+  }, // waitFor de 8000ms cada uno en el peor caso, el default de Vitest (5000ms // Timeout del test completo (no solo de cada waitFor individual): con dos
   // para todo el test) revienta antes de que cualquiera de los dos llegue a
   // su propio límite — visto en CI (setup de 60s+ en ese run, frente a ~1s
   // en local), no reproducible en una máquina poco cargada.

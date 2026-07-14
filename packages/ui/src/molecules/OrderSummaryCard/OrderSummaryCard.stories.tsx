@@ -7,6 +7,7 @@ const meta = {
   component: OrderSummaryCard,
   args: {
     orderId: "clx1a2b3c4d5e6f7g8h9",
+    title: (shortOrderId) => `Pedido #${shortOrderId}`,
     placedAtLabel: "12 de julio de 2026",
     statusBadge: { label: "Pendiente", intent: "warning" },
     totalCents: 5998,

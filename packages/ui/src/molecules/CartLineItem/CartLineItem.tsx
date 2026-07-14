@@ -17,6 +17,8 @@ export interface CartLineItemProps {
   onRemove: () => void;
   maxQuantity?: number;
   isUpdating?: boolean;
+  /** Locale de formateo del precio (ver PriceTag), default "es-ES". */
+  priceLocale?: string;
   quantityLabel?: string;
   decreaseQuantityLabel?: string;
   increaseQuantityLabel?: string;
@@ -34,6 +36,7 @@ export function CartLineItem({
   onRemove,
   maxQuantity,
   isUpdating = false,
+  priceLocale,
   quantityLabel = "Quantity",
   decreaseQuantityLabel = "Decrease quantity",
   increaseQuantityLabel = "Increase quantity",
@@ -48,7 +51,7 @@ export function CartLineItem({
         <Typography as="p" variant="body" className="font-medium">
           {name}
         </Typography>
-        <PriceTag amountCents={priceCents} size="sm" />
+        <PriceTag amountCents={priceCents} size="sm" locale={priceLocale} />
         <QuantitySelector
           value={quantity}
           onChange={onQuantityChange}

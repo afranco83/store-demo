@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Button, Input } from "@store-demo/ui";
 import { updateProfileRequestSchema } from "@store-demo/shared-types";
 import type { UpdateProfileRequest, User } from "@store-demo/shared-types";
@@ -10,6 +11,7 @@ import type { UpdateProfileRequest, User } from "@store-demo/shared-types";
 import { updateProfileAction } from "../api/update-profile.action";
 
 export function EditProfileForm({ profile }: { profile: User }) {
+  const t = useTranslations("account");
   const [serverError, setServerError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const {
@@ -44,14 +46,14 @@ export function EditProfileForm({ profile }: { profile: User }) {
       className="flex flex-col gap-4"
     >
       <Input
-        label="Nombre"
+        label={t("nameLabel")}
         autoComplete="name"
         error={errors.name?.message}
         {...register("name")}
       />
       <Input
         type="email"
-        label="Email"
+        label={t("emailLabel")}
         autoComplete="email"
         error={errors.email?.message}
         {...register("email")}
@@ -61,9 +63,9 @@ export function EditProfileForm({ profile }: { profile: User }) {
           {serverError}
         </p>
       ) : null}
-      {isSaved ? <p className="text-sm text-green-700">Cambios guardados.</p> : null}
+      {isSaved ? <p className="text-sm text-green-700">{t("savedMessage")}</p> : null}
       <Button type="submit" isLoading={isSubmitting} className="self-start">
-        Guardar cambios
+        {t("saveButton")}
       </Button>
     </form>
   );

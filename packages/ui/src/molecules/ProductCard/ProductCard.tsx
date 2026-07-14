@@ -16,6 +16,8 @@ export interface ProductCardProps {
   stockBadge?: { label: string; intent?: BadgeProps["intent"] };
   onAddToCart?: () => void;
   addToCartLabel?: string;
+  /** Locale de formateo del precio (ver PriceTag), default "es-ES". */
+  priceLocale?: string;
   // Espejo del prop `priority` de next/image, sin depender de Next.js
   // (packages/ui es ciego al framework, AGENTS.md §1.3): las cards visibles
   // sin scroll (candidatas a LCP) lo marcan para no cargar su imagen en
@@ -32,6 +34,7 @@ export function ProductCard({
   stockBadge,
   onAddToCart,
   addToCartLabel = "Add to cart",
+  priceLocale,
   priority = false,
   className,
   ref,
@@ -59,7 +62,7 @@ export function ProductCard({
         {name}
       </Typography>
       <div className="flex items-center justify-between gap-2">
-        <PriceTag amountCents={priceCents} />
+        <PriceTag amountCents={priceCents} locale={priceLocale} />
         {onAddToCart ? (
           // relative z-10: si quien consume la card la envuelve en un "stretched
           // link" (overlay absolute cubriendo toda la card, patrón habitual para

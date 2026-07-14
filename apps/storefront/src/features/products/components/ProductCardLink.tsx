@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { ProductCard } from "@store-demo/ui";
 import type { Product } from "@store-demo/shared-types";
 
+import { Link } from "@/i18n/navigation";
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { useAddToCartMutation } from "../../cart/hooks/use-add-to-cart-mutation";
 import { useCartDrawerStore } from "../../cart/store/use-cart-drawer-store";
 import { buildCloudinaryThumbnailUrl } from "../services/build-cloudinary-thumbnail-url";
@@ -18,6 +20,8 @@ export function ProductCardLink({
   product: Product;
   priority?: boolean;
 }) {
+  const t = useTranslations("products");
+  const locale = useLocale();
   const addToCartMutation = useAddToCartMutation();
   const openCartDrawer = useCartDrawerStore((state) => state.open);
 
@@ -39,8 +43,12 @@ export function ProductCardLink({
         name={product.name}
         imageUrl={buildCloudinaryThumbnailUrl(product.imageUrl, THUMBNAIL_WIDTH_PX)}
         priceCents={product.priceCents}
-        stockBadge={getStockBadge(product.stock)}
-        addToCartLabel="Añadir al carrito"
+        stockBadge={getStockBadge(product.stock, {
+          outOfStock: t("outOfStock"),
+          lowStock: t("lowStock"),
+        })}
+        addToCartLabel={t("addToCart")}
+        priceLocale={toIntlLocale(locale)}
         priority={priority}
         onAddToCart={
           product.stock > 0

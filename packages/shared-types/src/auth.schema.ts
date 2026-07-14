@@ -13,9 +13,11 @@ export const loginResponseSchema = z.object({
 });
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
+// Sin mensaje de error custom en password a propósito: ver el mismo
+// comentario en shipping-address.schema.ts.
 export const registerRequestSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8, "Password must be at least 8 characters long"),
+  password: z.string().min(8),
   name: z.string().min(1),
 });
 export type RegisterRequest = z.infer<typeof registerRequestSchema>;

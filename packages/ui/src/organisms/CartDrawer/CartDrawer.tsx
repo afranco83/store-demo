@@ -39,6 +39,9 @@ export interface CartDrawerProps {
   emptyStateAction?: ReactNode;
   /** Enlace/botón hacia el checkout, renderizado junto al subtotal cuando hay artículos. */
   checkoutAction?: ReactNode;
+  /** Locale de formateo de precios (ver PriceTag), default "es-ES" — se aplica
+   * al subtotal y se reenvía a cada CartLineItem. */
+  priceLocale?: string;
   title?: string;
   closeLabel?: string;
   emptyStateTitle?: string;
@@ -56,6 +59,7 @@ export function CartDrawer({
   errorMessage,
   emptyStateAction,
   checkoutAction,
+  priceLocale,
   title = "Cart",
   closeLabel = "Close cart",
   emptyStateTitle = "Your cart is empty",
@@ -161,7 +165,7 @@ export function CartDrawer({
         ) : (
           <div className="flex-1 divide-y divide-gray-100 overflow-y-auto">
             {items.map(({ id, ...item }) => (
-              <CartLineItem key={id} {...item} />
+              <CartLineItem key={id} {...item} priceLocale={priceLocale} />
             ))}
           </div>
         )}
@@ -172,7 +176,7 @@ export function CartDrawer({
               <Typography variant="body" className="font-medium">
                 {subtotalLabel}
               </Typography>
-              <PriceTag amountCents={subtotalCents} size="lg" />
+              <PriceTag amountCents={subtotalCents} size="lg" locale={priceLocale} />
             </div>
             {checkoutAction}
           </div>

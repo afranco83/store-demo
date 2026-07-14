@@ -1,11 +1,13 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 import { getOrders } from "@store-demo/api-client";
 import type { Order } from "@store-demo/shared-types";
 // Import de subpath (no del barrel "@store-demo/auth"): ver el mismo
 // comentario en features/cart/lib/get-cart-identity.ts.
 import { getApiToken } from "@store-demo/auth/get-api-token";
+
+import { redirect } from "@/i18n/navigation";
 
 export async function getOrdersAction(): Promise<Order[]> {
   const token = await getApiToken();
@@ -16,7 +18,7 @@ export async function getOrdersAction(): Promise<Order[]> {
     // — defensa en profundidad real, no solo teórica (AGENTS.md §10): en vez
     // de reventar con un error sin manejar, se degrada igual que el guard de
     // middleware.
-    redirect("/login");
+    return redirect({ href: "/login", locale: await getLocale() });
   }
   return getOrders({ token });
 }

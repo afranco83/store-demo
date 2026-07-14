@@ -1,15 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { CartDrawer, type CartDrawerItem, buttonVariants, cn } from "@store-demo/ui";
 
+import { Link } from "@/i18n/navigation";
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { useCart } from "../hooks/use-cart";
 import { useRemoveCartItemMutation } from "../hooks/use-remove-cart-item-mutation";
 import { useUpdateCartItemMutation } from "../hooks/use-update-cart-item-mutation";
 import { useCartDrawerStore } from "../store/use-cart-drawer-store";
 
 export function CartDrawerContainer() {
+  const t = useTranslations("cart");
+  const locale = useLocale();
   const isOpen = useCartDrawerStore((state) => state.isOpen);
   const close = useCartDrawerStore((state) => state.close);
 
@@ -50,10 +54,10 @@ export function CartDrawerContainer() {
     quantity: item.quantity,
     maxQuantity: item.product.stock,
     isUpdating: pendingProductIds.has(item.productId),
-    quantityLabel: "Cantidad",
-    decreaseQuantityLabel: "Reducir cantidad",
-    increaseQuantityLabel: "Aumentar cantidad",
-    removeLabel: "Eliminar producto",
+    quantityLabel: t("quantityLabel"),
+    decreaseQuantityLabel: t("decreaseQuantityLabel"),
+    increaseQuantityLabel: t("increaseQuantityLabel"),
+    removeLabel: t("removeLabel"),
     onQuantityChange: (next) => {
       markPending(item.productId);
       // mutateAsync (no mutate con callbacks) porque updateCartItemMutation
@@ -77,7 +81,7 @@ export function CartDrawerContainer() {
 
   const errorMessage =
     cartQuery.isError || updateCartItemMutation.isError || removeCartItemMutation.isError
-      ? "No se pudo actualizar el carrito. Inténtalo de nuevo."
+      ? t("errorMessage")
       : undefined;
 
   return (
@@ -88,11 +92,12 @@ export function CartDrawerContainer() {
       subtotalCents={subtotalCents}
       isLoading={cartQuery.isLoading}
       errorMessage={errorMessage}
-      title="Carrito"
-      closeLabel="Cerrar carrito"
-      emptyStateTitle="Tu carrito está vacío"
-      emptyStateDescription="Añade productos del catálogo para verlos aquí."
-      subtotalLabel="Subtotal"
+      title={t("title")}
+      closeLabel={t("closeLabel")}
+      emptyStateTitle={t("emptyStateTitle")}
+      emptyStateDescription={t("emptyStateDescription")}
+      subtotalLabel={t("subtotalLabel")}
+      priceLocale={toIntlLocale(locale)}
       checkoutAction={
         // `close()` explícito: CartDrawerContainer está montado en el layout
         // raíz (visible en todas las páginas), así que sin cerrar el drawer
@@ -102,7 +107,7 @@ export function CartDrawerContainer() {
           onClick={close}
           className={cn(buttonVariants(), "w-full justify-center")}
         >
-          Finalizar compra
+          {t("checkoutButton")}
         </Link>
       }
     />

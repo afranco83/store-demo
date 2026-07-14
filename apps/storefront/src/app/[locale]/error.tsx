@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Button, Typography } from "@store-demo/ui";
 
 export default function Error({
@@ -10,6 +11,8 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("errors");
+
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -17,13 +20,13 @@ export default function Error({
   return (
     <main className="mx-auto flex max-w-xl flex-col items-center gap-4 px-4 py-20 text-center">
       <Typography as="h1" variant="heading">
-        Algo ha ido mal
+        {t("title")}
       </Typography>
       <Typography variant="body" className="text-gray-600">
-        No se ha podido cargar esta página. Inténtalo de nuevo en unos segundos.
+        {t("description")}
       </Typography>
       <Button type="button" onClick={reset}>
-        Reintentar
+        {t("retryButton")}
       </Button>
     </main>
   );

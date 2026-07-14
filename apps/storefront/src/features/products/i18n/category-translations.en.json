@@ -1,0 +1,5 @@
+{
+  "camisetas": { "name": "T-Shirts", "description": "T-shirts for every occasion" },
+  "gorras": { "name": "Caps", "description": "Seasonal caps and hats" },
+  "zapatillas": { "name": "Sneakers", "description": "Sporty and casual footwear" }
+}

@@ -12,6 +12,7 @@ export * from "./molecules/CartLineItem";
 export * from "./molecules/ConfirmDialog";
 export * from "./molecules/EmptyState";
 export * from "./molecules/Hero";
+export * from "./molecules/LocaleSwitcher";
 export * from "./molecules/OrderSummaryCard";
 export * from "./molecules/ProductCard";
 export * from "./molecules/ProductGrid";

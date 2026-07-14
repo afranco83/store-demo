@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
-import { expectNoAccessibilityViolations, renderWithProviders } from "@store-demo/testing";
+import { expectNoAccessibilityViolations } from "@store-demo/testing";
 
+import { renderWithProviders } from "@/test/render-with-intl";
 import { useCheckoutWizardStore } from "../store/use-checkout-wizard-store";
 import { ShippingStepForm } from "./ShippingStepForm";
 
