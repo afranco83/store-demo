@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Button, Input } from "@store-demo/ui";
 import { simulatedPaymentSchema } from "@store-demo/shared-types";
 import type { SimulatedPayment } from "@store-demo/shared-types";
@@ -9,6 +10,7 @@ import type { SimulatedPayment } from "@store-demo/shared-types";
 import { useCheckoutWizardStore } from "../store/use-checkout-wizard-store";
 
 export function PaymentStepForm() {
+  const t = useTranslations("checkout.paymentForm");
   const payment = useCheckoutWizardStore((state) => state.payment);
   const completePaymentStep = useCheckoutWizardStore((state) => state.completePaymentStep);
   const goToStep = useCheckoutWizardStore((state) => state.goToStep);
@@ -35,13 +37,13 @@ export function PaymentStepForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       <Input
-        label="Nombre del titular"
+        label={t("cardholderNameLabel")}
         autoComplete="cc-name"
         error={errors.cardholderName?.message}
         {...register("cardholderName")}
       />
       <Input
-        label="Número de tarjeta"
+        label={t("cardNumberLabel")}
         inputMode="numeric"
         autoComplete="cc-number"
         maxLength={16}
@@ -50,25 +52,25 @@ export function PaymentStepForm() {
       />
       <div className="flex gap-4">
         <Input
-          label="Mes de caducidad"
+          label={t("expiryMonthLabel")}
           inputMode="numeric"
           autoComplete="cc-exp-month"
-          placeholder="MM"
+          placeholder={t("expiryMonthPlaceholder")}
           maxLength={2}
           error={errors.expiryMonth?.message}
           {...register("expiryMonth")}
         />
         <Input
-          label="Año de caducidad"
+          label={t("expiryYearLabel")}
           inputMode="numeric"
           autoComplete="cc-exp-year"
-          placeholder="AAAA"
+          placeholder={t("expiryYearPlaceholder")}
           maxLength={4}
           error={errors.expiryYear?.message}
           {...register("expiryYear")}
         />
         <Input
-          label="CVC"
+          label={t("cvcLabel")}
           inputMode="numeric"
           autoComplete="cc-csc"
           maxLength={4}
@@ -78,10 +80,10 @@ export function PaymentStepForm() {
       </div>
       <div className="flex gap-3">
         <Button type="button" intent="outline" onClick={() => goToStep("shipping")}>
-          Volver a envío
+          {t("backButton")}
         </Button>
         <Button type="submit" isLoading={isSubmitting}>
-          Continuar a revisión
+          {t("continueButton")}
         </Button>
       </div>
     </form>

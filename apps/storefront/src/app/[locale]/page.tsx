@@ -1,20 +1,30 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { buttonVariants, Hero } from "@store-demo/ui";
 
+import { Link } from "@/i18n/navigation";
 import { getProducts } from "@/features/products/api/products.api";
 import { ProductGridSection } from "@/features/products/components/ProductGridSection";
 
 const FEATURED_PRODUCTS_LIMIT = 8;
-const TITLE = "Inicio";
-const DESCRIPTION = "Streetwear con estilo: camisetas, gorras y zapatillas.";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  openGraph: { title: TITLE, description: DESCRIPTION },
-  twitter: { title: TITLE, description: DESCRIPTION },
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
+  const title = t("title");
+  const description = t("description");
+
+  return {
+    title,
+    description,
+    openGraph: { title, description },
+    twitter: { title, description },
+  };
+}
 
 // Sin esto, el `revalidate: 60` de getProducts() hace que Next intente
 // pre-renderizar esta página en build time — funciona en local porque
@@ -24,17 +34,17 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const products = await getProducts();
+  const [products, t] = await Promise.all([getProducts(), getTranslations("home")]);
 
   return (
     <main className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10">
       <Hero
-        eyebrow="Store Demo"
-        title="Streetwear con estilo"
-        description="Camisetas, gorras y zapatillas pensadas para el día a día."
+        eyebrow={t("heroEyebrow")}
+        title={t("heroTitle")}
+        description={t("heroDescription")}
         action={
           <Link href="/products" className={buttonVariants({ intent: "secondary", size: "lg" })}>
-            Ver catálogo
+            {t("viewCatalog")}
           </Link>
         }
       />

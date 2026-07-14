@@ -1,0 +1,177 @@
+{
+  "seo": {
+    "siteDescription": "Demo online store — showcase of a professional frontend architecture."
+  },
+  "nav": {
+    "home": "Home",
+    "catalog": "Catalog",
+    "login": "Log in",
+    "accountTrigger": "Account",
+    "myAccount": "My account",
+    "myOrders": "My orders",
+    "logout": "Log out",
+    "openCart": "Open cart"
+  },
+  "footer": {
+    "tagline": "Portfolio project showcasing a professional frontend stack: React, Next.js, TypeScript, Zod, TanStack Query and Zustand.",
+    "storeHeading": "Store",
+    "accountHeading": "Account",
+    "login": "Log in",
+    "register": "Create account",
+    "copyright": "© {year} Store Demo. Portfolio project.",
+    "github": "GitHub",
+    "languageLabel": "Language"
+  },
+  "cart": {
+    "title": "Cart",
+    "closeLabel": "Close cart",
+    "emptyStateTitle": "Your cart is empty",
+    "emptyStateDescription": "Add products from the catalog to see them here.",
+    "subtotalLabel": "Subtotal",
+    "quantityLabel": "Quantity",
+    "decreaseQuantityLabel": "Decrease quantity",
+    "increaseQuantityLabel": "Increase quantity",
+    "removeLabel": "Remove item",
+    "checkoutButton": "Checkout",
+    "errorMessage": "Couldn't update the cart. Please try again."
+  },
+  "home": {
+    "title": "Home",
+    "description": "Stylish streetwear: t-shirts, caps and sneakers.",
+    "heroEyebrow": "Store Demo",
+    "heroTitle": "Stylish streetwear",
+    "heroDescription": "T-shirts, caps and sneakers made for everyday life.",
+    "viewCatalog": "View catalog"
+  },
+  "products": {
+    "catalogTitle": "Catalog",
+    "catalogDescription": "Explore the full catalog of t-shirts, caps and sneakers.",
+    "filterByCategoryLabel": "Filter by category",
+    "allCategories": "All",
+    "emptyCategoryTitle": "No products in this category",
+    "emptyCategoryDescription": "Try choosing another category from the catalog.",
+    "relatedTitle": "You might also like",
+    "addToCart": "Add to cart",
+    "outOfStock": "Out of stock",
+    "lowStock": "Few units left",
+    "addToCartError": "Couldn't add the product to the cart. Please try again.",
+    "breadcrumbHome": "Home",
+    "breadcrumbCatalog": "Catalog"
+  },
+  "account": {
+    "pageTitle": "My account",
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "savedMessage": "Changes saved.",
+    "saveButton": "Save changes",
+    "viewOrdersLink": "View my orders",
+    "logoutButton": "Log out",
+    "orders": {
+      "pageTitle": "My orders",
+      "emptyTitle": "You don't have any orders yet",
+      "emptyDescription": "Once you complete a purchase, it will show up here."
+    },
+    "errors": {
+      "invalidFormData": "Check the form data.",
+      "emailInUse": "That email is already in use.",
+      "serviceError": "Couldn't save the changes. Please try again."
+    }
+  },
+  "auth": {
+    "login": {
+      "pageTitle": "Log in",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submitButton": "Log in",
+      "noAccountText": "Don't have an account?",
+      "registerLink": "Sign up"
+    },
+    "register": {
+      "pageTitle": "Create account",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "passwordHint": "At least 8 characters.",
+      "submitButton": "Create account",
+      "hasAccountText": "Already have an account?",
+      "loginLink": "Log in"
+    },
+    "errors": {
+      "invalidCredentials": "Enter a valid email and password.",
+      "wrongCredentials": "Incorrect email or password.",
+      "loginServiceError": "Couldn't log in. Please try again in a few minutes.",
+      "invalidFormData": "Check the form data.",
+      "emailTaken": "An account with that email already exists.",
+      "registerServiceError": "Couldn't complete the registration. Please try again.",
+      "accountCreatedButLoginFailed": "Account created. Log in to continue.",
+      "accountCreatedAutoLoginFailed": "Account created, but automatic login failed. Please log in manually."
+    }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "navLabel": "Checkout progress",
+    "completedStepLabel": "Completed",
+    "steps": {
+      "shipping": "Shipping",
+      "payment": "Payment",
+      "review": "Review"
+    },
+    "emptyCartTitle": "Your cart is empty",
+    "emptyCartDescription": "Add products from the catalog before continuing to payment.",
+    "viewCatalog": "View catalog",
+    "shippingForm": {
+      "fullNameLabel": "Full name",
+      "addressLine1Label": "Address",
+      "addressLine2Label": "Address (line 2, optional)",
+      "cityLabel": "City",
+      "postalCodeLabel": "Postal code",
+      "countryLabel": "Country",
+      "continueButton": "Continue to payment"
+    },
+    "paymentForm": {
+      "cardholderNameLabel": "Cardholder name",
+      "cardNumberLabel": "Card number",
+      "expiryMonthLabel": "Expiry month",
+      "expiryMonthPlaceholder": "MM",
+      "expiryYearLabel": "Expiry year",
+      "expiryYearPlaceholder": "YYYY",
+      "cvcLabel": "CVC",
+      "backButton": "Back to shipping",
+      "continueButton": "Continue to review"
+    },
+    "review": {
+      "shippingAddressLabel": "Shipping address",
+      "paymentLabel": "Payment",
+      "editButton": "Edit",
+      "itemsLabel": "Items",
+      "subtotalLabel": "Subtotal",
+      "shippingLabel": "Shipping",
+      "totalLabel": "Total",
+      "confirmButton": "Confirm order",
+      "thankYouTitle": "Thank you for your order!",
+      "thankYouDescription": "We've received your order. You can check its status at any time from your order history.",
+      "viewOrdersLink": "View my orders"
+    },
+    "errors": {
+      "invalidFormData": "Check the form data.",
+      "paymentDeclined": "Payment declined. Check your card details and try again.",
+      "serviceError": "Couldn't complete the order. Please try again."
+    }
+  },
+  "orderStatus": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "orders": {
+    "title": "Order #{shortId}",
+    "itemCount": "{count, plural, one {# item} other {# items}}"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "description": "This page couldn't be loaded. Please try again in a few seconds.",
+    "retryButton": "Retry"
+  }
+}

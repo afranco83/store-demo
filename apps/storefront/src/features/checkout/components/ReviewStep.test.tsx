@@ -1,13 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
-import {
-  createCartItemFixture,
-  createOrderFixture,
-  renderWithProviders,
-  server,
-} from "@store-demo/testing";
+import { createCartItemFixture, createOrderFixture, server } from "@store-demo/testing";
 import { http, HttpResponse } from "msw";
 
+import { renderWithProviders } from "@/test/render-with-intl";
 import { useCheckoutWizardStore } from "../store/use-checkout-wizard-store";
 import { createOrderAction } from "../api/create-order.action";
 import { ReviewStep } from "./ReviewStep";

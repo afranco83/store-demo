@@ -1,36 +1,35 @@
 import { describe, expect, it } from "vitest";
 import { createOrderFixture, createOrderItemFixture } from "@store-demo/testing";
 
-import {
-  formatOrderItemCountLabel,
-  formatOrderPlacedAtLabel,
-  ORDER_STATUS_BADGES,
-} from "./format-order";
+import { formatOrderPlacedAtLabel, getOrderItemCount, getOrderStatusIntent } from "./format-order";
 
 describe("format-order", () => {
-  it("should format the placed-at date in Spanish long style", () => {
+  it("should format the placed-at date in the given locale's long style", () => {
     const order = createOrderFixture({ createdAt: new Date("2026-07-10T10:00:00.000Z") });
 
-    expect(formatOrderPlacedAtLabel(order)).toContain("2026");
+    expect(formatOrderPlacedAtLabel(order, "es-ES")).toContain("2026");
+    expect(formatOrderPlacedAtLabel(order, "en-US")).toContain("2026");
   });
 
-  it("should singularize the item count label for a single unit", () => {
+  it("should sum quantities across a single item", () => {
     const order = createOrderFixture({ items: [createOrderItemFixture({ quantity: 1 })] });
 
-    expect(formatOrderItemCountLabel(order)).toBe("1 artículo");
+    expect(getOrderItemCount(order)).toBe(1);
   });
 
-  it("should pluralize the item count label and sum quantities across items", () => {
+  it("should sum quantities across multiple items", () => {
     const order = createOrderFixture({
       items: [createOrderItemFixture({ quantity: 2 }), createOrderItemFixture({ quantity: 3 })],
     });
 
-    expect(formatOrderItemCountLabel(order)).toBe("5 artículos");
+    expect(getOrderItemCount(order)).toBe(5);
   });
 
-  it("should expose a badge for every order status", () => {
-    expect(Object.keys(ORDER_STATUS_BADGES).sort()).toEqual(
-      ["cancelled", "delivered", "paid", "pending", "shipped"].sort(),
-    );
+  it("should expose an intent for every order status", () => {
+    const statuses = ["cancelled", "delivered", "paid", "pending", "shipped"] as const;
+
+    for (const status of statuses) {
+      expect(getOrderStatusIntent(status)).toBeDefined();
+    }
   });
 });

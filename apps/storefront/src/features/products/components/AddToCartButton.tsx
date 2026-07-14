@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button, QuantitySelector } from "@store-demo/ui";
 
 import { useAddToCartMutation } from "../../cart/hooks/use-add-to-cart-mutation";
@@ -13,6 +14,8 @@ export function AddToCartButton({
   productId: string;
   maxQuantity: number;
 }) {
+  const t = useTranslations("products");
+  const tCart = useTranslations("cart");
   const [quantity, setQuantity] = useState(1);
   const addToCartMutation = useAddToCartMutation();
   const openCartDrawer = useCartDrawerStore((state) => state.open);
@@ -30,9 +33,9 @@ export function AddToCartButton({
         onChange={setQuantity}
         max={maxQuantity}
         disabled={isOutOfStock}
-        label="Cantidad"
-        decreaseLabel="Reducir cantidad"
-        increaseLabel="Aumentar cantidad"
+        label={tCart("quantityLabel")}
+        decreaseLabel={tCart("decreaseQuantityLabel")}
+        increaseLabel={tCart("increaseQuantityLabel")}
       />
       <Button
         type="button"
@@ -40,11 +43,11 @@ export function AddToCartButton({
         disabled={isOutOfStock}
         isLoading={addToCartMutation.isPending}
       >
-        {isOutOfStock ? "Agotado" : "Añadir al carrito"}
+        {isOutOfStock ? t("outOfStock") : t("addToCart")}
       </Button>
       {addToCartMutation.isError ? (
         <p role="alert" className="text-sm text-red-600">
-          No se pudo añadir el producto al carrito. Inténtalo de nuevo.
+          {t("addToCartError")}
         </p>
       ) : null}
     </div>

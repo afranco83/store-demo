@@ -1,23 +1,28 @@
 import { PackageX } from "lucide-react";
+import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState, OrderSummaryCard } from "@store-demo/ui";
 
 import { getOrdersAction } from "../api/get-orders.action";
 import {
-  ORDER_STATUS_BADGES,
-  formatOrderItemCountLabel,
   formatOrderPlacedAtLabel,
+  getOrderItemCount,
+  getOrderStatusIntent,
 } from "../lib/format-order";
 
+const DATE_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
+
 export async function OrderHistorySection() {
-  const orders = await getOrdersAction();
+  const [orders, locale, t, tOrders, tOrderStatus] = await Promise.all([
+    getOrdersAction(),
+    getLocale(),
+    getTranslations("account.orders"),
+    getTranslations("orders"),
+    getTranslations("orderStatus"),
+  ]);
 
   if (orders.length === 0) {
     return (
-      <EmptyState
-        icon={PackageX}
-        title="Todavía no tienes pedidos"
-        description="Cuando completes una compra, aparecerá aquí."
-      />
+      <EmptyState icon={PackageX} title={t("emptyTitle")} description={t("emptyDescription")} />
     );
   }
 
@@ -27,10 +32,14 @@ export async function OrderHistorySection() {
         <OrderSummaryCard
           key={order.id}
           orderId={order.id}
-          placedAtLabel={formatOrderPlacedAtLabel(order)}
-          statusBadge={ORDER_STATUS_BADGES[order.status]}
+          title={(shortId) => tOrders("title", { shortId })}
+          placedAtLabel={formatOrderPlacedAtLabel(order, DATE_LOCALES[locale] ?? "es-ES")}
+          statusBadge={{
+            label: tOrderStatus(order.status),
+            intent: getOrderStatusIntent(order.status),
+          }}
           totalCents={order.totalCents}
-          itemCountLabel={formatOrderItemCountLabel(order)}
+          itemCountLabel={tOrders("itemCount", { count: getOrderItemCount(order) })}
         />
       ))}
     </div>

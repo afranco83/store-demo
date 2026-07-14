@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { Button, Input } from "@store-demo/ui";
 import { registerRequestSchema } from "@store-demo/shared-types";
 import type { RegisterRequest } from "@store-demo/shared-types";
@@ -10,6 +11,7 @@ import type { RegisterRequest } from "@store-demo/shared-types";
 import { registerAction } from "../api/register.action";
 
 export function RegisterForm() {
+  const t = useTranslations("auth.register");
   const [serverError, setServerError] = useState<string | null>(null);
   const {
     register,
@@ -28,22 +30,22 @@ export function RegisterForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       <Input
-        label="Nombre"
+        label={t("nameLabel")}
         autoComplete="name"
         error={errors.name?.message}
         {...register("name")}
       />
       <Input
         type="email"
-        label="Email"
+        label={t("emailLabel")}
         autoComplete="email"
         error={errors.email?.message}
         {...register("email")}
       />
       <Input
         type="password"
-        label="Contraseña"
-        hint="Mínimo 8 caracteres."
+        label={t("passwordLabel")}
+        hint={t("passwordHint")}
         autoComplete="new-password"
         error={errors.password?.message}
         {...register("password")}
@@ -54,7 +56,7 @@ export function RegisterForm() {
         </p>
       ) : null}
       <Button type="submit" isLoading={isSubmitting}>
-        Crear cuenta
+        {t("submitButton")}
       </Button>
     </form>
   );

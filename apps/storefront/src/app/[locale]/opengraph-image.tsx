@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
+import { getTranslations } from "next-intl/server";
 
-export const alt = "Store Demo — streetwear con estilo";
+export const alt = "Store Demo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -11,7 +12,10 @@ const ACCENT_FROM = "#c2410c";
 const ACCENT_TO = "#9a3412";
 const ACCENT_FOREGROUND = "#ffffff";
 
-export default function Image() {
+export default async function Image({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "home" });
+
   return new ImageResponse(
     <div
       style={{
@@ -28,12 +32,10 @@ export default function Image() {
       }}
     >
       <div style={{ fontSize: 32, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>
-        Store Demo
+        {t("heroEyebrow")}
       </div>
-      <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1 }}>Streetwear con estilo</div>
-      <div style={{ fontSize: 32, opacity: 0.9, maxWidth: 800 }}>
-        Camisetas, gorras y zapatillas pensadas para el día a día.
-      </div>
+      <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1 }}>{t("heroTitle")}</div>
+      <div style={{ fontSize: 32, opacity: 0.9, maxWidth: 800 }}>{t("heroDescription")}</div>
     </div>,
     { ...size },
   );

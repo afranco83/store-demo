@@ -1,8 +1,10 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Footer, Typography, VersionBadge } from "@store-demo/ui";
 import { auth } from "@store-demo/auth";
 
+import { Link } from "@/i18n/navigation";
 import { getCategories } from "@/features/products/api/categories.api";
+import { LocaleSwitcherContainer } from "./LocaleSwitcherContainer";
 
 const version = process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0";
 
@@ -11,7 +13,18 @@ export async function SiteFooter() {
   // páginas — un fallo de sesión o de apps/api aquí no debe tumbar el sitio
   // entero (no hay global-error.tsx que lo cubra). Se degrada mostrando el
   // footer sin esas secciones en vez de propagar el error.
-  const [sessionResult, categoriesResult] = await Promise.allSettled([auth(), getCategories()]);
+  const [sessionResult, categoriesResult, t, tNav] = await Promise.all([
+    auth().then(
+      (session) => ({ status: "fulfilled" as const, value: session }),
+      () => ({ status: "rejected" as const }),
+    ),
+    getCategories().then(
+      (categories) => ({ status: "fulfilled" as const, value: categories }),
+      () => ({ status: "rejected" as const }),
+    ),
+    getTranslations("footer"),
+    getTranslations("nav"),
+  ]);
   const session = sessionResult.status === "fulfilled" ? sessionResult.value : null;
   const categories = categoriesResult.status === "fulfilled" ? categoriesResult.value : [];
 
@@ -25,20 +38,24 @@ export async function SiteFooter() {
             </Typography>
           </Link>
           <Typography variant="body" className="mt-2 text-sm text-gray-400">
-            Proyecto de portfolio que demuestra un stack profesional de frontend: React, Next.js,
-            TypeScript, Zod, TanStack Query y Zustand.
+            {t("tagline")}
           </Typography>
         </>
       }
       columns={[
         {
-          heading: "Tienda",
+          heading: t("storeHeading"),
           links: (
             <>
-              <Link href="/">Inicio</Link>
-              <Link href="/products">Catálogo</Link>
+              <Link href="/">{tNav("home")}</Link>
+              <Link href="/products">{tNav("catalog")}</Link>
               {categories.map((category) => (
-                <Link key={category.id} href={`/products?category=${category.slug}`}>
+                // Objeto {pathname, query}, no un string con "?" — ver el
+                // mismo comentario en CategoryFilterNav.tsx.
+                <Link
+                  key={category.id}
+                  href={{ pathname: "/products", query: { category: category.slug } }}
+                >
                   {category.name}
                 </Link>
               ))}
@@ -46,30 +63,31 @@ export async function SiteFooter() {
           ),
         },
         {
-          heading: "Cuenta",
+          heading: t("accountHeading"),
           links: session ? (
             <>
-              <Link href="/account">Mi cuenta</Link>
-              <Link href="/account/orders">Mis pedidos</Link>
+              <Link href="/account">{tNav("myAccount")}</Link>
+              <Link href="/account/orders">{tNav("myOrders")}</Link>
             </>
           ) : (
             <>
-              <Link href="/login">Iniciar sesión</Link>
-              <Link href="/register">Crear cuenta</Link>
+              <Link href="/login">{t("login")}</Link>
+              <Link href="/register">{t("register")}</Link>
             </>
           ),
         },
       ]}
-      bottomStart={<span>© {new Date().getFullYear()} Store Demo. Proyecto de portfolio.</span>}
+      bottomStart={<span>{t("copyright", { year: new Date().getFullYear() })}</span>}
       bottomEnd={
         <>
+          <LocaleSwitcherContainer />
           <a
             href="https://github.com/afranco83/store-demo"
             target="_blank"
             rel="noopener noreferrer"
             className="text-gray-300 transition-colors hover:text-accent-on-dark"
           >
-            GitHub
+            {t("github")}
           </a>
           <VersionBadge
             version={version}

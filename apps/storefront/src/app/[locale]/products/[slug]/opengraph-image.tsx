@@ -8,10 +8,18 @@ export const alt = "Producto de Store Demo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const currencyFormatter = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
+const PRICE_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
 
-export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
+  const currencyFormatter = new Intl.NumberFormat(PRICE_LOCALES[locale] ?? "es-ES", {
+    style: "currency",
+    currency: "EUR",
+  });
   // Reusa la foto Cloudinary real del producto (ya vetada en el seed) — no
   // se introduce ninguna fuente de imagen nueva, mismo criterio que el Hero.
   let product;
@@ -22,7 +30,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
     // vieja): no hay producto que mostrar, se cae al banner genérico de
     // marca en vez de dejar pasar un 500 sin controlar.
     if (error instanceof ApiClientError && error.status === 404) {
-      return DefaultOgImage();
+      return DefaultOgImage({ params });
     }
     throw error;
   }

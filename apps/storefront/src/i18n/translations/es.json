@@ -1,0 +1,177 @@
+{
+  "seo": {
+    "siteDescription": "Tienda online demo — showcase de arquitectura frontend profesional."
+  },
+  "nav": {
+    "home": "Inicio",
+    "catalog": "Catálogo",
+    "login": "Login",
+    "accountTrigger": "Cuenta",
+    "myAccount": "Mi cuenta",
+    "myOrders": "Mis pedidos",
+    "logout": "Cerrar sesión",
+    "openCart": "Abrir carrito"
+  },
+  "footer": {
+    "tagline": "Proyecto de portfolio que demuestra un stack profesional de frontend: React, Next.js, TypeScript, Zod, TanStack Query y Zustand.",
+    "storeHeading": "Tienda",
+    "accountHeading": "Cuenta",
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "copyright": "© {year} Store Demo. Proyecto de portfolio.",
+    "github": "GitHub",
+    "languageLabel": "Idioma"
+  },
+  "cart": {
+    "title": "Carrito",
+    "closeLabel": "Cerrar carrito",
+    "emptyStateTitle": "Tu carrito está vacío",
+    "emptyStateDescription": "Añade productos del catálogo para verlos aquí.",
+    "subtotalLabel": "Subtotal",
+    "quantityLabel": "Cantidad",
+    "decreaseQuantityLabel": "Reducir cantidad",
+    "increaseQuantityLabel": "Aumentar cantidad",
+    "removeLabel": "Eliminar producto",
+    "checkoutButton": "Finalizar compra",
+    "errorMessage": "No se pudo actualizar el carrito. Inténtalo de nuevo."
+  },
+  "home": {
+    "title": "Inicio",
+    "description": "Streetwear con estilo: camisetas, gorras y zapatillas.",
+    "heroEyebrow": "Store Demo",
+    "heroTitle": "Streetwear con estilo",
+    "heroDescription": "Camisetas, gorras y zapatillas pensadas para el día a día.",
+    "viewCatalog": "Ver catálogo"
+  },
+  "products": {
+    "catalogTitle": "Catálogo",
+    "catalogDescription": "Explora el catálogo completo de camisetas, gorras y zapatillas.",
+    "filterByCategoryLabel": "Filtrar por categoría",
+    "allCategories": "Todas",
+    "emptyCategoryTitle": "No hay productos en esta categoría",
+    "emptyCategoryDescription": "Prueba a elegir otra categoría del catálogo.",
+    "relatedTitle": "También te puede interesar",
+    "addToCart": "Añadir al carrito",
+    "outOfStock": "Agotado",
+    "lowStock": "Últimas unidades",
+    "addToCartError": "No se pudo añadir el producto al carrito. Inténtalo de nuevo.",
+    "breadcrumbHome": "Inicio",
+    "breadcrumbCatalog": "Catálogo"
+  },
+  "account": {
+    "pageTitle": "Mi cuenta",
+    "nameLabel": "Nombre",
+    "emailLabel": "Email",
+    "savedMessage": "Cambios guardados.",
+    "saveButton": "Guardar cambios",
+    "viewOrdersLink": "Ver mis pedidos",
+    "logoutButton": "Cerrar sesión",
+    "orders": {
+      "pageTitle": "Mis pedidos",
+      "emptyTitle": "Todavía no tienes pedidos",
+      "emptyDescription": "Cuando completes una compra, aparecerá aquí."
+    },
+    "errors": {
+      "invalidFormData": "Revisa los datos del formulario.",
+      "emailInUse": "Ese email ya está en uso.",
+      "serviceError": "No se pudieron guardar los cambios. Inténtalo de nuevo."
+    }
+  },
+  "auth": {
+    "login": {
+      "pageTitle": "Iniciar sesión",
+      "emailLabel": "Email",
+      "passwordLabel": "Contraseña",
+      "submitButton": "Iniciar sesión",
+      "noAccountText": "¿No tienes cuenta?",
+      "registerLink": "Regístrate"
+    },
+    "register": {
+      "pageTitle": "Crear cuenta",
+      "nameLabel": "Nombre",
+      "emailLabel": "Email",
+      "passwordLabel": "Contraseña",
+      "passwordHint": "Mínimo 8 caracteres.",
+      "submitButton": "Crear cuenta",
+      "hasAccountText": "¿Ya tienes cuenta?",
+      "loginLink": "Inicia sesión"
+    },
+    "errors": {
+      "invalidCredentials": "Introduce un email y una contraseña válidos.",
+      "wrongCredentials": "Email o contraseña incorrectos.",
+      "loginServiceError": "No se pudo iniciar sesión. Inténtalo de nuevo en unos minutos.",
+      "invalidFormData": "Revisa los datos del formulario.",
+      "emailTaken": "Ya existe una cuenta con ese email.",
+      "registerServiceError": "No se pudo completar el registro. Inténtalo de nuevo.",
+      "accountCreatedButLoginFailed": "Cuenta creada. Inicia sesión para continuar.",
+      "accountCreatedAutoLoginFailed": "Cuenta creada, pero no se pudo iniciar sesión automáticamente. Inicia sesión manualmente."
+    }
+  },
+  "checkout": {
+    "title": "Checkout",
+    "navLabel": "Progreso del checkout",
+    "completedStepLabel": "Completado",
+    "steps": {
+      "shipping": "Envío",
+      "payment": "Pago",
+      "review": "Revisión"
+    },
+    "emptyCartTitle": "Tu carrito está vacío",
+    "emptyCartDescription": "Añade productos del catálogo antes de continuar con el pago.",
+    "viewCatalog": "Ver catálogo",
+    "shippingForm": {
+      "fullNameLabel": "Nombre completo",
+      "addressLine1Label": "Dirección",
+      "addressLine2Label": "Dirección (línea 2, opcional)",
+      "cityLabel": "Ciudad",
+      "postalCodeLabel": "Código postal",
+      "countryLabel": "País",
+      "continueButton": "Continuar a pago"
+    },
+    "paymentForm": {
+      "cardholderNameLabel": "Nombre del titular",
+      "cardNumberLabel": "Número de tarjeta",
+      "expiryMonthLabel": "Mes de caducidad",
+      "expiryMonthPlaceholder": "MM",
+      "expiryYearLabel": "Año de caducidad",
+      "expiryYearPlaceholder": "AAAA",
+      "cvcLabel": "CVC",
+      "backButton": "Volver a envío",
+      "continueButton": "Continuar a revisión"
+    },
+    "review": {
+      "shippingAddressLabel": "Dirección de envío",
+      "paymentLabel": "Pago",
+      "editButton": "Editar",
+      "itemsLabel": "Artículos",
+      "subtotalLabel": "Subtotal",
+      "shippingLabel": "Envío",
+      "totalLabel": "Total",
+      "confirmButton": "Confirmar pedido",
+      "thankYouTitle": "¡Gracias por tu pedido!",
+      "thankYouDescription": "Hemos recibido tu pedido correctamente. Puedes consultar su estado en cualquier momento desde tu historial de pedidos.",
+      "viewOrdersLink": "Ver mis pedidos"
+    },
+    "errors": {
+      "invalidFormData": "Revisa los datos del formulario.",
+      "paymentDeclined": "Pago rechazado. Comprueba los datos de tu tarjeta e inténtalo de nuevo.",
+      "serviceError": "No se pudo completar el pedido. Inténtalo de nuevo."
+    }
+  },
+  "orderStatus": {
+    "pending": "Pendiente",
+    "paid": "Pagado",
+    "shipped": "Enviado",
+    "delivered": "Entregado",
+    "cancelled": "Cancelado"
+  },
+  "orders": {
+    "title": "Pedido #{shortId}",
+    "itemCount": "{count, plural, one {# artículo} other {# artículos}}"
+  },
+  "errors": {
+    "title": "Algo ha ido mal",
+    "description": "No se ha podido cargar esta página. Inténtalo de nuevo en unos segundos.",
+    "retryButton": "Reintentar"
+  }
+}

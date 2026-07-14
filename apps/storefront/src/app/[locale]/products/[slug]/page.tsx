@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 import { fetchOrNotFound } from "@store-demo/core";
 import { Badge, PriceTag, ProductGrid, Typography } from "@store-demo/ui";
 
@@ -10,10 +11,12 @@ import { getRelatedProducts } from "@/features/products/services/get-related-pro
 import { getStockBadge } from "@/features/products/services/get-stock-badge";
 import { SITE_URL } from "@/lib/site-url";
 
+const PRICE_TAG_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   // Mismo fetch que el componente de página — Next.js deduplica llamadas a
@@ -29,22 +32,33 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function ProductDetailPage({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}) {
+  const { locale, slug } = await params;
 
   // getProducts() es solo para "también te puede interesar" — un fallo ahí
   // no debe romper la página de un producto que sí existe y se resolvió
   // bien, así que su error se aísla del de fetchOrNotFound (que si no,
   // haría fallar Promise.all entero y mostraría un error genérico en vez
   // del producto real).
-  const [product, allProducts] = await Promise.all([
+  const [product, allProducts, t] = await Promise.all([
     fetchOrNotFound(getProductBySlug({ slug })),
     getProducts().catch(() => []),
+    getTranslations("products"),
   ]);
 
-  const stockBadge = getStockBadge(product.stock);
+  const stockBadge = getStockBadge(product.stock, {
+    outOfStock: t("outOfStock"),
+    lowStock: t("lowStock"),
+  });
   const relatedProducts = getRelatedProducts(allProducts, product);
-  const productUrl = `${SITE_URL}/products/${product.slug}`;
+  // localePrefix "as-needed": español sin prefijo, inglés con /en (mismo
+  // criterio que apps/storefront/src/app/sitemap.ts).
+  const localePath = locale === "en" ? "/en" : "";
+  const productUrl = `${SITE_URL}${localePath}/products/${product.slug}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -65,8 +79,18 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       {
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: "Catálogo", item: `${SITE_URL}/products` },
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: t("breadcrumbHome"),
+            item: `${SITE_URL}${localePath}`,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: t("breadcrumbCatalog"),
+            item: `${SITE_URL}${localePath}/products`,
+          },
           { "@type": "ListItem", position: 3, name: product.name, item: productUrl },
         ],
       },
@@ -95,7 +119,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {product.name}
           </Typography>
           {stockBadge ? <Badge intent={stockBadge.intent}>{stockBadge.label}</Badge> : null}
-          <PriceTag amountCents={product.priceCents} size="lg" />
+          <PriceTag amountCents={product.priceCents} size="lg" locale={PRICE_TAG_LOCALES[locale]} />
           <Typography variant="body" className="text-gray-600">
             {product.description}
           </Typography>
@@ -105,7 +129,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       {relatedProducts.length > 0 ? (
         <section className="mx-auto max-w-6xl px-4 pb-10">
           <Typography as="h2" variant="heading" className="mb-4">
-            También te puede interesar
+            {t("relatedTitle")}
           </Typography>
           <ProductGrid>
             {relatedProducts.map((relatedProduct) => (
