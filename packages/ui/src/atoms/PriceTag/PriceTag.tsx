@@ -26,6 +26,21 @@ export interface PriceTagProps
   ref?: Ref<HTMLSpanElement>;
 }
 
+// `Intl.NumberFormat` cachea la carga de datos ICU por locale — con solo un
+// puñado de locales posibles, reutilizar la instancia evita reconstruirla en
+// cada render de cada PriceTag (antes de soportar `locale` dinámico era un
+// singleton de módulo; este Map conserva esa reutilización por locale).
+const currencyFormatters = new Map<string, Intl.NumberFormat>();
+
+function getCurrencyFormatter(locale: string): Intl.NumberFormat {
+  let formatter = currencyFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" });
+    currencyFormatters.set(locale, formatter);
+  }
+  return formatter;
+}
+
 export function PriceTag({
   amountCents,
   size,
@@ -34,10 +49,7 @@ export function PriceTag({
   ref,
   ...props
 }: PriceTagProps) {
-  const currencyFormatter = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "EUR",
-  });
+  const currencyFormatter = getCurrencyFormatter(locale);
 
   return (
     <span ref={ref} className={cn(priceTagVariants({ size }), className)} {...props}>

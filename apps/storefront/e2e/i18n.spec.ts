@@ -46,3 +46,26 @@ test("keeps a protected route's locale prefix through the login redirect", async
   await page.waitForURL(/\/en\/login/);
   await expect(page.getByRole("heading", { name: "Log in" })).toBeVisible();
 });
+
+test("keeps the active category filter when switching locale", async ({ page }) => {
+  await page.goto("/products?category=camisetas");
+
+  await page
+    .getByRole("group", { name: "Idioma" })
+    .getByRole("link", { name: "EN", exact: true })
+    .click();
+
+  await page.waitForURL("/en/products?category=camisetas");
+});
+
+test("shows the curated English translation for a product just added to the cart", async ({
+  page,
+}) => {
+  await page.goto("/en/products/camisetas-small-rubber-t-shirt-0");
+
+  // Scoped a main: la sección de "también te puede interesar" añade sus
+  // propios botones "Add to cart" por cada producto relacionado.
+  await page.locator("main").getByRole("button", { name: "Add to cart" }).click();
+
+  await expect(page.getByRole("dialog").getByText("Sleek Rubber-Print Tee")).toBeVisible();
+});

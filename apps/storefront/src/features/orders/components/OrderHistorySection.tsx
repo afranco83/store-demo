@@ -2,14 +2,13 @@ import { PackageX } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { EmptyState, OrderSummaryCard } from "@store-demo/ui";
 
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { getOrdersAction } from "../api/get-orders.action";
 import {
   formatOrderPlacedAtLabel,
   getOrderItemCount,
   getOrderStatusIntent,
 } from "../lib/format-order";
-
-const DATE_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
 
 export async function OrderHistorySection() {
   const [orders, locale, t, tOrders, tOrderStatus] = await Promise.all([
@@ -33,7 +32,7 @@ export async function OrderHistorySection() {
           key={order.id}
           orderId={order.id}
           title={(shortId) => tOrders("title", { shortId })}
-          placedAtLabel={formatOrderPlacedAtLabel(order, DATE_LOCALES[locale] ?? "es-ES")}
+          placedAtLabel={formatOrderPlacedAtLabel(order, toIntlLocale(locale))}
           statusBadge={{
             label: tOrderStatus(order.status),
             intent: getOrderStatusIntent(order.status),

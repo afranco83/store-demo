@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { ApiClientError } from "@store-demo/api-client";
 
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { getProductBySlug } from "@/features/products/api/products.api";
 import DefaultOgImage from "../../opengraph-image";
 
@@ -8,15 +9,13 @@ export const alt = "Producto de Store Demo";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const PRICE_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
-
 export default async function Image({
   params,
 }: {
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const currencyFormatter = new Intl.NumberFormat(PRICE_LOCALES[locale] ?? "es-ES", {
+  const currencyFormatter = new Intl.NumberFormat(toIntlLocale(locale), {
     style: "currency",
     currency: "EUR",
   });

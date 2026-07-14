@@ -1,5 +1,5 @@
 import createIntlMiddleware from "next-intl/middleware";
-import type { NextFetchEvent, NextMiddleware, NextRequest } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
 import { withAuthGuard } from "@store-demo/auth/middleware-guard";
 
 import { routing } from "./i18n/routing";
@@ -10,17 +10,10 @@ const handleIntl = createIntlMiddleware(routing);
 // explícito ("en") — el guard necesita conocerlo para despojarlo antes de
 // comparar contra protectedPaths y para anteponerlo a los redirects a
 // /login (ver packages/auth/src/middleware-guard.ts).
-//
-// Cast a NextMiddleware: sin tipar explícitamente el resultado de
-// withAuthGuard(), TypeScript infiere para su callback interno (auth((req)
-// => ...) en middleware-guard.ts) la sobrecarga de Route Handler de
-// NextAuth (segundo parámetro `{ params }`) en vez de la de Middleware
-// (segundo parámetro `NextFetchEvent`) — mismo valor en runtime (siempre ha
-// sido el middleware por defecto de esta app), solo desambigua el tipo.
 const handleAuth = withAuthGuard({
   protectedPaths: ["/account", "/checkout"],
   localePrefixes: routing.locales.filter((locale) => locale !== routing.defaultLocale),
-}) as unknown as NextMiddleware;
+});
 
 export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   const intlResponse = handleIntl(request);
@@ -36,6 +29,17 @@ export default async function middleware(request: NextRequest, event: NextFetchE
   const authResponse = await handleAuth(request, event);
   if (!authResponse) {
     return intlResponse;
+  }
+
+  // Si el guard de auth ya decidió redirigir (p. ej. a /login), esa
+  // respuesta no necesita las cabeceras internas de next-intl
+  // (x-middleware-rewrite, usadas para reescribir "/" a "/es" en modo
+  // "as-needed") — copiarlas encima dejaría una cabecera de reescritura
+  // apuntando a un path distinto del destino real del redirect. El
+  // navegador vuelve a pasar por este middleware al seguir el redirect, así
+  // que el locale se resuelve igualmente en esa siguiente request.
+  if (authResponse.headers.get("location")) {
+    return authResponse;
   }
 
   // Propaga las cabeceras que añade next-intl (usadas por next-intl/server

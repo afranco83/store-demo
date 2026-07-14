@@ -8,6 +8,7 @@ import { calculateShippingCents } from "@store-demo/shared-types";
 import type { CheckoutRequest } from "@store-demo/shared-types";
 
 import { Link } from "@/i18n/navigation";
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { useCart } from "../../cart/hooks/use-cart";
 import { cartQueryKey } from "../../cart/hooks/cart-query-key";
 import {
@@ -18,16 +19,12 @@ import {
 import { createOrderAction } from "../api/create-order.action";
 import { useCheckoutWizardStore } from "../store/use-checkout-wizard-store";
 
-const PRICE_TAG_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
-const DATE_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
-
 export function ReviewStep() {
   const locale = useLocale();
   const t = useTranslations("checkout.review");
   const tOrders = useTranslations("orders");
   const tOrderStatus = useTranslations("orderStatus");
-  const priceTagLocale = PRICE_TAG_LOCALES[locale] ?? "es-ES";
-  const dateLocale = DATE_LOCALES[locale] ?? "es-ES";
+  const intlLocale = toIntlLocale(locale);
 
   const queryClient = useQueryClient();
   const cartQuery = useCart();
@@ -53,7 +50,7 @@ export function ReviewStep() {
         <OrderSummaryCard
           orderId={confirmedOrder.id}
           title={(shortId) => tOrders("title", { shortId })}
-          placedAtLabel={formatOrderPlacedAtLabel(confirmedOrder, dateLocale)}
+          placedAtLabel={formatOrderPlacedAtLabel(confirmedOrder, intlLocale)}
           statusBadge={{
             label: tOrderStatus(confirmedOrder.status),
             intent: getOrderStatusIntent(confirmedOrder.status),
@@ -147,7 +144,7 @@ export function ReviewStep() {
             <PriceTag
               amountCents={item.product.priceCents * item.quantity}
               size="sm"
-              locale={priceTagLocale}
+              locale={intlLocale}
             />
           </div>
         ))}
@@ -156,17 +153,17 @@ export function ReviewStep() {
       <div className="flex flex-col gap-1 border-t border-gray-200 pt-4">
         <div className="flex items-center justify-between">
           <Typography variant="caption">{t("subtotalLabel")}</Typography>
-          <PriceTag amountCents={subtotalCents} size="sm" locale={priceTagLocale} />
+          <PriceTag amountCents={subtotalCents} size="sm" locale={intlLocale} />
         </div>
         <div className="flex items-center justify-between">
           <Typography variant="caption">{t("shippingLabel")}</Typography>
-          <PriceTag amountCents={shippingCents} size="sm" locale={priceTagLocale} />
+          <PriceTag amountCents={shippingCents} size="sm" locale={intlLocale} />
         </div>
         <div className="flex items-center justify-between">
           <Typography as="p" variant="body" className="font-medium">
             {t("totalLabel")}
           </Typography>
-          <PriceTag amountCents={totalCents} locale={priceTagLocale} />
+          <PriceTag amountCents={totalCents} locale={intlLocale} />
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -62,10 +62,23 @@ export default async function RootLayout({
   // pasar el locale explícito) para el resto del árbol de esta request.
   setRequestLocale(locale);
 
+  // El resto de namespaces (nav/footer/cart/products/checkout/auth/account/
+  // orders/orderStatus/errors) sí los consume algún Client Component en
+  // algún punto del árbol — repartir el catálogo por ruta con `pick()`
+  // exigiría un NextIntlClientProvider por segmento y mantener esa lista
+  // sincronizada a mano; con solo 2 locales y un catálogo de este tamaño no
+  // compensa la complejidad todavía (YAGNI, AGENTS.md §1.10). "seo" es la
+  // única excepción clara: solo se usa en generateMetadata (servidor), nunca
+  // desde un Client Component.
+  const allMessages = await getMessages();
+  const clientMessages = Object.fromEntries(
+    Object.entries(allMessages).filter(([namespace]) => namespace !== "seo"),
+  );
+
   return (
     <html lang={locale}>
       <body>
-        <NextIntlClientProvider>
+        <NextIntlClientProvider messages={clientMessages}>
           <QueryProvider>
             <SiteHeader />
             {children}

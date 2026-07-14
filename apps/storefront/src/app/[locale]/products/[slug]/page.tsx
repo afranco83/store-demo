@@ -4,14 +4,13 @@ import { getTranslations } from "next-intl/server";
 import { fetchOrNotFound } from "@store-demo/core";
 import { Badge, PriceTag, ProductGrid, Typography } from "@store-demo/ui";
 
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { getProductBySlug, getProducts } from "@/features/products/api/products.api";
 import { AddToCartButton } from "@/features/products/components/AddToCartButton";
 import { ProductCardLink } from "@/features/products/components/ProductCardLink";
 import { getRelatedProducts } from "@/features/products/services/get-related-products";
 import { getStockBadge } from "@/features/products/services/get-stock-badge";
 import { SITE_URL } from "@/lib/site-url";
-
-const PRICE_TAG_LOCALES: Record<string, string> = { es: "es-ES", en: "en-US" };
 
 export async function generateMetadata({
   params,
@@ -119,7 +118,7 @@ export default async function ProductDetailPage({
             {product.name}
           </Typography>
           {stockBadge ? <Badge intent={stockBadge.intent}>{stockBadge.label}</Badge> : null}
-          <PriceTag amountCents={product.priceCents} size="lg" locale={PRICE_TAG_LOCALES[locale]} />
+          <PriceTag amountCents={product.priceCents} size="lg" locale={toIntlLocale(locale)} />
           <Typography variant="body" className="text-gray-600">
             {product.description}
           </Typography>

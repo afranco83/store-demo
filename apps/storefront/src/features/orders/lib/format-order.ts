@@ -9,8 +9,22 @@ const ORDER_STATUS_INTENTS: Record<OrderStatus, BadgeProps["intent"]> = {
   cancelled: "danger",
 };
 
+// Reutiliza el formatter por locale (antes de soportar locale dinámico era
+// un singleton de módulo) en vez de reconstruirlo en cada pedido de una
+// lista — mismo criterio que PriceTag en packages/ui.
+const dateFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getDateFormatter(locale: string): Intl.DateTimeFormat {
+  let formatter = dateFormatters.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(locale, { dateStyle: "long" });
+    dateFormatters.set(locale, formatter);
+  }
+  return formatter;
+}
+
 export function formatOrderPlacedAtLabel(order: Order, locale: string): string {
-  return new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(order.createdAt);
+  return getDateFormatter(locale).format(order.createdAt);
 }
 
 export function getOrderItemCount(order: Order): number {

@@ -1,7 +1,24 @@
 import NextAuth from "next-auth";
+import type { NextAuthRequest } from "next-auth";
 import { NextResponse } from "next/server";
+import type { NextFetchEvent, NextMiddleware } from "next/server";
 import type { UserRole } from "@store-demo/shared-types";
 import { authConfig } from "./auth.config";
+
+// Tipo del callback interno de auth() cuando se usa como middleware (no como
+// Route Handler, su otra sobrecarga) — NextAuth no exporta este tipo en su
+// entrada pública (solo vive en next-auth/lib, un import profundo que no
+// conviene depender de él), así que se reconstruye aquí con piezas sí
+// públicas (`NextAuthRequest` de "next-auth", `NextFetchEvent`/`NextMiddleware`
+// de "next/server"). Sin esto, `auth((req) => ...)` con un callback de un
+// solo parámetro resuelve a la sobrecarga de Route Handler (segundo parámetro
+// `{ params }`) en vez de la de Middleware (segundo parámetro
+// `NextFetchEvent`), obligando a castear el resultado en cada call site
+// (AGENTS.md §2: ningún `x as T` para silenciar el compilador).
+type AuthMiddlewareCallback = (
+  request: NextAuthRequest,
+  event: NextFetchEvent,
+) => ReturnType<NextMiddleware>;
 
 // Instancia de auth() propia para middleware (Edge runtime): usa la config
 // edge-safe, nunca la config completa con el Credentials provider.
@@ -44,7 +61,7 @@ export function withAuthGuard({
   forbiddenRedirectPath?: string;
   localePrefixes?: string[];
 }) {
-  return auth((req) => {
+  const middleware: AuthMiddlewareCallback = (req) => {
     const { locale, pathname } = stripLocalePrefix(req.nextUrl.pathname, localePrefixes);
     const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
     if (!isProtected) {
@@ -66,5 +83,6 @@ export function withAuthGuard({
     }
 
     return NextResponse.next();
-  });
+  };
+  return auth(middleware);
 }

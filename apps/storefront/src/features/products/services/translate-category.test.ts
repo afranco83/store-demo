@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { createCategoryFixture } from "@store-demo/testing";
 
-import { translateCategory, type CategoryTranslations } from "./translate-category";
+import {
+  translateCategory,
+  translateCategoryForLocale,
+  type CategoryTranslations,
+} from "./translate-category";
 
 const translations: CategoryTranslations = {
   "known-slug": { name: "English name", description: "English description" },
@@ -43,5 +47,21 @@ describe("translateCategory", () => {
     const category = createCategoryFixture({ slug: "unknown-slug", name: "Nombre" });
 
     expect(translateCategory(category, "en", translations)).toBe(category);
+  });
+});
+
+describe("translateCategoryForLocale", () => {
+  it("should resolve the real English translations file for a known seeded slug", () => {
+    const category = createCategoryFixture({ slug: "camisetas", name: "Camisetas" });
+
+    const translated = translateCategoryForLocale(category, "en");
+
+    expect(translated.name).toBe("T-Shirts");
+  });
+
+  it("should return the category unchanged when there is no translations file for the locale", () => {
+    const category = createCategoryFixture({ slug: "camisetas" });
+
+    expect(translateCategoryForLocale(category, "fr")).toBe(category);
   });
 });
