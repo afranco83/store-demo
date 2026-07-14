@@ -1,3 +1,14 @@
+# [1.3.0](https://github.com/afranco83/store-demo/compare/v1.2.0...v1.3.0) (2026-07-14)
+
+### Bug Fixes
+
+- **i18n:** corregir los 10 hallazgos del /code-review high ([91f1cd6](https://github.com/afranco83/store-demo/commit/91f1cd62b6da105b9d2e1538bc085ba939b8ec1b))
+- **i18n:** corregir los 2 hallazgos del agente bug-hunter ([b9f99d2](https://github.com/afranco83/store-demo/commit/b9f99d20cd9fcadc4e1c9b97737c753ff9f8c9b6))
+
+### Features
+
+- **i18n:** internacionalización (ES/EN) en apps/storefront con next-intl ([d5c58d3](https://github.com/afranco83/store-demo/commit/d5c58d3d8faecdc736ee56d44a72b77315809034))
+
 # [1.2.0](https://github.com/afranco83/store-demo/compare/v1.1.0...v1.2.0) (2026-07-13)
 
 ### Features
