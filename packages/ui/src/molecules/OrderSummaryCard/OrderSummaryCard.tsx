@@ -15,6 +15,8 @@ export interface OrderSummaryCardProps {
   statusBadge: { label: string; intent?: BadgeProps["intent"] };
   totalCents: number;
   itemCountLabel: string;
+  /** Locale de formateo del precio (ver PriceTag), default "es-ES". */
+  priceLocale?: string;
   className?: string;
   ref?: Ref<HTMLDivElement>;
 }
@@ -26,6 +28,7 @@ export function OrderSummaryCard({
   statusBadge,
   totalCents,
   itemCountLabel,
+  priceLocale,
   className,
   ref,
 }: OrderSummaryCardProps) {
@@ -46,7 +49,7 @@ export function OrderSummaryCard({
       </div>
       <div className="flex flex-col items-end gap-2">
         <Badge intent={statusBadge.intent}>{statusBadge.label}</Badge>
-        <PriceTag amountCents={totalCents} />
+        <PriceTag amountCents={totalCents} locale={priceLocale} />
       </div>
     </div>
   );

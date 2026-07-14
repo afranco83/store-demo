@@ -14,8 +14,10 @@ export const userSchema = z.object({
 });
 export type User = z.infer<typeof userSchema>;
 
+// Sin mensaje de error custom a propósito: ver el mismo comentario en
+// shipping-address.schema.ts.
 export const updateProfileRequestSchema = z.object({
-  name: z.string().min(1, "El nombre no puede estar vacío"),
+  name: z.string().min(1),
   email: z.string().email(),
 });
 export type UpdateProfileRequest = z.infer<typeof updateProfileRequestSchema>;

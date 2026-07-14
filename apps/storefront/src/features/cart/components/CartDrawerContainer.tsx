@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CartDrawer, type CartDrawerItem, buttonVariants, cn } from "@store-demo/ui";
 
 import { Link } from "@/i18n/navigation";
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { useCart } from "../hooks/use-cart";
 import { useRemoveCartItemMutation } from "../hooks/use-remove-cart-item-mutation";
 import { useUpdateCartItemMutation } from "../hooks/use-update-cart-item-mutation";
@@ -12,6 +13,7 @@ import { useCartDrawerStore } from "../store/use-cart-drawer-store";
 
 export function CartDrawerContainer() {
   const t = useTranslations("cart");
+  const locale = useLocale();
   const isOpen = useCartDrawerStore((state) => state.isOpen);
   const close = useCartDrawerStore((state) => state.close);
 
@@ -95,6 +97,7 @@ export function CartDrawerContainer() {
       emptyStateTitle={t("emptyStateTitle")}
       emptyStateDescription={t("emptyStateDescription")}
       subtotalLabel={t("subtotalLabel")}
+      priceLocale={toIntlLocale(locale)}
       checkoutAction={
         // `close()` explícito: CartDrawerContainer está montado en el layout
         // raíz (visible en todas las páginas), así que sin cerrar el drawer

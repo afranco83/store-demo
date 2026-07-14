@@ -57,6 +57,7 @@ export function ReviewStep() {
           }}
           totalCents={confirmedOrder.totalCents}
           itemCountLabel={tOrders("itemCount", { count: getOrderItemCount(confirmedOrder) })}
+          priceLocale={intlLocale}
         />
         <Link href="/account/orders" className={cn(buttonVariants(), "self-start")}>
           {t("viewOrdersLink")}

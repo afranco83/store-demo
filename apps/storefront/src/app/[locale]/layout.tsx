@@ -10,6 +10,7 @@ import "./globals.css";
 
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { ZodLocaleSync } from "@/components/ZodLocaleSync";
 import { CartDrawerContainer } from "@/features/cart/components/CartDrawerContainer";
 import { routing } from "@/i18n/routing";
 import { SITE_URL } from "@/lib/site-url";
@@ -79,6 +80,7 @@ export default async function RootLayout({
     <html lang={locale}>
       <body>
         <NextIntlClientProvider messages={clientMessages}>
+          <ZodLocaleSync />
           <QueryProvider>
             <SiteHeader />
             {children}

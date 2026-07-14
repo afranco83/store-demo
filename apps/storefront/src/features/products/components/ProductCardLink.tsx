@@ -1,10 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ProductCard } from "@store-demo/ui";
 import type { Product } from "@store-demo/shared-types";
 
 import { Link } from "@/i18n/navigation";
+import { toIntlLocale } from "@/i18n/intl-locale";
 import { useAddToCartMutation } from "../../cart/hooks/use-add-to-cart-mutation";
 import { useCartDrawerStore } from "../../cart/store/use-cart-drawer-store";
 import { buildCloudinaryThumbnailUrl } from "../services/build-cloudinary-thumbnail-url";
@@ -20,6 +21,7 @@ export function ProductCardLink({
   priority?: boolean;
 }) {
   const t = useTranslations("products");
+  const locale = useLocale();
   const addToCartMutation = useAddToCartMutation();
   const openCartDrawer = useCartDrawerStore((state) => state.open);
 
@@ -46,6 +48,7 @@ export function ProductCardLink({
           lowStock: t("lowStock"),
         })}
         addToCartLabel={t("addToCart")}
+        priceLocale={toIntlLocale(locale)}
         priority={priority}
         onAddToCart={
           product.stock > 0

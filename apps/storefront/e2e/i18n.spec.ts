@@ -69,3 +69,28 @@ test("shows the curated English translation for a product just added to the cart
 
   await expect(page.getByRole("dialog").getByText("Sleek Rubber-Print Tee")).toBeVisible();
 });
+
+test("formats catalog prices per locale, not just on the product detail page", async ({ page }) => {
+  await page.goto("/en/products/camisetas-small-rubber-t-shirt-0");
+
+  // "También te puede interesar" reusa ProductCard (packages/ui) — antes de
+  // propagar la prop `priceLocale` hasta ahí, sus precios se quedaban en
+  // formato es-ES pese al resto de la página estar en inglés.
+  await expect(
+    page
+      .locator("main")
+      .getByText(/€\d+\.\d{2}/)
+      .first(),
+  ).toBeVisible();
+});
+
+test("shows a locale-aware Zod validation message on an invalid registration", async ({ page }) => {
+  await page.goto("/en/register");
+
+  await page.getByLabel("Name").fill("Test User");
+  await page.getByLabel("Email").fill(`test-${Date.now()}@store-demo.test`);
+  await page.getByLabel("Password").fill("short");
+  await page.getByRole("button", { name: "Create account" }).click();
+
+  await expect(page.getByRole("alert").getByText(/too small/i)).toBeVisible();
+});

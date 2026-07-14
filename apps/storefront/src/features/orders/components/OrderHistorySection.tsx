@@ -39,6 +39,7 @@ export async function OrderHistorySection() {
           }}
           totalCents={order.totalCents}
           itemCountLabel={tOrders("itemCount", { count: getOrderItemCount(order) })}
+          priceLocale={toIntlLocale(locale)}
         />
       ))}
     </div>
