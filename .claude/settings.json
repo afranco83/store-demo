@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "frontend-react-ts@afai-conventions-tools": true
+  }
+}

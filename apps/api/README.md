@@ -1,6 +1,6 @@
 # @store-demo/api
 
-Backend fake (`:4000`) — Next.js Route Handlers + Prisma + SQLite (vía libSQL), en vez de mocks estáticos. No es un microservicio real de producción: existe para que `apps/storefront`/`apps/admin` consuman datos reales tipados de extremo a extremo (Zod en el borde, ver `AGENTS.md §1.1`).
+Backend fake (`:4000`) — Next.js Route Handlers + Prisma + SQLite (vía libSQL), en vez de mocks estáticos. No es un microservicio real de producción: existe para que `apps/storefront`/`apps/admin` consuman datos reales tipados de extremo a extremo (Zod en el borde, ver `§Principios` (1, Type Safety First) del canon).
 
 Identidad derivada siempre de un JWT propio verificado server-side (`Authorization: Bearer`, `src/lib/jwt.ts`) — nunca de un `userId` que el cliente ponga en la URL/body. `src/lib/guard.ts` centraliza `requireUser`/`requireAdmin`/`resolveCartIdentity` (usuario o invitado) y el guard de administración de `products`/`categories` (Fase 7).
 

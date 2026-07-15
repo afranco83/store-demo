@@ -4,7 +4,7 @@ Tienda pública (`:3000`) — primera app de negocio del monorepo. Catálogo (fi
 
 **Demo pública**: [store-demo-storefront-kappa.vercel.app](https://store-demo-storefront-kappa.vercel.app)
 
-Organización por dominio (`src/features/{products,cart,auth,account,orders,checkout}`, `AGENTS.md §1.2`), Server Components por defecto, TanStack Query para estado de servidor y Zustand para estado de UI del carrito/wizard de checkout (`docs/ARCHITECTURE.md §5`).
+Organización por dominio (`src/features/{products,cart,auth,account,orders,checkout}`, `§Principios` (9, organización por dominio) del canon), Server Components por defecto, TanStack Query para estado de servidor y Zustand para estado de UI del carrito/wizard de checkout (`docs/ARCHITECTURE.md §5`).
 
 ## Qué puedes probar
 
@@ -34,4 +34,4 @@ pnpm --filter @store-demo/storefront exec lhci autorun              # Lighthouse
 pnpm --filter @store-demo/storefront run analyze                    # bundle real (next experimental-analyze)
 ```
 
-Cobertura de test (`AGENTS.md §6`): umbral ≥80% en `src/features/**/{hooks,services,store,lib,schemas}`; páginas y componentes de composición Server/Client se cubren por integración/E2E, no por cobertura unitaria exhaustiva.
+Cobertura de test (`§Testing` del canon): umbral ≥80% en `src/features/**/{hooks,services,store,lib,schemas}`; páginas y componentes de composición Server/Client se cubren por integración/E2E, no por cobertura unitaria exhaustiva.

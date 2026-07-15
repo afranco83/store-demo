@@ -1,6 +1,6 @@
 # @store-demo/testing
 
-Infraestructura de test centralizada, consumida por `packages/ui`, `packages/api-client` y `features/*` de cada app — evita reimplementar el mismo setup en cada paquete (`AGENTS.md §6`).
+Infraestructura de test centralizada, consumida por `packages/ui`, `packages/api-client` y `features/*` de cada app — evita reimplementar el mismo setup en cada paquete (`§Testing` del canon).
 
 - `render.ts`: `renderWithProviders` (wrapper de `render` + `userEvent.setup()` + `QueryClientProvider`).
 - `query-client.ts`: `createTestQueryClient`/`createQueryWrapper` para tests de hooks de TanStack Query.
