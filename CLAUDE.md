@@ -2,8 +2,9 @@
 
 Este archivo da a Claude Code el contexto operativo de este repositorio. Las convenciones de código detalladas viven en dos documentos externos, compartidos con otros repos propios sobre el mismo stack vía el marketplace [`afai-conventions-tools`](https://github.com/afranco83/afai-conventions-tools) — léelos antes de escribir o modificar código; son la fuente de verdad y aplican también a otras herramientas de codificación, no solo a Claude Code:
 
-@~~/Projects/afai-conventions-tools/AGENTS.md
-@~~/Projects/afai-conventions-tools/plugins/frontend-react-ts/AGENTS.md
+@~/Projects/afai-conventions-tools/AGENTS.md
+
+@~/Projects/afai-conventions-tools/plugins/frontend-react-ts/AGENTS.md
 
 ## Qué es este proyecto
 
