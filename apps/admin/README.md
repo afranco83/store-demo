@@ -33,4 +33,4 @@ pnpm --filter @store-demo/admin exec playwright test   # E2E, requiere apps/api 
 pnpm --filter @store-demo/admin run analyze             # bundle real (next experimental-analyze)
 ```
 
-Cobertura de test (`AGENTS.md §6`): umbral ≥80% en `src/features/**/components` — a diferencia de `apps/storefront`, `admin` no tiene `hooks/services/store/lib/schemas` (sin TanStack Query ni Zustand, ver `docs/adr/0005-admin-without-query-zustand.md`); su lógica testeable en aislado vive en los Client Components (formularios RHF+Zod, tablas), ya cubiertos por test de integración real.
+Cobertura de test (`§Testing` del canon): umbral ≥80% en `src/features/**/components` — a diferencia de `apps/storefront`, `admin` no tiene `hooks/services/store/lib/schemas` (sin TanStack Query ni Zustand, ver `docs/adr/0005-admin-without-query-zustand.md`); su lógica testeable en aislado vive en los Client Components (formularios RHF+Zod, tablas), ya cubiertos por test de integración real.

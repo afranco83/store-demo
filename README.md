@@ -98,7 +98,7 @@ pnpm turbo test:e2e --concurrency=1             # specs E2E (Playwright), requie
 pnpm --filter @store-demo/storefront exec lhci autorun   # Lighthouse, requiere build de producción
 ```
 
-Cobertura de test exigida (`AGENTS.md §6`): ≥80% en `packages/ui` (85%), `packages/api-client`, `packages/shared-types`, `packages/auth`, `apps/api` y `features/**/{hooks,services,store,lib,schemas}` de cada app — en la práctica, la mayoría de paquetes está por encima del 95%. Cifras exactas y actualizadas por fase en [`docs/ROADMAP.md`](./docs/ROADMAP.md) (evita que este README quede desincronizado cada vez que cambian).
+Cobertura de test exigida (`§Testing` del canon): ≥80% en `packages/ui` (85%), `packages/api-client`, `packages/shared-types`, `packages/auth`, `apps/api` y `features/**/{hooks,services,store,lib,schemas}` de cada app — en la práctica, la mayoría de paquetes está por encima del 95%. Cifras exactas y actualizadas por fase en [`docs/ROADMAP.md`](./docs/ROADMAP.md) (evita que este README quede desincronizado cada vez que cambian).
 
 ## Documentación
 
