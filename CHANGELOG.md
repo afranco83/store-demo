@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/afranco83/store-demo/compare/v1.3.0...v1.3.1) (2026-07-15)
+
+### Bug Fixes
+
+- corregir tilde duplicada en [@import](https://github.com/import) de CLAUDE.md tras prettier ([e189ea9](https://github.com/afranco83/store-demo/commit/e189ea91bead4eaf25a0318f1c085e00524651bb))
+
 # [1.3.0](https://github.com/afranco83/store-demo/compare/v1.2.0...v1.3.0) (2026-07-14)
 
 ### Bug Fixes
