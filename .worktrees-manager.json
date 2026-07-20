@@ -1,0 +1,4 @@
+{
+  "devCommand": "pnpm dev",
+  "postCreateCommand": "pnpm --filter @store-demo/api db:migrate && pnpm --filter @store-demo/api db:seed"
+}
