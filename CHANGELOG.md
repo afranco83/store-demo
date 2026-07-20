@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/afranco83/store-demo/compare/v1.3.1...v1.3.2) (2026-07-20)
+
+### Bug Fixes
+
+- fija el puerto de playground para evitar choque con admin ([cd8c975](https://github.com/afranco83/store-demo/commit/cd8c975cd72c8901fa138c7f473efe68365aa350))
+
 ## [1.3.1](https://github.com/afranco83/store-demo/compare/v1.3.0...v1.3.1) (2026-07-15)
 
 ### Bug Fixes
